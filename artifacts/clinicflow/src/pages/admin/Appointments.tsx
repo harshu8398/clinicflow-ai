@@ -102,7 +102,7 @@ export default function Appointments() {
                   <TableRow key={apt.id} className="hover:bg-gray-50/50 transition-colors">
                     <TableCell className="font-medium text-gray-900">{apt.patientName}</TableCell>
                     <TableCell className="text-gray-600">
-                      {format(new Date(apt.appointmentDate || apt.createdAt), "MMM d, yyyy • h:mm a")}
+                      {(() => { const d = new Date(apt.appointmentDate); return isNaN(d.getTime()) ? apt.appointmentDate : format(d, "MMM d, yyyy"); })()}
                     </TableCell>
                     <TableCell className="text-gray-600 truncate max-w-[250px]" title={apt.patientProblem}>
                       {apt.patientProblem}
