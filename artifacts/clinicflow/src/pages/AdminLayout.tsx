@@ -15,11 +15,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const id = Number(clinicId);
   const { data: clinic } = useGetClinic(id);
 
+  // Inside a nested wouter context (/admin/:clinicId), hrefs are relative to the nest base.
+  // Use "/" for dashboard, "/appointments" etc. for sub-pages.
+  // Prefix with "~" to escape the nest for absolute routes like /chat/:id.
   const links = [
-    { href: `/admin/${id}`, label: "Dashboard", icon: LayoutDashboard, exact: true },
-    { href: `/admin/${id}/appointments`, label: "Appointments", icon: CalendarDays },
-    { href: `/admin/${id}/faqs`, label: "FAQs", icon: MessageCircleQuestion },
-    { href: `/admin/${id}/settings`, label: "Settings", icon: SettingsIcon },
+    { href: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
+    { href: "/appointments", label: "Appointments", icon: CalendarDays },
+    { href: "/faqs", label: "FAQs", icon: MessageCircleQuestion },
+    { href: "/settings", label: "Settings", icon: SettingsIcon },
   ];
 
   return (
@@ -44,7 +47,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           })}
         </nav>
         <div className="p-4 border-t border-gray-200">
-          <Link href="/">
+          <Link href="~/">
             <div className="flex items-center px-4 py-3 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors cursor-pointer">
               <LogOut className="w-5 h-5 mr-3 text-gray-400" />
               Switch Clinic
@@ -60,11 +63,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {links.find(l => (l.exact ? location === l.href : location.startsWith(l.href)))?.label || "Dashboard"}
           </h1>
           <div className="flex items-center gap-4">
-            <Link href={`/chat/${id}`} target="_blank">
-              <div className="text-sm text-primary hover:underline cursor-pointer font-medium">
-                Open Patient Chat ↗
-              </div>
-            </Link>
+            <a href={`/chat/${id}`} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline font-medium">
+              Open Patient Chat ↗
+            </a>
           </div>
         </header>
         <main className="flex-1 p-8">
