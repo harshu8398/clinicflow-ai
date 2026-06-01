@@ -1,22 +1,31 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: ClinicFlow AI API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: clinics
+    description: Clinic management
+  - name: appointments
+    description: Appointment management
+  - name: faqs
+    description: FAQ management
+  - name: chat
+    description: Chat receptionist
+  - name: dashboard
+    description: Admin dashboard
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +33,468 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /clinics:
+    get:
+      operationId: listClinics
+      tags: [clinics]
+      summary: List all clinics
+      responses:
+        "200":
+          description: List of clinics
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Clinic"
+    post:
+      operationId: createClinic
+      tags: [clinics]
+      summary: Register a new clinic
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClinicInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Clinic"
+
+  /clinics/{clinicId}:
+    get:
+      operationId: getClinic
+      tags: [clinics]
+      summary: Get clinic by ID
+      parameters:
+        - $ref: "#/components/parameters/ClinicIdParam"
+      responses:
+        "200":
+          description: Clinic details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Clinic"
+        "404":
+          description: Not found
+    put:
+      operationId: updateClinic
+      tags: [clinics]
+      summary: Update clinic settings
+      parameters:
+        - $ref: "#/components/parameters/ClinicIdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClinicUpdate"
+      responses:
+        "200":
+          description: Updated clinic
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Clinic"
+
+  /clinics/{clinicId}/dashboard:
+    get:
+      operationId: getDashboard
+      tags: [dashboard]
+      summary: Get admin dashboard stats for a clinic
+      parameters:
+        - $ref: "#/components/parameters/ClinicIdParam"
+      responses:
+        "200":
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /clinics/{clinicId}/appointments:
+    get:
+      operationId: listAppointments
+      tags: [appointments]
+      summary: List all appointments for a clinic
+      parameters:
+        - $ref: "#/components/parameters/ClinicIdParam"
+      responses:
+        "200":
+          description: List of appointments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Appointment"
+    post:
+      operationId: createAppointment
+      tags: [appointments]
+      summary: Book a new appointment
+      parameters:
+        - $ref: "#/components/parameters/ClinicIdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppointmentInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+
+  /clinics/{clinicId}/appointments/{appointmentId}:
+    get:
+      operationId: getAppointment
+      tags: [appointments]
+      summary: Get a specific appointment
+      parameters:
+        - $ref: "#/components/parameters/ClinicIdParam"
+        - $ref: "#/components/parameters/AppointmentIdParam"
+      responses:
+        "200":
+          description: Appointment details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateAppointmentStatus
+      tags: [appointments]
+      summary: Update appointment status
+      parameters:
+        - $ref: "#/components/parameters/ClinicIdParam"
+        - $ref: "#/components/parameters/AppointmentIdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppointmentStatusUpdate"
+      responses:
+        "200":
+          description: Updated appointment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+    delete:
+      operationId: deleteAppointment
+      tags: [appointments]
+      summary: Delete an appointment
+      parameters:
+        - $ref: "#/components/parameters/ClinicIdParam"
+        - $ref: "#/components/parameters/AppointmentIdParam"
+      responses:
+        "204":
+          description: Deleted
+
+  /clinics/{clinicId}/faqs:
+    get:
+      operationId: listFaqs
+      tags: [faqs]
+      summary: List FAQs for a clinic
+      parameters:
+        - $ref: "#/components/parameters/ClinicIdParam"
+      responses:
+        "200":
+          description: List of FAQs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Faq"
+    post:
+      operationId: createFaq
+      tags: [faqs]
+      summary: Add a FAQ
+      parameters:
+        - $ref: "#/components/parameters/ClinicIdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FaqInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Faq"
+
+  /clinics/{clinicId}/faqs/{faqId}:
+    delete:
+      operationId: deleteFaq
+      tags: [faqs]
+      summary: Delete a FAQ
+      parameters:
+        - $ref: "#/components/parameters/ClinicIdParam"
+        - $ref: "#/components/parameters/FaqIdParam"
+      responses:
+        "204":
+          description: Deleted
+
+  /clinics/{clinicId}/chat/start:
+    post:
+      operationId: startChat
+      tags: [chat]
+      summary: Start a new chat session
+      parameters:
+        - $ref: "#/components/parameters/ClinicIdParam"
+      responses:
+        "200":
+          description: Initial greeting message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatResponse"
+
+  /clinics/{clinicId}/chat/message:
+    post:
+      operationId: sendChatMessage
+      tags: [chat]
+      summary: Send a message in the chat flow
+      parameters:
+        - $ref: "#/components/parameters/ClinicIdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatMessageInput"
+      responses:
+        "200":
+          description: Bot reply
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatResponse"
+
 components:
+  parameters:
+    ClinicIdParam:
+      name: clinicId
+      in: path
+      required: true
+      schema:
+        type: integer
+    AppointmentIdParam:
+      name: appointmentId
+      in: path
+      required: true
+      schema:
+        type: integer
+    FaqIdParam:
+      name: faqId
+      in: path
+      required: true
+      schema:
+        type: integer
+
   schemas:
     HealthStatus:
       type: object
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    Clinic:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        address:
+          type: string
+        fee:
+          type: string
+        timings:
+          type: string
+        logoUrl:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required: [id, name, email, address, fee, timings, createdAt]
+
+    ClinicInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+        address:
+          type: string
+        fee:
+          type: string
+        timings:
+          type: string
+        logoUrl:
+          type: ["string", "null"]
+      required: [name, email, address, fee, timings]
+
+    ClinicUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        address:
+          type: string
+        fee:
+          type: string
+        timings:
+          type: string
+        logoUrl:
+          type: ["string", "null"]
+
+    Appointment:
+      type: object
+      properties:
+        id:
+          type: integer
+        clinicId:
+          type: integer
+        patientName:
+          type: string
+        patientPhone:
+          type: string
+        patientProblem:
+          type: string
+        appointmentDate:
+          type: string
+        status:
+          type: string
+          enum: [pending, confirmed, completed]
+        createdAt:
+          type: string
+      required: [id, clinicId, patientName, patientPhone, patientProblem, appointmentDate, status, createdAt]
+
+    AppointmentInput:
+      type: object
+      properties:
+        patientName:
+          type: string
+          minLength: 1
+        patientPhone:
+          type: string
+          minLength: 1
+        patientProblem:
+          type: string
+          minLength: 1
+        appointmentDate:
+          type: string
+          minLength: 1
+      required: [patientName, patientPhone, patientProblem, appointmentDate]
+
+    AppointmentStatusUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, confirmed, completed]
+      required: [status]
+
+    Faq:
+      type: object
+      properties:
+        id:
+          type: integer
+        clinicId:
+          type: integer
+        question:
+          type: string
+        answer:
+          type: string
+        createdAt:
+          type: string
+      required: [id, clinicId, question, answer, createdAt]
+
+    FaqInput:
+      type: object
+      properties:
+        question:
+          type: string
+          minLength: 1
+        answer:
+          type: string
+          minLength: 1
+      required: [question, answer]
+
+    DashboardStats:
+      type: object
+      properties:
+        totalAppointments:
+          type: integer
+        todayAppointments:
+          type: integer
+        pendingCount:
+          type: integer
+        confirmedCount:
+          type: integer
+        completedCount:
+          type: integer
+        recentAppointments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Appointment"
+      required: [totalAppointments, todayAppointments, pendingCount, confirmedCount, completedCount, recentAppointments]
+
+    ChatMessageInput:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        step:
+          type: string
+        message:
+          type: string
+          minLength: 1
+        context:
+          type: object
+          properties:
+            patientName:
+              type: ["string", "null"]
+            patientPhone:
+              type: ["string", "null"]
+            patientProblem:
+              type: ["string", "null"]
+            appointmentDate:
+              type: ["string", "null"]
+      required: [sessionId, step, message]
+
+    ChatResponse:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        step:
+          type: string
+        botMessage:
+          type: string
+        isComplete:
+          type: boolean
+        appointment:
+          $ref: "#/components/schemas/Appointment"
+      required: [sessionId, step, botMessage, isComplete]

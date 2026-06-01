@@ -1,0 +1,163 @@
+You are a senior full-stack SaaS engineer and Flask architect.
+
+Build Phase 1 of a production-style MVP SaaS called:
+
+ClinicFlow AI
+
+Tagline: "Your 24×7 Digital Receptionist for Clinics"
+
+🎯 GOAL (PHASE 1 ONLY)
+
+Build a fully working multi-tenant SaaS MVP where:
+
+Clinics can receive patient inquiries via chat
+Patients can book appointments through a chat-style interface
+Data is stored per clinic (multi-tenant isolation)
+Clinic admin can view dashboard with appointments
+
+DO NOT implement Google Calendar or email in this phase.
+
+🧠 TECH STACK
+
+Frontend:
+
+HTML
+CSS
+Vanilla JavaScript
+
+Backend:
+
+Python
+Flask
+
+Database:
+
+SQLite (ONLY)
+🏗️ REQUIRED PROJECT STRUCTURE
+
+Create clean modular architecture:
+
+/app
+/models
+/routes
+/static
+/templates
+/services
+config.py
+main.py
+
+🧾 DATABASE MODELS (SQLAlchemy)
+
+Create these tables:
+
+clinics
+clinic_id (PK)
+clinic_name
+email
+address
+fee
+timings
+logo_url
+created_at
+appointments
+appointment_id (PK)
+clinic_id (FK)
+patient_name
+patient_phone
+patient_problem
+appointment_date
+status (pending/confirmed/completed)
+created_at
+faq
+faq_id (PK)
+clinic_id (FK)
+question
+answer
+
+IMPORTANT: Every table MUST include clinic_id for multi-tenant isolation.
+
+💬 CORE FEATURE: CHAT RECEPTIONIST (VERY IMPORTANT)
+
+Build a WhatsApp-style chat UI.
+
+Patient flow must be step-by-step:
+
+Welcome message from clinic
+Ask patient name
+Ask phone number
+Ask health problem
+Ask preferred appointment date
+Confirm booking
+Save data into appointments table
+
+Chat must feel like a real conversation using JavaScript + Flask API.
+
+🧑‍💼 ADMIN DASHBOARD
+
+Create a simple admin dashboard page:
+
+It must show:
+
+Total appointments
+Today’s appointments
+List of all patients
+Appointment status (pending/confirmed/completed)
+⚙️ CLINIC SETTINGS
+
+Create a basic clinic settings system where clinic owner can view:
+
+Clinic name
+Address
+Fee
+Timings
+Email
+
+(Editing can be simple or optional in Phase 1, but structure must exist)
+
+📡 API ENDPOINTS (Flask)
+
+Create clean REST APIs:
+
+POST /api/chat/start
+POST /api/chat/message
+POST /api/appointment/create
+GET /api/admin/dashboard
+
+All APIs MUST require clinic_id for isolation.
+
+🧠 MULTI-TENANT RULE (CRITICAL)
+Every request MUST include clinic_id
+No data leakage between clinics allowed
+All database queries must filter by clinic_id
+🎨 UI REQUIREMENTS
+
+Chat UI:
+
+WhatsApp-like design
+Mobile responsive
+Smooth message animation
+Clean modern UI
+
+Admin dashboard:
+
+Simple SaaS-style layout
+Cards + tables
+Minimal modern design
+⚠️ IMPORTANT CONSTRAINTS
+DO NOT add Google Calendar in this phase
+DO NOT add email system
+DO NOT overcomplicate architecture
+Focus on working MVP first
+Ensure app runs with: python main.py
+🚀 OUTPUT REQUIREMENT
+
+Generate complete working code:
+
+No pseudocode
+No missing imports
+No broken endpoints
+Clean modular structure
+Ready to run locally
+📌 START BUILDING NOW
+
+First create project structure, then backend, then frontend.
