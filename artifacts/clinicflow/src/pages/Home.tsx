@@ -27,8 +27,7 @@ export default function Home() {
   });
 
   const handleClinicSelect = (clinicId: number) => {
-    localStorage.setItem("selectedClinicId", clinicId.toString());
-    setLocation(`/admin/${clinicId}`);
+    setLocation(`/chat/${clinicId}`);
   };
 
   const onSubmit = (e: React.FormEvent) => {
@@ -61,10 +60,14 @@ export default function Home() {
 
         <div className="flex justify-between items-center mt-12">
           <h2 className="text-2xl font-semibold text-gray-900">Select Clinic</h2>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button>Register New Clinic</Button>
-            </DialogTrigger>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" onClick={() => setLocation("/login")}>
+              Admin Login
+            </Button>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button>Register New Clinic</Button>
+              </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Register Clinic</DialogTitle>
@@ -96,7 +99,8 @@ export default function Home() {
                 </Button>
               </form>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </div>
         </div>
 
         {isLoading ? (

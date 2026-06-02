@@ -1,0 +1,285 @@
+# ClinicFlow AI – Fix Patient Routing Without Breaking Authentication
+
+## IMPORTANT
+
+The current authentication and authorization system is working correctly.
+
+DO NOT modify:
+
+* Login system
+* Session system
+* Authorization checks
+* Clinic ownership validation
+* 401/403 protection
+* Dashboard security
+
+These features are already working correctly and must remain unchanged.
+
+---
+
+## CURRENT PROBLEM
+
+Right now, when a user clicks a clinic card on the homepage:
+
+Homepage
+→ Clinic Card
+→ Login Page
+
+This is incorrect.
+
+Patients should not be sent to the admin login page.
+
+The clinic card should represent the patient entry point.
+
+---
+
+# REQUIRED BEHAVIOR
+
+## PATIENT FLOW
+
+Homepage
+→ Click Clinic Card
+→ Open Patient Chat
+
+Example:
+
+Clinic ID = 3
+
+Clinic Card Click:
+
+/chat/3
+
+No login required.
+
+No signup required.
+
+No authentication required.
+
+Patients must be able to immediately start chatting.
+
+The existing chat flow must continue working:
+
+1. Name
+2. Mobile Number
+3. Health Issue
+4. Date Picker
+5. Appointment Submission
+
+Do not modify the chat flow.
+
+---
+
+## ADMIN FLOW
+
+Admins should enter through a separate login path.
+
+Create a clearly visible:
+
+"Admin Login"
+
+button in the homepage navigation/header.
+
+Admin Login Route:
+
+/login
+
+After successful login:
+
+Redirect to:
+
+/admin/<clinic_id>
+
+using the clinic_id already associated with the authenticated user.
+
+---
+
+# HOMEPAGE CHANGES
+
+Current clinic cards should remain visible.
+
+Do not redesign the homepage.
+
+Only change the click behavior.
+
+Current:
+
+Clinic Card
+→ Login
+
+Replace with:
+
+Clinic Card
+→ /chat/<clinic_id>
+
+---
+
+# ROUTING RULES
+
+## PUBLIC ROUTES
+
+These routes must remain public:
+
+/
+/chat/<clinic_id>
+
+No login required.
+
+---
+
+## PROTECTED ROUTES
+
+These routes must remain protected:
+
+/admin/<clinic_id>
+/dashboard
+/settings
+/appointments
+
+Authentication required.
+
+Authorization required.
+
+Do not modify existing protection.
+
+---
+
+# AUTHORIZATION REQUIREMENT
+
+Keep current behavior exactly as implemented.
+
+Example:
+
+User belongs to clinic_id = 3
+
+Allowed:
+
+/admin/3
+
+Blocked:
+
+/admin/1
+/admin/2
+/admin/4
+
+Return:
+
+401 Unauthorized
+
+or
+
+403 Forbidden
+
+Continue current implementation.
+
+Do not change it.
+
+---
+
+# UI REQUIREMENTS
+
+Do not redesign UI.
+
+Do not change styling.
+
+Do not modify dashboard layout.
+
+Do not modify chat layout.
+
+Only:
+
+1. Change clinic card destination.
+2. Add Admin Login button.
+
+Everything else should remain visually identical.
+
+---
+
+# TEST CASES
+
+## Test 1
+
+Open homepage.
+
+Click Aadhava Clinic.
+
+Expected:
+
+/chat/3 opens.
+
+No login page.
+
+---
+
+## Test 2
+
+Open homepage.
+
+Click Admin Login.
+
+Expected:
+
+/login opens.
+
+---
+
+## Test 3
+
+Login as Clinic 3 admin.
+
+Expected:
+
+Redirect to:
+
+/admin/3
+
+---
+
+## Test 4
+
+While logged in as Clinic 3 admin:
+
+Try:
+
+/admin/4
+
+Expected:
+
+401 Unauthorized
+
+or
+
+403 Forbidden
+
+---
+
+## Test 5
+
+Patient should complete appointment booking without any login.
+
+Expected:
+
+Works successfully.
+
+---
+
+# SUCCESS CRITERIA
+
+The task is complete when:
+
+✓ Clinic cards open patient chat.
+
+✓ Patients never see login.
+
+✓ Admin Login is separate.
+
+✓ Existing authentication remains unchanged.
+
+✓ Existing authorization remains unchanged.
+
+✓ Existing dashboard remains unchanged.
+
+✓ Existing chat booking flow remains unchanged.
+
+Do not rebuild anything.
+
+Only correct routing behavior.
