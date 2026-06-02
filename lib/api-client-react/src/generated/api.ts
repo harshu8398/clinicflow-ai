@@ -31,7 +31,8 @@ import type {
   DashboardStats,
   Faq,
   FaqInput,
-  HealthStatus
+  HealthStatus,
+  StartChatBody
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -1106,14 +1107,16 @@ export const getStartChatUrl = (clinicId: number,) => {
 /**
  * @summary Start a new chat session
  */
-export const startChat = async (clinicId: number, options?: RequestInit): Promise<ChatResponse> => {
+export const startChat = async (clinicId: number,
+    startChatBody: StartChatBody, options?: RequestInit): Promise<ChatResponse> => {
 
   return customFetch<ChatResponse>(getStartChatUrl(clinicId),
   {
     ...options,
-    method: 'POST'
-
-
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      startChatBody,)
   }
 );}
 
@@ -1121,8 +1124,8 @@ export const startChat = async (clinicId: number, options?: RequestInit): Promis
 
 
 export const getStartChatMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startChat>>, TError,{clinicId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof startChat>>, TError,{clinicId: number}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startChat>>, TError,{clinicId: number;data: BodyType<StartChatBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof startChat>>, TError,{clinicId: number;data: BodyType<StartChatBody>}, TContext> => {
 
 const mutationKey = ['startChat'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -1134,10 +1137,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof startChat>>, {clinicId: number}> = (props) => {
-          const {clinicId} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof startChat>>, {clinicId: number;data: BodyType<StartChatBody>}> = (props) => {
+          const {clinicId,data} = props ?? {};
 
-          return  startChat(clinicId,requestOptions)
+          return  startChat(clinicId,data,requestOptions)
         }
 
 
@@ -1148,18 +1151,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type StartChatMutationResult = NonNullable<Awaited<ReturnType<typeof startChat>>>
-
+    export type StartChatMutationBody = BodyType<StartChatBody>
     export type StartChatMutationError = ErrorType<unknown>
 
     /**
  * @summary Start a new chat session
  */
 export const useStartChat = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startChat>>, TError,{clinicId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startChat>>, TError,{clinicId: number;data: BodyType<StartChatBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof startChat>>,
         TError,
-        {clinicId: number},
+        {clinicId: number;data: BodyType<StartChatBody>},
         TContext
       > => {
       return useMutation(getStartChatMutationOptions(options));

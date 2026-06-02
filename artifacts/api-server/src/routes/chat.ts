@@ -27,6 +27,40 @@ function serializeAppt(a: Record<string, unknown>) {
 const NAME_REGEX = /^[a-zA-Z\s]+$/;
 const PHONE_REGEX = /^\d{10}$/;
 
+// Issue a single-use entry token for a clinic chat (called by homepage clinic card click)
+router.post("/clinics/:clinicId/chat/token", async (req, res): Promise<void> => {
+  const clinicId = Number(req.params["clinicId"]);
+  if (!clinicId || isNaN(clinicId)) {
+    res.status(400).json({ error: "Invalid clinic ID" });
+    return;
+  }
+
+  const [clinic] = await db
+    .select({ id: clinicsTable.id })
+    .from(clinicsTable)
+    .where(eq(clinicsTable.id, clinicId));
+
+  if (!clinic) {
+    res.status(404).json({ error: "Clinic not found" });
+    return;
+  }
+
+  const entryToken = randomUUID();
+  const tokenExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+  // Store token-only row (no sessionId yet — that is created on chat/start)
+  await db.insert(chatSessionsTable).values({
+    sessionId: `pending:${entryToken}`,
+    clinicId,
+    entryToken,
+    tokenExpiresAt,
+    tokenUsed: false,
+  });
+
+  res.json({ token: entryToken });
+});
+
+// Start chat — consumes the entry token and creates a real session
 router.post("/clinics/:clinicId/chat/start", async (req, res): Promise<void> => {
   const params = StartChatParams.safeParse(req.params);
   if (!params.success) {
@@ -34,10 +68,44 @@ router.post("/clinics/:clinicId/chat/start", async (req, res): Promise<void> => 
     return;
   }
 
+  const clinicId = params.data.clinicId;
+  const { token } = req.body as { token?: string };
+
+  if (!token) {
+    res.status(403).json({ error: "Access token required" });
+    return;
+  }
+
+  // Validate token: must exist, belong to this clinic, not expired, not used
+  const [tokenRow] = await db
+    .select()
+    .from(chatSessionsTable)
+    .where(
+      and(
+        eq(chatSessionsTable.entryToken, token),
+        eq(chatSessionsTable.clinicId, clinicId)
+      )
+    );
+
+  if (!tokenRow) {
+    res.status(403).json({ error: "Invalid or expired access token" });
+    return;
+  }
+
+  if (tokenRow.tokenUsed) {
+    res.status(403).json({ error: "Access token already used" });
+    return;
+  }
+
+  if (tokenRow.tokenExpiresAt && tokenRow.tokenExpiresAt < new Date()) {
+    res.status(403).json({ error: "Access token expired" });
+    return;
+  }
+
   const [clinic] = await db
     .select()
     .from(clinicsTable)
-    .where(eq(clinicsTable.id, params.data.clinicId));
+    .where(eq(clinicsTable.id, clinicId));
 
   if (!clinic) {
     res.status(404).json({ error: "Clinic not found" });
@@ -46,11 +114,11 @@ router.post("/clinics/:clinicId/chat/start", async (req, res): Promise<void> => 
 
   const sessionId = randomUUID();
 
-  // Bind session to this clinic — enforced on every subsequent message
-  await db.insert(chatSessionsTable).values({
-    sessionId,
-    clinicId: params.data.clinicId,
-  });
+  // Mark token as used and update the row with the real sessionId
+  await db
+    .update(chatSessionsTable)
+    .set({ tokenUsed: true, sessionId })
+    .where(eq(chatSessionsTable.entryToken, token));
 
   res.json(
     StartChatResponse.parse({
@@ -62,6 +130,7 @@ router.post("/clinics/:clinicId/chat/start", async (req, res): Promise<void> => 
   );
 });
 
+// Send message — session must belong to this clinic
 router.post("/clinics/:clinicId/chat/message", async (req, res): Promise<void> => {
   const params = SendChatMessageParams.safeParse(req.params);
   if (!params.success) {
@@ -78,14 +147,16 @@ router.post("/clinics/:clinicId/chat/message", async (req, res): Promise<void> =
   const { clinicId } = params.data;
   const { sessionId, step, message, context } = parsed.data;
 
-  // Enforce clinic isolation: session must have been started for this exact clinic
+  // Enforce clinic isolation: session must belong to this exact clinic
   const [chatSession] = await db
     .select()
     .from(chatSessionsTable)
-    .where(and(
-      eq(chatSessionsTable.sessionId, sessionId),
-      eq(chatSessionsTable.clinicId, clinicId)
-    ));
+    .where(
+      and(
+        eq(chatSessionsTable.sessionId, sessionId),
+        eq(chatSessionsTable.clinicId, clinicId)
+      )
+    );
 
   if (!chatSession) {
     res.status(403).json({ error: "Session does not belong to this clinic" });

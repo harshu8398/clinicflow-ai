@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useListClinics, useCreateClinic, getListClinicsQueryKey } from "@workspace/api-client-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,8 +26,23 @@ export default function Home() {
     timings: ""
   });
 
+  const getToken = useMutation({
+    mutationFn: async (clinicId: number) => {
+      const res = await fetch(`/api/clinics/${clinicId}/chat/token`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed to get access token");
+      const data = await res.json() as { token: string };
+      return { clinicId, token: data.token };
+    },
+    onSuccess: ({ clinicId, token }) => {
+      setLocation(`/chat/${clinicId}?token=${token}`);
+    },
+    onError: () => {
+      toast({ title: "Could not open chat. Please try again.", variant: "destructive" });
+    },
+  });
+
   const handleClinicSelect = (clinicId: number) => {
-    setLocation(`/chat/${clinicId}`);
+    getToken.mutate(clinicId);
   };
 
   const onSubmit = (e: React.FormEvent) => {

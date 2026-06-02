@@ -256,6 +256,16 @@ paths:
       summary: Start a new chat session
       parameters:
         - $ref: "#/components/parameters/ClinicIdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token:
+                  type: string
       responses:
         "200":
           description: Initial greeting message

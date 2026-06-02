@@ -149,3 +149,7 @@ export interface ChatResponse {
   appointment?: Appointment;
 }
 
+export type StartChatBody = {
+  token: string;
+};
+

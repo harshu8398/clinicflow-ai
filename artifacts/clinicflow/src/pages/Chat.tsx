@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "wouter";
+import { useParams, useSearch } from "wouter";
 import { useStartChat, useSendChatMessage, ChatResponse } from "@workspace/api-client-react";
 import { useGetClinic } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Calendar } from "@/components/ui/calendar";
-import { Send, Loader2, Hospital, Bot, User, CheckCircle2, CalendarIcon } from "lucide-react";
+import { Send, Loader2, Hospital, Bot, User, CheckCircle2, CalendarIcon, ShieldAlert } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { format } from "date-fns";
 
@@ -20,7 +20,9 @@ const SESSION_KEY = "clinicflow_session_";
 
 export default function Chat() {
   const { clinicId } = useParams();
+  const search = useSearch();
   const id = Number(clinicId);
+  const token = new URLSearchParams(search).get("token");
   const { data: clinic } = useGetClinic(id);
   const startChat = useStartChat();
   const sendMessage = useSendChatMessage();
@@ -31,10 +33,29 @@ export default function Chat() {
   const [context, setContext] = useState<any>({});
   const [isTyping, setIsTyping] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [accessDenied, setAccessDenied] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const sessionStorageKey = `${SESSION_KEY}${id}`;
+
+  // No token in URL = direct URL access, reject immediately
+  if (!token && !session) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="text-center max-w-sm">
+          <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <ShieldAlert className="w-8 h-8" />
+          </div>
+          <h1 className="text-xl font-bold text-gray-900 mb-2">Access Denied</h1>
+          <p className="text-gray-500 mb-6">Please select a clinic from the homepage to start a chat.</p>
+          <a href="/" className="inline-block bg-primary text-white font-medium px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity">
+            Go to Homepage
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -43,13 +64,12 @@ export default function Chat() {
   }, [messages, isTyping]);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || !token) return;
     const stored = localStorage.getItem(sessionStorageKey);
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
         if (parsed.session?.isComplete) {
-          // Completed session — start fresh
           localStorage.removeItem(sessionStorageKey);
         } else if (parsed.session) {
           setSession(parsed.session);
@@ -61,9 +81,9 @@ export default function Chat() {
         localStorage.removeItem(sessionStorageKey);
       }
     }
-    // Start new session
+    // Start new session — pass token so backend can validate it
     setIsTyping(true);
-    startChat.mutate({ clinicId: id }, {
+    startChat.mutate({ clinicId: id, data: { token: token! } }, {
       onSuccess: (res: ChatResponse) => {
         setTimeout(() => {
           const newSession = { id: res.sessionId, step: res.step, isComplete: res.isComplete, appointment: res.appointment };
@@ -74,9 +94,12 @@ export default function Chat() {
           localStorage.setItem(sessionStorageKey, JSON.stringify({ session: newSession, messages: newMessages, context: {} }));
         }, 500);
       },
-      onError: () => setIsTyping(false),
+      onError: () => {
+        setIsTyping(false);
+        setAccessDenied(true);
+      },
     });
-  }, [id]);
+  }, [id, token]);
 
   const persistState = (newSession: typeof session, newMessages: Message[], newContext: any) => {
     localStorage.setItem(sessionStorageKey, JSON.stringify({ session: newSession, messages: newMessages, context: newContext }));
@@ -143,6 +166,24 @@ export default function Chat() {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
+  // Invalid/expired/already-used token
+  if (accessDenied) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="text-center max-w-sm">
+          <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <ShieldAlert className="w-8 h-8" />
+          </div>
+          <h1 className="text-xl font-bold text-gray-900 mb-2">Access Denied</h1>
+          <p className="text-gray-500 mb-6">This link is invalid or has already been used. Please go back and select a clinic again.</p>
+          <a href="/" className="inline-block bg-primary text-white font-medium px-6 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity">
+            Go to Homepage
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center pt-8 px-4 pb-8">

@@ -277,6 +277,10 @@ export const StartChatParams = zod.object({
   "clinicId": zod.coerce.number()
 })
 
+export const StartChatBody = zod.object({
+  "token": zod.string()
+})
+
 export const StartChatResponse = zod.object({
   "sessionId": zod.string(),
   "step": zod.string(),

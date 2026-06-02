@@ -21,3 +21,4 @@ export * from './dashboardStats';
 export * from './faq';
 export * from './faqInput';
 export * from './healthStatus';
+export * from './startChatBody';
