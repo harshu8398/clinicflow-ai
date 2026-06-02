@@ -10,6 +10,26 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { CalendarX2, Trash2 } from "lucide-react";
 
+type AppointmentStatus = "pending" | "pending_slot_selection" | "confirmed" | "booked" | "completed" | "cancelled";
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: "Pending",
+  pending_slot_selection: "Awaiting Slot",
+  confirmed: "Confirmed",
+  booked: "Booked",
+  completed: "Completed",
+  cancelled: "Cancelled",
+};
+
+const STATUS_COLORS: Record<string, string> = {
+  pending: "bg-amber-100 text-amber-800 border-amber-200",
+  pending_slot_selection: "bg-orange-100 text-orange-800 border-orange-200",
+  confirmed: "bg-primary/10 text-primary border-primary/20",
+  booked: "bg-blue-100 text-blue-800 border-blue-200",
+  completed: "bg-green-100 text-green-800 border-green-200",
+  cancelled: "bg-red-100 text-red-800 border-red-200",
+};
+
 export default function Appointments() {
   const { clinicId } = useParams();
   const id = Number(clinicId);
@@ -19,7 +39,7 @@ export default function Appointments() {
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<string>("all");
 
-  const handleStatusChange = (appointmentId: number, status: 'pending' | 'confirmed' | 'completed') => {
+  const handleStatusChange = (appointmentId: number, status: AppointmentStatus) => {
     updateStatus.mutate(
       { clinicId: id, appointmentId, data: { status } },
       {
@@ -43,35 +63,35 @@ export default function Appointments() {
     }
   };
 
-  const statusColors = {
-    pending: "bg-amber-100 text-amber-800 border-amber-200",
-    confirmed: "bg-primary/10 text-primary border-primary/20",
-    completed: "bg-green-100 text-green-800 border-green-200",
-  };
-
   const filteredAppointments = appointments?.filter(apt => filter === "all" || apt.status === filter) || [];
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <Card className="bg-white border-gray-100 shadow-sm overflow-hidden">
         <CardHeader className="border-b border-gray-50 bg-gray-50/50 flex flex-row items-center justify-between">
-          <CardTitle className="text-lg font-semibold text-gray-900">All Appointments</CardTitle>
+          <div>
+            <CardTitle className="text-lg font-semibold text-gray-900">All Appointments</CardTitle>
+            <p className="text-sm text-gray-500 mt-0.5">{appointments?.length ?? 0} total</p>
+          </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">Filter by status:</span>
+            <span className="text-sm text-gray-500">Filter:</span>
             <Select value={filter} onValueChange={setFilter}>
-              <SelectTrigger className="w-36 h-9">
+              <SelectTrigger className="w-44 h-9">
                 <SelectValue placeholder="All" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="pending_slot_selection">Awaiting Slot</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="confirmed">Confirmed</SelectItem>
+                <SelectItem value="booked">Booked</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </CardHeader>
-        
+
         {isLoading ? (
           <div className="p-6 space-y-4">
             {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-16 w-full" />)}
@@ -90,7 +110,7 @@ export default function Appointments() {
               <TableHeader>
                 <TableRow className="bg-gray-50/30 hover:bg-gray-50/30">
                   <TableHead className="font-medium text-gray-500">Patient</TableHead>
-                  <TableHead className="font-medium text-gray-500">Date & Time</TableHead>
+                  <TableHead className="font-medium text-gray-500">Preferred Date</TableHead>
                   <TableHead className="font-medium text-gray-500 w-[250px]">Problem</TableHead>
                   <TableHead className="font-medium text-gray-500">Phone</TableHead>
                   <TableHead className="font-medium text-gray-500">Status</TableHead>
@@ -99,38 +119,45 @@ export default function Appointments() {
               </TableHeader>
               <TableBody>
                 {filteredAppointments.map((apt) => (
-                  <TableRow key={apt.id} className="hover:bg-gray-50/50 transition-colors">
+                  <TableRow key={apt.id} className="hover:bg-gray-50/50 transition-colors" data-testid={`row-appointment-${apt.id}`}>
                     <TableCell className="font-medium text-gray-900">{apt.patientName}</TableCell>
                     <TableCell className="text-gray-600">
-                      {(() => { const d = new Date(apt.appointmentDate); return isNaN(d.getTime()) ? apt.appointmentDate : format(d, "MMM d, yyyy"); })()}
+                      {(() => {
+                        const d = new Date(apt.appointmentDate);
+                        return isNaN(d.getTime()) ? apt.appointmentDate : format(d, "dd MMM yyyy");
+                      })()}
                     </TableCell>
                     <TableCell className="text-gray-600 truncate max-w-[250px]" title={apt.patientProblem}>
                       {apt.patientProblem}
                     </TableCell>
                     <TableCell className="text-gray-600">{apt.patientPhone}</TableCell>
                     <TableCell>
-                      <Select 
-                        value={apt.status} 
-                        onValueChange={(val: any) => handleStatusChange(apt.id, val)}
+                      <Select
+                        value={apt.status}
+                        onValueChange={(val) => handleStatusChange(apt.id, val as AppointmentStatus)}
                         disabled={updateStatus.isPending}
                       >
-                        <SelectTrigger className={`w-32 h-8 border shadow-none ${statusColors[apt.status]}`}>
+                        <SelectTrigger className={`w-40 h-8 border shadow-none text-xs font-medium ${STATUS_COLORS[apt.status] ?? STATUS_COLORS.pending}`}>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="pending_slot_selection">Awaiting Slot</SelectItem>
                           <SelectItem value="pending">Pending</SelectItem>
                           <SelectItem value="confirmed">Confirmed</SelectItem>
+                          <SelectItem value="booked">Booked</SelectItem>
                           <SelectItem value="completed">Completed</SelectItem>
+                          <SelectItem value="cancelled">Cancelled</SelectItem>
                         </SelectContent>
                       </Select>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         className="text-gray-400 hover:text-red-600 hover:bg-red-50"
                         onClick={() => handleDelete(apt.id)}
                         disabled={deleteAppointment.isPending}
+                        data-testid={`button-delete-${apt.id}`}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

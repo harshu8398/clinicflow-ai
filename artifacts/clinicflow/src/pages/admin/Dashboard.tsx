@@ -16,9 +16,9 @@ export default function Dashboard() {
   const updateStatus = useUpdateAppointmentStatus();
   const queryClient = useQueryClient();
 
-  const handleStatusChange = (appointmentId: number, status: 'pending' | 'confirmed' | 'completed') => {
+  const handleStatusChange = (appointmentId: number, status: string) => {
     updateStatus.mutate(
-      { clinicId: id, appointmentId, data: { status } },
+      { clinicId: id, appointmentId, data: { status: status as any } },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getGetDashboardQueryKey(id) });
@@ -27,10 +27,22 @@ export default function Dashboard() {
     );
   };
 
-  const statusColors = {
+  const STATUS_LABELS: Record<string, string> = {
+    pending: "Pending",
+    pending_slot_selection: "Awaiting Slot",
+    confirmed: "Confirmed",
+    booked: "Booked",
+    completed: "Completed",
+    cancelled: "Cancelled",
+  };
+
+  const statusColors: Record<string, string> = {
     pending: "bg-amber-100 text-amber-800 border-amber-200",
+    pending_slot_selection: "bg-orange-100 text-orange-800 border-orange-200",
     confirmed: "bg-primary/10 text-primary border-primary/20",
+    booked: "bg-blue-100 text-blue-800 border-blue-200",
     completed: "bg-green-100 text-green-800 border-green-200",
+    cancelled: "bg-red-100 text-red-800 border-red-200",
   };
 
   if (isLoading) {

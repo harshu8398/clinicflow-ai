@@ -384,9 +384,15 @@ components:
           type: string
         appointmentDate:
           type: string
+        sessionId:
+          type: ["string", "null"]
+        selectedTimeSlot:
+          type: ["string", "null"]
+        calendarEventId:
+          type: ["string", "null"]
         status:
           type: string
-          enum: [pending, confirmed, completed]
+          enum: [pending, pending_slot_selection, confirmed, booked, completed, cancelled]
         createdAt:
           type: string
       required: [id, clinicId, patientName, patientPhone, patientProblem, appointmentDate, status, createdAt]
@@ -413,7 +419,7 @@ components:
       properties:
         status:
           type: string
-          enum: [pending, confirmed, completed]
+          enum: [pending, pending_slot_selection, confirmed, booked, completed, cancelled]
       required: [status]
 
     Faq:

@@ -115,7 +115,10 @@ export const GetDashboardResponse = zod.object({
   "patientPhone": zod.string(),
   "patientProblem": zod.string(),
   "appointmentDate": zod.string(),
-  "status": zod.enum(['pending', 'confirmed', 'completed']),
+  "sessionId": zod.string().nullish(),
+  "selectedTimeSlot": zod.string().nullish(),
+  "calendarEventId": zod.string().nullish(),
+  "status": zod.enum(['pending', 'pending_slot_selection', 'confirmed', 'booked', 'completed', 'cancelled']),
   "createdAt": zod.string()
 }))
 })
@@ -135,7 +138,10 @@ export const ListAppointmentsResponseItem = zod.object({
   "patientPhone": zod.string(),
   "patientProblem": zod.string(),
   "appointmentDate": zod.string(),
-  "status": zod.enum(['pending', 'confirmed', 'completed']),
+  "sessionId": zod.string().nullish(),
+  "selectedTimeSlot": zod.string().nullish(),
+  "calendarEventId": zod.string().nullish(),
+  "status": zod.enum(['pending', 'pending_slot_selection', 'confirmed', 'booked', 'completed', 'cancelled']),
   "createdAt": zod.string()
 })
 export const ListAppointmentsResponse = zod.array(ListAppointmentsResponseItem)
@@ -177,7 +183,10 @@ export const GetAppointmentResponse = zod.object({
   "patientPhone": zod.string(),
   "patientProblem": zod.string(),
   "appointmentDate": zod.string(),
-  "status": zod.enum(['pending', 'confirmed', 'completed']),
+  "sessionId": zod.string().nullish(),
+  "selectedTimeSlot": zod.string().nullish(),
+  "calendarEventId": zod.string().nullish(),
+  "status": zod.enum(['pending', 'pending_slot_selection', 'confirmed', 'booked', 'completed', 'cancelled']),
   "createdAt": zod.string()
 })
 
@@ -191,7 +200,7 @@ export const UpdateAppointmentStatusParams = zod.object({
 })
 
 export const UpdateAppointmentStatusBody = zod.object({
-  "status": zod.enum(['pending', 'confirmed', 'completed'])
+  "status": zod.enum(['pending', 'pending_slot_selection', 'confirmed', 'booked', 'completed', 'cancelled'])
 })
 
 export const UpdateAppointmentStatusResponse = zod.object({
@@ -201,7 +210,10 @@ export const UpdateAppointmentStatusResponse = zod.object({
   "patientPhone": zod.string(),
   "patientProblem": zod.string(),
   "appointmentDate": zod.string(),
-  "status": zod.enum(['pending', 'confirmed', 'completed']),
+  "sessionId": zod.string().nullish(),
+  "selectedTimeSlot": zod.string().nullish(),
+  "calendarEventId": zod.string().nullish(),
+  "status": zod.enum(['pending', 'pending_slot_selection', 'confirmed', 'booked', 'completed', 'cancelled']),
   "createdAt": zod.string()
 })
 
@@ -277,7 +289,10 @@ export const StartChatResponse = zod.object({
   "patientPhone": zod.string(),
   "patientProblem": zod.string(),
   "appointmentDate": zod.string(),
-  "status": zod.enum(['pending', 'confirmed', 'completed']),
+  "sessionId": zod.string().nullish(),
+  "selectedTimeSlot": zod.string().nullish(),
+  "calendarEventId": zod.string().nullish(),
+  "status": zod.enum(['pending', 'pending_slot_selection', 'confirmed', 'booked', 'completed', 'cancelled']),
   "createdAt": zod.string()
 }).optional()
 })
@@ -317,7 +332,10 @@ export const SendChatMessageResponse = zod.object({
   "patientPhone": zod.string(),
   "patientProblem": zod.string(),
   "appointmentDate": zod.string(),
-  "status": zod.enum(['pending', 'confirmed', 'completed']),
+  "sessionId": zod.string().nullish(),
+  "selectedTimeSlot": zod.string().nullish(),
+  "calendarEventId": zod.string().nullish(),
+  "status": zod.enum(['pending', 'pending_slot_selection', 'confirmed', 'booked', 'completed', 'cancelled']),
   "createdAt": zod.string()
 }).optional()
 })

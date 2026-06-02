@@ -14,6 +14,12 @@ export interface Appointment {
   patientPhone: string;
   patientProblem: string;
   appointmentDate: string;
+  /** @nullable */
+  sessionId?: string | null;
+  /** @nullable */
+  selectedTimeSlot?: string | null;
+  /** @nullable */
+  calendarEventId?: string | null;
   status: AppointmentStatus;
   createdAt: string;
 }

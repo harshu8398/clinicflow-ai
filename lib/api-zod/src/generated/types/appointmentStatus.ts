@@ -11,6 +11,9 @@ export type AppointmentStatus = typeof AppointmentStatus[keyof typeof Appointmen
 
 export const AppointmentStatus = {
   pending: 'pending',
+  pending_slot_selection: 'pending_slot_selection',
   confirmed: 'confirmed',
+  booked: 'booked',
   completed: 'completed',
+  cancelled: 'cancelled',
 } as const;

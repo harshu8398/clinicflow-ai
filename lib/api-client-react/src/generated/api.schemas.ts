@@ -47,8 +47,11 @@ export type AppointmentStatus = typeof AppointmentStatus[keyof typeof Appointmen
 
 export const AppointmentStatus = {
   pending: 'pending',
+  pending_slot_selection: 'pending_slot_selection',
   confirmed: 'confirmed',
+  booked: 'booked',
   completed: 'completed',
+  cancelled: 'cancelled',
 } as const;
 
 export interface Appointment {
@@ -58,6 +61,12 @@ export interface Appointment {
   patientPhone: string;
   patientProblem: string;
   appointmentDate: string;
+  /** @nullable */
+  sessionId?: string | null;
+  /** @nullable */
+  selectedTimeSlot?: string | null;
+  /** @nullable */
+  calendarEventId?: string | null;
   status: AppointmentStatus;
   createdAt: string;
 }
@@ -78,8 +87,11 @@ export type AppointmentStatusUpdateStatus = typeof AppointmentStatusUpdateStatus
 
 export const AppointmentStatusUpdateStatus = {
   pending: 'pending',
+  pending_slot_selection: 'pending_slot_selection',
   confirmed: 'confirmed',
+  booked: 'booked',
   completed: 'completed',
+  cancelled: 'cancelled',
 } as const;
 
 export interface AppointmentStatusUpdate {

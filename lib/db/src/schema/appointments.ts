@@ -6,11 +6,14 @@ import { clinicsTable } from "./clinics";
 export const appointmentsTable = pgTable("appointments", {
   id: serial("id").primaryKey(),
   clinicId: integer("clinic_id").notNull().references(() => clinicsTable.id, { onDelete: "cascade" }),
+  sessionId: text("session_id"),
   patientName: text("patient_name").notNull(),
   patientPhone: text("patient_phone").notNull(),
   patientProblem: text("patient_problem").notNull(),
   appointmentDate: text("appointment_date").notNull(),
-  status: text("status").notNull().default("pending"),
+  selectedTimeSlot: text("selected_time_slot"),
+  calendarEventId: text("calendar_event_id"),
+  status: text("status").notNull().default("pending_slot_selection"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
