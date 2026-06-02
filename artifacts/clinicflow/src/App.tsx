@@ -24,9 +24,10 @@ function ProtectedAdminRoute({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isLoading && !user) {
-      setLocation("/login");
+      const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+      window.location.replace(`${base}/login`);
     }
-  }, [isLoading, user, setLocation]);
+  }, [isLoading, user]);
 
   if (isLoading) {
     return (
@@ -50,7 +51,10 @@ function ProtectedAdminRoute({ children }: { children: React.ReactNode }) {
           <p className="text-gray-500 mb-6">You do not have permission to access this clinic's dashboard.</p>
           <button
             className="text-primary hover:underline text-sm font-medium"
-            onClick={() => setLocation(`/admin/${user.clinicId}`)}
+            onClick={() => {
+              const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+              window.location.replace(`${base}/admin/${user.clinicId}`);
+            }}
           >
             Go to your clinic →
           </button>

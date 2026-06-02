@@ -1,0 +1,151 @@
+🚨 ClinicFlow AI – Authentication Repair & Debug Prompt
+IMPORTANT
+
+The last authentication update broke the application.
+
+Current behavior:
+
+Main page loads.
+When clicking a clinic card, a blank white page appears.
+The application is no longer functioning correctly.
+
+Your task is NOT to add new features.
+
+Your task is to diagnose and repair the existing authentication implementation.
+
+STEP 1 – IDENTIFY THE FAILURE
+
+Carefully inspect:
+
+Flask routes
+Authentication middleware
+Session logic
+Database queries
+Login redirects
+Template rendering
+
+Find the exact cause of the blank page.
+
+Check for:
+
+Missing routes
+Missing templates
+Missing users table
+Invalid redirects
+Session errors
+Jinja template errors
+Flask exceptions
+STEP 2 – FIX WITHOUT BREAKING EXISTING FEATURES
+
+Preserve:
+
+Main page
+Clinic cards
+Patient chat flow
+Appointment booking flow
+Existing dashboard UI
+
+Do not redesign anything.
+
+STEP 3 – SAFE AUTHENTICATION
+
+Implement a minimal working authentication system.
+
+Requirements:
+
+Public
+
+These routes must always work:
+
+/
+/chat/<clinic_id>
+
+No login required.
+
+Protected
+
+These routes require login:
+
+/admin/<clinic_id>
+/dashboard
+/settings
+/appointments
+STEP 4 – CREATE LOGIN PAGE IF MISSING
+
+If no login page exists:
+
+Create:
+
+/login
+
+Fields:
+
+Email
+Password
+STEP 5 – CREATE DEFAULT ADMIN IF NEEDED
+
+If users table is empty:
+
+Automatically create a demo admin account.
+
+Example:
+
+Email:
+
+admin@example.com
+
+Password:
+
+admin123
+
+Display these credentials in comments or documentation.
+
+STEP 6 – ERROR HANDLING
+
+Never show blank pages.
+
+If an exception occurs:
+
+Log the error
+Show friendly error page
+
+Example:
+
+Something went wrong.
+Please try again.
+STEP 7 – VERIFY ALL ROUTES
+
+After fixes:
+
+These must work:
+
+Public
+/
+/chat/3
+Login
+/login
+Protected
+/admin/3
+
+Behavior:
+
+Logged out → redirect to login
+Logged in → dashboard opens
+STEP 8 – OUTPUT
+
+After repairs:
+
+Provide a report:
+
+Root cause of blank page
+Files modified
+Authentication flow implemented
+Default admin credentials
+Remaining issues (if any)
+IMPORTANT
+
+Do not add new features.
+
+Do not modify Phase 1.1 booking logic.
+
+Only restore application functionality and implement working authentication.

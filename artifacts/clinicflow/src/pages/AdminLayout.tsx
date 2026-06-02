@@ -19,7 +19,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const handleLogout = async () => {
     await logout();
-    setLocation("/login");
+    const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+    window.location.replace(`${base}/login`);
   };
 
   // Inside a nested wouter context (/admin/:clinicId), hrefs are relative to the nest base.
