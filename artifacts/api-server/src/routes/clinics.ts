@@ -10,6 +10,7 @@ import {
   ListClinicsResponse,
   CreateClinicBody,
 } from "@workspace/api-zod";
+import { requireAuth, requireClinicOwnership } from "../middleware/auth";
 
 const router: IRouter = Router();
 
@@ -49,7 +50,7 @@ router.get("/clinics/:clinicId", async (req, res): Promise<void> => {
   res.json(GetClinicResponse.parse(serializeClinic(clinic)));
 });
 
-router.put("/clinics/:clinicId", async (req, res): Promise<void> => {
+router.put("/clinics/:clinicId", requireAuth, requireClinicOwnership, async (req, res): Promise<void> => {
   const params = UpdateClinicParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });

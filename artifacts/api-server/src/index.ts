@@ -1,5 +1,6 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { seedAdminUsersIfEmpty } from "./lib/seed-admin-users";
 
 const rawPort = process.env["PORT"];
 
@@ -14,6 +15,10 @@ const port = Number(rawPort);
 if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
+
+seedAdminUsersIfEmpty().catch((err) =>
+  logger.error({ err }, "Failed to seed admin users")
+);
 
 app.listen(port, (err) => {
   if (err) {

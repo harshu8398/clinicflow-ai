@@ -8,6 +8,7 @@ import {
   CreateFaqBody,
   DeleteFaqParams,
 } from "@workspace/api-zod";
+import { requireAuth, requireClinicOwnership } from "../middleware/auth";
 
 const router: IRouter = Router();
 
@@ -15,7 +16,7 @@ function serializeFaq(f: Record<string, unknown>) {
   return { ...f, createdAt: f.createdAt instanceof Date ? f.createdAt.toISOString() : f.createdAt };
 }
 
-router.get("/clinics/:clinicId/faqs", async (req, res): Promise<void> => {
+router.get("/clinics/:clinicId/faqs", requireAuth, requireClinicOwnership, async (req, res): Promise<void> => {
   const params = ListFaqsParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -31,7 +32,7 @@ router.get("/clinics/:clinicId/faqs", async (req, res): Promise<void> => {
   res.json(ListFaqsResponse.parse(faqs.map(serializeFaq)));
 });
 
-router.post("/clinics/:clinicId/faqs", async (req, res): Promise<void> => {
+router.post("/clinics/:clinicId/faqs", requireAuth, requireClinicOwnership, async (req, res): Promise<void> => {
   const params = CreateFaqParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -52,7 +53,7 @@ router.post("/clinics/:clinicId/faqs", async (req, res): Promise<void> => {
   res.status(201).json(serializeFaq(faq));
 });
 
-router.delete("/clinics/:clinicId/faqs/:faqId", async (req, res): Promise<void> => {
+router.delete("/clinics/:clinicId/faqs/:faqId", requireAuth, requireClinicOwnership, async (req, res): Promise<void> => {
   const params = DeleteFaqParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });

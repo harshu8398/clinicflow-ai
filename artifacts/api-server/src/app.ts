@@ -1,8 +1,12 @@
 import express, { type Express } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
+import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
 import router from "./routes";
 import { logger } from "./lib/logger";
+
+const PgStore = connectPgSimple(session);
 
 const app: Express = express();
 
@@ -25,7 +29,24 @@ app.use(
     },
   }),
 );
-app.use(cors());
+
+app.use(cors({ origin: true, credentials: true }));
+
+app.use(
+  session({
+    store: new PgStore({ conString: process.env["DATABASE_URL"] }),
+    secret: process.env["SESSION_SECRET"] ?? "clinicflow-dev-secret",
+    resave: false,
+    saveUninitialized: false,
+    name: "clinicflow.sid",
+    cookie: {
+      httpOnly: true,
+      secure: process.env["NODE_ENV"] === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    },
+  })
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

@@ -1,5 +1,6 @@
 import { useParams, useLocation } from "wouter";
 import { useGetClinic } from "@workspace/api-client-react";
+import { useAuth } from "@/context/AuthContext";
 import { Link } from "wouter";
 import { 
   LayoutDashboard, 
@@ -11,9 +12,15 @@ import {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { clinicId } = useParams();
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const id = Number(clinicId);
   const { data: clinic } = useGetClinic(id);
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    setLocation("/login");
+  };
 
   // Inside a nested wouter context (/admin/:clinicId), hrefs are relative to the nest base.
   // Use "/" for dashboard, "/appointments" etc. for sub-pages.
@@ -47,12 +54,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           })}
         </nav>
         <div className="p-4 border-t border-gray-200">
-          <Link href="~/">
-            <div className="flex items-center px-4 py-3 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors cursor-pointer">
-              <LogOut className="w-5 h-5 mr-3 text-gray-400" />
-              Switch Clinic
-            </div>
-          </Link>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center px-4 py-3 text-sm font-medium text-gray-600 rounded-lg hover:bg-red-50 hover:text-red-700 transition-colors"
+          >
+            <LogOut className="w-5 h-5 mr-3 text-gray-400" />
+            Sign out
+          </button>
         </div>
       </div>
 

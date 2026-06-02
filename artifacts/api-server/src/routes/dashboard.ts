@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
 import { db, appointmentsTable } from "@workspace/db";
 import { GetDashboardParams, GetDashboardResponse } from "@workspace/api-zod";
+import { requireAuth, requireClinicOwnership } from "../middleware/auth";
 
 const router: IRouter = Router();
 
@@ -9,7 +10,7 @@ function serializeAppt(a: Record<string, unknown>) {
   return { ...a, createdAt: a.createdAt instanceof Date ? a.createdAt.toISOString() : a.createdAt };
 }
 
-router.get("/clinics/:clinicId/dashboard", async (req, res): Promise<void> => {
+router.get("/clinics/:clinicId/dashboard", requireAuth, requireClinicOwnership, async (req, res): Promise<void> => {
   const params = GetDashboardParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });

@@ -1,0 +1,294 @@
+🚨 ClinicFlow AI – Admin Authentication & Security Fix
+IMPORTANT
+
+This is a security upgrade.
+
+Do NOT redesign the UI.
+
+Do NOT modify the patient chat flow.
+
+Do NOT modify the appointment booking flow.
+
+Do NOT modify the dashboard design.
+
+Only implement proper authentication, authorization, and clinic isolation.
+
+🎯 GOAL
+
+Currently, anyone can access admin dashboard URLs directly.
+
+Example:
+
+/admin/3
+
+This is a security issue.
+
+Admin dashboards must be private.
+
+Patients and visitors must never access clinic dashboards.
+
+REQUIRED SECURITY MODEL
+Public Routes
+
+The following routes must remain public:
+
+/
+ /chat/<clinic_id>
+
+Patients should access these routes without login.
+
+Protected Routes
+
+The following routes must require authentication:
+
+/admin/<clinic_id>
+/settings
+/appointments
+/dashboard
+
+If user is not authenticated:
+
+Redirect to login page.
+
+ADMIN LOGIN SYSTEM
+
+Create a proper admin authentication system.
+
+Use:
+
+Flask sessions
+SQLite users table
+Password hashing
+
+Never store plain text passwords.
+
+Use Werkzeug password hashing.
+
+Example:
+
+generate_password_hash()
+check_password_hash()
+USERS TABLE
+
+Ensure users table contains:
+
+user_id
+clinic_id
+email
+password_hash
+role
+created_at
+LOGIN PAGE
+
+Create login page if not already present.
+
+Fields:
+
+Email
+Password
+
+Validation:
+
+Required fields
+Proper error messages
+SESSION MANAGEMENT
+
+After successful login:
+
+Store:
+
+session["user_id"]
+session["clinic_id"]
+session["role"]
+session["authenticated"] = True
+LOGOUT
+
+Create logout route.
+
+Example:
+
+/logout
+
+On logout:
+
+Clear session
+Redirect to login
+ROUTE PROTECTION
+
+Create authentication middleware/decorator.
+
+Example:
+
+@login_required
+
+Apply to:
+
+/admin/*
+/dashboard/*
+/settings/*
+/appointments/*
+CLINIC OWNERSHIP PROTECTION (VERY IMPORTANT)
+
+Authentication alone is NOT enough.
+
+A logged-in admin must only access their own clinic.
+
+Example:
+
+Admin belongs to:
+
+clinic_id = 3
+
+Allowed:
+
+/admin/3
+
+Blocked:
+
+/admin/4
+/admin/5
+/admin/100
+
+If clinic mismatch:
+
+Return:
+
+403 Forbidden
+
+or redirect to their own dashboard.
+
+MULTI-CLINIC DATA ISOLATION
+
+Every dashboard query must filter by:
+
+clinic_id
+
+Examples:
+
+Appointments:
+
+SELECT *
+FROM appointments
+WHERE clinic_id = ?
+
+Patients:
+
+SELECT *
+FROM inquiries
+WHERE clinic_id = ?
+
+Never return data from other clinics.
+
+PATIENT CHAT MUST REMAIN PUBLIC
+
+The following route must continue working without login:
+
+/chat/<clinic_id>
+
+Patients should:
+
+Open chat instantly
+Submit appointment requests
+Use anonymous session system
+
+No authentication required.
+
+ADMIN DASHBOARD ACCESS FLOW
+
+Visitor opens:
+
+/admin/3
+
+If NOT logged in:
+
+Redirect:
+
+/login
+
+If logged in AND owns clinic:
+
+Open dashboard.
+
+If logged in BUT does not own clinic:
+
+Return:
+
+403 Forbidden
+SECURITY REQUIREMENTS
+
+Never expose:
+
+Patient phone numbers
+Appointment records
+Dashboard analytics
+Clinic settings
+
+to unauthenticated users.
+
+TEST CASES
+
+The implementation is complete only if all pass:
+
+Test 1
+
+Open:
+
+/admin/3
+
+while logged out.
+
+Expected:
+
+Redirect to login.
+
+Test 2
+
+Login as clinic 3 admin.
+
+Open:
+
+/admin/3
+
+Expected:
+
+Dashboard loads.
+
+Test 3
+
+Login as clinic 3 admin.
+
+Open:
+
+/admin/4
+
+Expected:
+
+403 Forbidden.
+
+Test 4
+
+Open:
+
+/chat/3
+
+without login.
+
+Expected:
+
+Chat opens normally.
+
+Test 5
+
+Patient can complete booking flow without login.
+
+Expected:
+
+Works normally.
+
+IMPORTANT
+
+Do not break existing UI.
+
+Do not break existing patient booking flow.
+
+Only add production-ready authentication, authorization, and clinic isolation.

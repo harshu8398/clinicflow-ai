@@ -13,6 +13,7 @@ import {
   UpdateAppointmentStatusResponse,
   DeleteAppointmentParams,
 } from "@workspace/api-zod";
+import { requireAuth, requireClinicOwnership } from "../middleware/auth";
 
 const router: IRouter = Router();
 
@@ -20,7 +21,7 @@ function serializeAppt(a: Record<string, unknown>) {
   return { ...a, createdAt: a.createdAt instanceof Date ? a.createdAt.toISOString() : a.createdAt };
 }
 
-router.get("/clinics/:clinicId/appointments", async (req, res): Promise<void> => {
+router.get("/clinics/:clinicId/appointments", requireAuth, requireClinicOwnership, async (req, res): Promise<void> => {
   const params = ListAppointmentsParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -36,7 +37,7 @@ router.get("/clinics/:clinicId/appointments", async (req, res): Promise<void> =>
   res.json(ListAppointmentsResponse.parse(appointments.map(serializeAppt)));
 });
 
-router.post("/clinics/:clinicId/appointments", async (req, res): Promise<void> => {
+router.post("/clinics/:clinicId/appointments", requireAuth, requireClinicOwnership, async (req, res): Promise<void> => {
   const params = CreateAppointmentParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -57,7 +58,7 @@ router.post("/clinics/:clinicId/appointments", async (req, res): Promise<void> =
   res.status(201).json(GetAppointmentResponse.parse(serializeAppt(appointment)));
 });
 
-router.get("/clinics/:clinicId/appointments/:appointmentId", async (req, res): Promise<void> => {
+router.get("/clinics/:clinicId/appointments/:appointmentId", requireAuth, requireClinicOwnership, async (req, res): Promise<void> => {
   const params = GetAppointmentParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -82,7 +83,7 @@ router.get("/clinics/:clinicId/appointments/:appointmentId", async (req, res): P
   res.json(GetAppointmentResponse.parse(serializeAppt(appointment)));
 });
 
-router.patch("/clinics/:clinicId/appointments/:appointmentId", async (req, res): Promise<void> => {
+router.patch("/clinics/:clinicId/appointments/:appointmentId", requireAuth, requireClinicOwnership, async (req, res): Promise<void> => {
   const params = UpdateAppointmentStatusParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -114,7 +115,7 @@ router.patch("/clinics/:clinicId/appointments/:appointmentId", async (req, res):
   res.json(UpdateAppointmentStatusResponse.parse(serializeAppt(appointment)));
 });
 
-router.delete("/clinics/:clinicId/appointments/:appointmentId", async (req, res): Promise<void> => {
+router.delete("/clinics/:clinicId/appointments/:appointmentId", requireAuth, requireClinicOwnership, async (req, res): Promise<void> => {
   const params = DeleteAppointmentParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
