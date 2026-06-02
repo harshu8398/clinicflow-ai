@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { db, appointmentsTable, clinicsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { db, appointmentsTable, clinicsTable, chatSessionsTable } from "@workspace/db";
+import { eq, and } from "drizzle-orm";
 import {
   StartChatParams,
   StartChatResponse,
@@ -46,6 +46,12 @@ router.post("/clinics/:clinicId/chat/start", async (req, res): Promise<void> => 
 
   const sessionId = randomUUID();
 
+  // Bind session to this clinic — enforced on every subsequent message
+  await db.insert(chatSessionsTable).values({
+    sessionId,
+    clinicId: params.data.clinicId,
+  });
+
   res.json(
     StartChatResponse.parse({
       sessionId,
@@ -71,6 +77,21 @@ router.post("/clinics/:clinicId/chat/message", async (req, res): Promise<void> =
 
   const { clinicId } = params.data;
   const { sessionId, step, message, context } = parsed.data;
+
+  // Enforce clinic isolation: session must have been started for this exact clinic
+  const [chatSession] = await db
+    .select()
+    .from(chatSessionsTable)
+    .where(and(
+      eq(chatSessionsTable.sessionId, sessionId),
+      eq(chatSessionsTable.clinicId, clinicId)
+    ));
+
+  if (!chatSession) {
+    res.status(403).json({ error: "Session does not belong to this clinic" });
+    return;
+  }
+
   const ctx = context ?? {};
 
   let nextStep: string;

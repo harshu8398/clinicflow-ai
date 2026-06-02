@@ -1,0 +1,168 @@
+# ClinicFlow AI – Fix Patient Chat Multi-Tenant Isolation
+
+## IMPORTANT
+
+DO NOT modify:
+
+* Authentication system
+* Admin login
+* Authorization middleware
+* Dashboard security
+* UI design
+* Routing structure (except validation fix)
+
+This is NOT an auth change.
+
+This is a data isolation fix.
+
+---
+
+# 🚨 CURRENT CRITICAL ISSUE
+
+Patient chat URLs allow cross-clinic access:
+
+Example:
+
+/chat/1
+/chat/2
+/chat/3
+
+Currently, any clinic_id can be accessed directly by changing URL.
+
+This breaks multi-tenant security.
+
+---
+
+# 🎯 REQUIRED BEHAVIOR
+
+Each chat must be strictly bound to clinic_id.
+
+A patient accessing:
+
+/chat/3
+
+must ONLY see data for clinic_id = 3
+
+and NEVER any other clinic data.
+
+---
+
+# 🔐 REQUIRED FIXES
+
+## 1. Backend Validation (MANDATORY)
+
+Every chat API / query must enforce:
+
+clinic_id match is REQUIRED
+
+Example fix:
+
+```sql
+SELECT *
+FROM messages
+WHERE session_id = ?
+AND clinic_id = ?
+```
+
+---
+
+## 2. Session Binding
+
+When session is created:
+
+session must store clinic_id
+
+Example:
+
+session_id → clinic_id binding
+
+A session created for clinic 3:
+
+CANNOT access clinic 1 or 2
+
+---
+
+## 3. Route Protection (Patient Chat)
+
+Route:
+
+/chat/<clinic_id>
+
+must validate:
+
+IF clinic_id is not valid OR mismatch occurs:
+→ reject request OR redirect to safe page
+
+---
+
+## 4. API Security Rule
+
+ALL chat-related endpoints MUST enforce:
+
+* clinic_id match
+* session_id match
+* no cross-clinic data leakage
+
+---
+
+## 5. Data Isolation Rule
+
+Ensure:
+
+Clinic A data = ONLY Clinic A
+
+Clinic B data = ONLY Clinic B
+
+NO SHARED ACCESS EVER
+
+---
+
+# 🧪 TEST CASES
+
+## Test 1
+
+Open:
+/chat/1
+
+Expected:
+Only clinic 1 data shown
+
+---
+
+## Test 2
+
+Open:
+/chat/2
+
+Expected:
+Only clinic 2 data shown
+
+---
+
+## Test 3
+
+Try switching URL manually:
+
+/chat/1 → /chat/2
+
+Expected:
+No data leakage
+
+---
+
+## SUCCESS CRITERIA
+
+✓ No cross-clinic chat access possible
+✓ Each clinic fully isolated
+✓ Same session cannot access multiple clinics
+✓ No UI changes
+✓ No auth system changes
+✓ Only data-layer fix
+
+---
+
+## FINAL NOTE
+
+This is a multi-tenant SaaS security requirement.
+
+Fix must ensure strict clinic-level isolation at backend level, not just frontend routing.
