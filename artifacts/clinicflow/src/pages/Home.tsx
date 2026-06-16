@@ -21,6 +21,7 @@ export default function Home() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    password: "",
     address: "",
     fee: "",
     timings: ""
@@ -95,6 +96,10 @@ export default function Home() {
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input id="email" type="email" required value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input id="password" type="password" required minLength={6} value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="address">Address</Label>

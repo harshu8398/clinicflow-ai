@@ -12,6 +12,7 @@ import Dashboard from "@/pages/admin/Dashboard";
 import Appointments from "@/pages/admin/Appointments";
 import Settings from "@/pages/admin/Settings";
 import Faqs from "@/pages/admin/Faqs";
+import PublicBook from "@/pages/PublicBook";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { Loader2 } from "lucide-react";
 
@@ -72,6 +73,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/login" component={Login} />
       <Route path="/chat/:clinicId" component={Chat} />
+      <Route path="/book/:slug" component={PublicBook} />
       <Route path="/admin/:clinicId" nest>
         <ProtectedAdminRoute>
           <AdminLayout>

@@ -10,6 +10,9 @@ import {
 } from "@workspace/api-zod";
 import { randomUUID } from "crypto";
 
+import { calculateAvailableSlots } from "../lib/scheduler";
+import { getValidAccessToken, createCalendarEvent } from "../lib/google-calendar";
+
 const router: IRouter = Router();
 
 const STEPS = {
@@ -17,8 +20,22 @@ const STEPS = {
   ASK_PHONE: "ask_phone",
   ASK_PROBLEM: "ask_problem",
   ASK_DATE: "ask_date",
+  ASK_SLOT: "ask_slot",
+  CONFIRM_BOOKING: "confirm_booking",
   DONE: "done",
 };
+
+function convertTo24Hour(time12h: string): string {
+  const [time, modifier] = time12h.split(" ");
+  let [hours, minutes] = time.split(":");
+  if (hours === "12") {
+    hours = "00";
+  }
+  if (modifier === "PM") {
+    hours = (parseInt(hours, 10) + 12).toString();
+  }
+  return `${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}:00`;
+}
 
 function serializeAppt(a: Record<string, unknown>) {
   return { ...a, createdAt: a.createdAt instanceof Date ? a.createdAt.toISOString() : a.createdAt };
@@ -231,9 +248,84 @@ router.post("/clinics/:clinicId/chat/message", async (req, res): Promise<void> =
         return;
       }
 
+      const availableSlots = await calculateAvailableSlots(clinicId, date);
+      if (availableSlots.length === 0) {
+        res.json(SendChatMessageResponse.parse({
+          sessionId,
+          step: STEPS.ASK_DATE,
+          botMessage: "No available slots remain for this date.\n\nPlease select another appointment date.",
+          isComplete: false,
+        }));
+        return;
+      }
+
+      ctx.appointmentDate = date;
+
+      nextStep = STEPS.ASK_SLOT;
+      isComplete = false;
+      botMessage = `Great! Please select your preferred time slot for ${date} from the available options.`;
+      break;
+    }
+
+    case STEPS.ASK_SLOT: {
+      const slot = message.trim();
+      const match = slot.match(/^\d{2}:\d{2}\s*(AM|PM)$/i);
+
+      const availableSlots = await calculateAvailableSlots(clinicId, ctx.appointmentDate || "");
+      if (availableSlots.length === 0) {
+        res.json(SendChatMessageResponse.parse({
+          sessionId,
+          step: STEPS.ASK_DATE,
+          botMessage: "No available slots remain for this date.\n\nPlease select another appointment date.",
+          isComplete: false,
+        }));
+        return;
+      }
+
+      if (!match) {
+        res.json(SendChatMessageResponse.parse({
+          sessionId,
+          step: STEPS.ASK_SLOT,
+          botMessage: "Please select a valid time slot from the options.",
+          isComplete: false,
+        }));
+        return;
+      }
+
+      ctx.selectedTimeSlot = slot;
+
+      nextStep = STEPS.CONFIRM_BOOKING;
+      isComplete = false;
+      botMessage = `Here is a summary of your appointment details. Please review them and click "Confirm Booking" to finalize.`;
+      break;
+    }
+
+    case STEPS.CONFIRM_BOOKING: {
+      const confirmation = message.trim().toLowerCase();
+      if (confirmation !== "confirm") {
+        res.json(SendChatMessageResponse.parse({
+          sessionId,
+          step: STEPS.CONFIRM_BOOKING,
+          botMessage: "Please confirm your booking details to finalize.",
+          isComplete: false,
+        }));
+        return;
+      }
+
       const patientName = ctx.patientName ?? "Patient";
       const patientPhone = ctx.patientPhone ?? "";
       const patientProblem = ctx.patientProblem ?? "";
+      const appointmentDate = ctx.appointmentDate ?? "";
+      const selectedTimeSlot = ctx.selectedTimeSlot ?? "";
+
+      // Check double-booking
+      const availableSlots = await calculateAvailableSlots(clinicId, appointmentDate);
+      if (!availableSlots.includes(selectedTimeSlot)) {
+        nextStep = STEPS.ASK_SLOT;
+        isComplete = false;
+        botMessage = `Sorry, the time slot ${selectedTimeSlot} on ${appointmentDate} was just booked by someone else. Please select another slot.`;
+        break;
+      }
 
       const [newAppt] = await db
         .insert(appointmentsTable)
@@ -243,15 +335,45 @@ router.post("/clinics/:clinicId/chat/message", async (req, res): Promise<void> =
           patientName,
           patientPhone,
           patientProblem,
-          appointmentDate: date,
-          status: "pending_slot_selection",
+          appointmentDate,
+          selectedTimeSlot,
+          status: "confirmed",
         })
         .returning();
 
+      // Sync to Google Calendar
+      const [clinic] = await db.select().from(clinicsTable).where(eq(clinicsTable.id, clinicId));
+      let googleEventId: string | null = null;
+      if (clinic && clinic.googleConnected && clinic.googleCalendarId) {
+        try {
+          const startLocal = `${appointmentDate}T${convertTo24Hour(selectedTimeSlot)}`;
+          const startDate = new Date(startLocal);
+          const endDate = new Date(startDate.getTime() + (clinic.slotDuration || 30) * 60 * 1000);
+
+          const eventDetails = {
+            summary: `Appointment: ${patientName}`,
+            description: `Appointment booked via ClinicFlow AI.\nPatient: ${patientName}\nPhone: ${patientPhone}\nProblem: ${patientProblem}`,
+            start: startDate.toISOString(),
+            end: endDate.toISOString(),
+          };
+
+          const token = await getValidAccessToken(clinic);
+          googleEventId = await createCalendarEvent(token, clinic.googleCalendarId, eventDetails);
+
+          await db
+            .update(appointmentsTable)
+            .set({ calendarEventId: googleEventId })
+            .where(eq(appointmentsTable.id, newAppt.id));
+
+          newAppt.calendarEventId = googleEventId;
+        } catch (err) {
+          console.error("Failed to create Google Calendar event in chat confirmation:", err);
+        }
+      }
       nextStep = STEPS.DONE;
       isComplete = true;
       appointment = serializeAppt(newAppt as unknown as Record<string, unknown>);
-      botMessage = `Your appointment request has been submitted successfully!\n\nSummary:\n- Name: ${patientName}\n- Phone: ${patientPhone}\n- Concern: ${patientProblem}\n- Preferred Date: ${date}\n\nThe clinic team will confirm your slot shortly. Thank you for choosing us!`;
+      botMessage = `Your appointment has been successfully booked and confirmed!\n\nSummary:\n- Doctor: ${clinic?.doctorName || "Doctor"}\n- Date: ${appointmentDate}\n- Time: ${selectedTimeSlot}\n- Name: ${patientName}\n- Phone: ${patientPhone}\n- Concern: ${patientProblem}\n\nA confirmation has been synced with the doctor's calendar. Thank you for choosing us!`;
       break;
     }
 

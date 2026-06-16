@@ -9,6 +9,11 @@ export interface HealthStatus {
   status: string;
 }
 
+export type ClinicWorkingSessionsItem = {
+  start: string;
+  end: string;
+};
+
 export interface Clinic {
   id: number;
   name: string;
@@ -18,19 +23,80 @@ export interface Clinic {
   timings: string;
   /** @nullable */
   logoUrl?: string | null;
+  /** @nullable */
+  doctorName?: string | null;
+  /** @nullable */
+  doctorQualification?: string | null;
+  /** @nullable */
+  doctorSpecialization?: string | null;
+  /** @nullable */
+  phone?: string | null;
+  clinicName?: string;
+  contactEmail?: string;
+  consultationFee?: string;
+  operatingTimings?: string;
+  /** @nullable */
+  clinicLogo?: string | null;
+  /** @nullable */
+  clinicPhoneNumber?: string | null;
+  workingSessions?: ClinicWorkingSessionsItem[];
   createdAt: string;
+  /** @nullable */
+  workingDays?: string | null;
+  /** @nullable */
+  openingTime?: string | null;
+  /** @nullable */
+  closingTime?: string | null;
+  /** @nullable */
+  slotDuration?: number | null;
+  googleConnected: boolean;
+  /** @nullable */
+  googleConnectedEmail?: string | null;
+  /** @nullable */
+  googleCalendarId?: string | null;
+  /** @nullable */
+  googleLastSyncAt?: string | null;
 }
+
+export type ClinicInputWorkingSessionsItem = {
+  start: string;
+  end: string;
+};
 
 export interface ClinicInput {
   /** @minLength 1 */
   name: string;
   email: string;
+  /** @minLength 6 */
+  password: string;
   address: string;
   fee: string;
   timings: string;
   /** @nullable */
   logoUrl?: string | null;
+  doctorName?: string;
+  doctorQualification?: string;
+  doctorSpecialization?: string;
+  phone?: string;
+  clinicName?: string;
+  contactEmail?: string;
+  consultationFee?: string;
+  operatingTimings?: string;
+  /** @nullable */
+  clinicLogo?: string | null;
+  /** @nullable */
+  clinicPhoneNumber?: string | null;
+  workingSessions?: ClinicInputWorkingSessionsItem[];
+  workingDays?: string;
+  openingTime?: string;
+  closingTime?: string;
+  slotDuration?: number;
 }
+
+export type ClinicUpdateWorkingSessionsItem = {
+  start: string;
+  end: string;
+};
 
 export interface ClinicUpdate {
   name?: string;
@@ -40,6 +106,23 @@ export interface ClinicUpdate {
   timings?: string;
   /** @nullable */
   logoUrl?: string | null;
+  doctorName?: string;
+  doctorQualification?: string;
+  doctorSpecialization?: string;
+  phone?: string;
+  clinicName?: string;
+  contactEmail?: string;
+  consultationFee?: string;
+  operatingTimings?: string;
+  /** @nullable */
+  clinicLogo?: string | null;
+  /** @nullable */
+  clinicPhoneNumber?: string | null;
+  workingSessions?: ClinicUpdateWorkingSessionsItem[];
+  workingDays?: string;
+  openingTime?: string;
+  closingTime?: string;
+  slotDuration?: number;
 }
 
 export type AppointmentStatus = typeof AppointmentStatus[keyof typeof AppointmentStatus];
@@ -96,6 +179,8 @@ export const AppointmentStatusUpdateStatus = {
 
 export interface AppointmentStatusUpdate {
   status: AppointmentStatusUpdateStatus;
+  appointmentDate?: string;
+  selectedTimeSlot?: string;
 }
 
 export interface Faq {
@@ -131,6 +216,8 @@ export type ChatMessageInputContext = {
   patientProblem?: string | null;
   /** @nullable */
   appointmentDate?: string | null;
+  /** @nullable */
+  selectedTimeSlot?: string | null;
 };
 
 export interface ChatMessageInput {
@@ -148,6 +235,14 @@ export interface ChatResponse {
   isComplete: boolean;
   appointment?: Appointment;
 }
+
+export type DisconnectGoogleAuth200 = {
+  success: boolean;
+};
+
+export type ListAvailableSlotsParams = {
+date: string;
+};
 
 export type StartChatBody = {
   token: string;

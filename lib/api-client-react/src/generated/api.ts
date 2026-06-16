@@ -29,9 +29,11 @@ import type {
   ClinicInput,
   ClinicUpdate,
   DashboardStats,
+  DisconnectGoogleAuth200,
   Faq,
   FaqInput,
   HealthStatus,
+  ListAvailableSlotsParams,
   StartChatBody
 } from './api.schemas';
 
@@ -420,6 +422,242 @@ export const useUpdateClinic = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getUpdateClinicMutationOptions(options));
     }
+
+export const getInitiateGoogleAuthUrl = (clinicId: number,) => {
+
+
+
+
+  return `/api/clinics/${clinicId}/auth/google`
+}
+
+/**
+ * @summary Connect Google Calendar using OAuth
+ */
+export const initiateGoogleAuth = async (clinicId: number, options?: RequestInit): Promise<unknown> => {
+
+  return customFetch<unknown>(getInitiateGoogleAuthUrl(clinicId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getInitiateGoogleAuthQueryKey = (clinicId: number,) => {
+    return [
+    `/api/clinics/${clinicId}/auth/google`
+    ] as const;
+    }
+
+
+export const getInitiateGoogleAuthQueryOptions = <TData = Awaited<ReturnType<typeof initiateGoogleAuth>>, TError = ErrorType<void>>(clinicId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof initiateGoogleAuth>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getInitiateGoogleAuthQueryKey(clinicId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof initiateGoogleAuth>>> = ({ signal }) => initiateGoogleAuth(clinicId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(clinicId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof initiateGoogleAuth>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type InitiateGoogleAuthQueryResult = NonNullable<Awaited<ReturnType<typeof initiateGoogleAuth>>>
+export type InitiateGoogleAuthQueryError = ErrorType<void>
+
+
+/**
+ * @summary Connect Google Calendar using OAuth
+ */
+
+export function useInitiateGoogleAuth<TData = Awaited<ReturnType<typeof initiateGoogleAuth>>, TError = ErrorType<void>>(
+ clinicId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof initiateGoogleAuth>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getInitiateGoogleAuthQueryOptions(clinicId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getDisconnectGoogleAuthUrl = (clinicId: number,) => {
+
+
+
+
+  return `/api/clinics/${clinicId}/auth/google/disconnect`
+}
+
+/**
+ * @summary Disconnect Google Calendar connection
+ */
+export const disconnectGoogleAuth = async (clinicId: number, options?: RequestInit): Promise<DisconnectGoogleAuth200> => {
+
+  return customFetch<DisconnectGoogleAuth200>(getDisconnectGoogleAuthUrl(clinicId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getDisconnectGoogleAuthMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof disconnectGoogleAuth>>, TError,{clinicId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof disconnectGoogleAuth>>, TError,{clinicId: number}, TContext> => {
+
+const mutationKey = ['disconnectGoogleAuth'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof disconnectGoogleAuth>>, {clinicId: number}> = (props) => {
+          const {clinicId} = props ?? {};
+
+          return  disconnectGoogleAuth(clinicId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DisconnectGoogleAuthMutationResult = NonNullable<Awaited<ReturnType<typeof disconnectGoogleAuth>>>
+
+    export type DisconnectGoogleAuthMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Disconnect Google Calendar connection
+ */
+export const useDisconnectGoogleAuth = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof disconnectGoogleAuth>>, TError,{clinicId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof disconnectGoogleAuth>>,
+        TError,
+        {clinicId: number},
+        TContext
+      > => {
+      return useMutation(getDisconnectGoogleAuthMutationOptions(options));
+    }
+
+export const getListAvailableSlotsUrl = (clinicId: number,
+    params: ListAvailableSlotsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/clinics/${clinicId}/slots?${stringifiedParams}` : `/api/clinics/${clinicId}/slots`
+}
+
+/**
+ * @summary Get available slots for a date
+ */
+export const listAvailableSlots = async (clinicId: number,
+    params: ListAvailableSlotsParams, options?: RequestInit): Promise<string[]> => {
+
+  return customFetch<string[]>(getListAvailableSlotsUrl(clinicId,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListAvailableSlotsQueryKey = (clinicId: number,
+    params?: ListAvailableSlotsParams,) => {
+    return [
+    `/api/clinics/${clinicId}/slots`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListAvailableSlotsQueryOptions = <TData = Awaited<ReturnType<typeof listAvailableSlots>>, TError = ErrorType<unknown>>(clinicId: number,
+    params: ListAvailableSlotsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAvailableSlots>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAvailableSlotsQueryKey(clinicId,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAvailableSlots>>> = ({ signal }) => listAvailableSlots(clinicId,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(clinicId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAvailableSlots>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListAvailableSlotsQueryResult = NonNullable<Awaited<ReturnType<typeof listAvailableSlots>>>
+export type ListAvailableSlotsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get available slots for a date
+ */
+
+export function useListAvailableSlots<TData = Awaited<ReturnType<typeof listAvailableSlots>>, TError = ErrorType<unknown>>(
+ clinicId: number,
+    params: ListAvailableSlotsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAvailableSlots>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListAvailableSlotsQueryOptions(clinicId,params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
 
 export const getGetDashboardUrl = (clinicId: number,) => {
 

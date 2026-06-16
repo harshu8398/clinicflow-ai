@@ -9,4 +9,6 @@ import type { AppointmentStatusUpdateStatus } from './appointmentStatusUpdateSta
 
 export interface AppointmentStatusUpdate {
   status: AppointmentStatusUpdateStatus;
+  appointmentDate?: string;
+  selectedTimeSlot?: string;
 }

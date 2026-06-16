@@ -1,0 +1,42 @@
+import nodemailer from "nodemailer";
+
+const getTransporter = () => {
+  const host = process.env.SMTP_HOST || "smtp.gmail.com";
+  const port = Number(process.env.SMTP_PORT || 587);
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: {
+      user,
+      pass,
+    },
+  });
+};
+
+export async function sendOtpEmail(toEmail: string, otp: string): Promise<void> {
+  const transporter = getTransporter();
+
+  const mailOptions = {
+    from: `"ClinicFlow AI" <${process.env.SMTP_USER}>`,
+    to: toEmail,
+    subject: "Your ClinicFlow AI Reset Password Verification Code",
+    text: `Your reset password verification code is: ${otp}. This code is valid for 10 minutes.`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #f0f0f0; border-radius: 8px;">
+        <h2 style="color: #0f172a; text-align: center;">Reset Your Password</h2>
+        <p>You requested a password reset for your clinic administrator account on ClinicFlow AI.</p>
+        <p>Here is your 6-digit verification code (OTP):</p>
+        <div style="background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 15px; border-radius: 8px; text-align: center; margin: 20px 0;">
+          <span style="font-size: 24px; font-weight: bold; letter-spacing: 5px; color: #3b82f6;">${otp}</span>
+        </div>
+        <p style="color: #64748b; font-size: 12px; text-align: center;">This code will expire in 10 minutes. If you did not request this, please ignore this email.</p>
+      </div>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
+}

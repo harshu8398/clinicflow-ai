@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -10,8 +10,23 @@ export const clinicsTable = pgTable("clinics", {
   fee: text("fee").notNull(),
   timings: text("timings").notNull(),
   logoUrl: text("logo_url"),
+  doctorName: text("doctor_name"),
+  doctorQualification: text("doctor_qualification"),
+  doctorSpecialization: text("doctor_specialization"),
+  phone: text("phone"),
   calendarId: text("calendar_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  workingDays: text("working_days"),
+  openingTime: text("opening_time"),
+  closingTime: text("closing_time"),
+  slotDuration: integer("slot_duration"),
+  googleConnected: boolean("google_connected").default(false),
+  googleConnectedEmail: text("google_connected_email"),
+  googleCalendarId: text("google_calendar_id"),
+  googleAccessToken: text("google_access_token"),
+  googleRefreshToken: text("google_refresh_token"),
+  googleTokenExpiresAt: timestamp("google_token_expires_at"),
+  googleLastSyncAt: timestamp("google_last_sync_at"),
 });
 
 export const insertClinicSchema = createInsertSchema(clinicsTable).omit({ id: true, createdAt: true });

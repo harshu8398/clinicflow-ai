@@ -5,6 +5,7 @@
  * ClinicFlow AI API
  * OpenAPI spec version: 0.1.0
  */
+import type { ClinicWorkingSessionsItem } from './clinicWorkingSessionsItem';
 
 export interface Clinic {
   id: number;
@@ -15,5 +16,37 @@ export interface Clinic {
   timings: string;
   /** @nullable */
   logoUrl?: string | null;
+  /** @nullable */
+  doctorName?: string | null;
+  /** @nullable */
+  doctorQualification?: string | null;
+  /** @nullable */
+  doctorSpecialization?: string | null;
+  /** @nullable */
+  phone?: string | null;
+  clinicName?: string;
+  contactEmail?: string;
+  consultationFee?: string;
+  operatingTimings?: string;
+  /** @nullable */
+  clinicLogo?: string | null;
+  /** @nullable */
+  clinicPhoneNumber?: string | null;
+  workingSessions?: ClinicWorkingSessionsItem[];
   createdAt: string;
+  /** @nullable */
+  workingDays?: string | null;
+  /** @nullable */
+  openingTime?: string | null;
+  /** @nullable */
+  closingTime?: string | null;
+  /** @nullable */
+  slotDuration?: number | null;
+  googleConnected: boolean;
+  /** @nullable */
+  googleConnectedEmail?: string | null;
+  /** @nullable */
+  googleCalendarId?: string | null;
+  /** @nullable */
+  googleLastSyncAt?: string | null;
 }

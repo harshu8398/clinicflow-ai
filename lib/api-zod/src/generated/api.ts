@@ -27,7 +27,29 @@ export const ListClinicsResponseItem = zod.object({
   "fee": zod.string(),
   "timings": zod.string(),
   "logoUrl": zod.string().nullish(),
-  "createdAt": zod.string()
+  "doctorName": zod.string().nullish(),
+  "doctorQualification": zod.string().nullish(),
+  "doctorSpecialization": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "clinicName": zod.string().optional(),
+  "contactEmail": zod.string().optional(),
+  "consultationFee": zod.string().optional(),
+  "operatingTimings": zod.string().optional(),
+  "clinicLogo": zod.string().nullish(),
+  "clinicPhoneNumber": zod.string().nullish(),
+  "workingSessions": zod.array(zod.object({
+  "start": zod.string(),
+  "end": zod.string()
+})).optional(),
+  "createdAt": zod.string(),
+  "workingDays": zod.string().nullish(),
+  "openingTime": zod.string().nullish(),
+  "closingTime": zod.string().nullish(),
+  "slotDuration": zod.number().nullish(),
+  "googleConnected": zod.boolean(),
+  "googleConnectedEmail": zod.string().nullish(),
+  "googleCalendarId": zod.string().nullish(),
+  "googleLastSyncAt": zod.string().nullish()
 })
 export const ListClinicsResponse = zod.array(ListClinicsResponseItem)
 
@@ -36,15 +58,36 @@ export const ListClinicsResponse = zod.array(ListClinicsResponseItem)
  * @summary Register a new clinic
  */
 
+export const createClinicBodyPasswordMin = 6;
+
 
 
 export const CreateClinicBody = zod.object({
   "name": zod.string().min(1),
   "email": zod.string(),
+  "password": zod.string().min(createClinicBodyPasswordMin),
   "address": zod.string(),
   "fee": zod.string(),
   "timings": zod.string(),
-  "logoUrl": zod.string().nullish()
+  "logoUrl": zod.string().nullish(),
+  "doctorName": zod.string().optional(),
+  "doctorQualification": zod.string().optional(),
+  "doctorSpecialization": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "clinicName": zod.string().optional(),
+  "contactEmail": zod.string().optional(),
+  "consultationFee": zod.string().optional(),
+  "operatingTimings": zod.string().optional(),
+  "clinicLogo": zod.string().nullish(),
+  "clinicPhoneNumber": zod.string().nullish(),
+  "workingSessions": zod.array(zod.object({
+  "start": zod.string(),
+  "end": zod.string()
+})).optional(),
+  "workingDays": zod.string().optional(),
+  "openingTime": zod.string().optional(),
+  "closingTime": zod.string().optional(),
+  "slotDuration": zod.number().optional()
 })
 
 
@@ -63,7 +106,29 @@ export const GetClinicResponse = zod.object({
   "fee": zod.string(),
   "timings": zod.string(),
   "logoUrl": zod.string().nullish(),
-  "createdAt": zod.string()
+  "doctorName": zod.string().nullish(),
+  "doctorQualification": zod.string().nullish(),
+  "doctorSpecialization": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "clinicName": zod.string().optional(),
+  "contactEmail": zod.string().optional(),
+  "consultationFee": zod.string().optional(),
+  "operatingTimings": zod.string().optional(),
+  "clinicLogo": zod.string().nullish(),
+  "clinicPhoneNumber": zod.string().nullish(),
+  "workingSessions": zod.array(zod.object({
+  "start": zod.string(),
+  "end": zod.string()
+})).optional(),
+  "createdAt": zod.string(),
+  "workingDays": zod.string().nullish(),
+  "openingTime": zod.string().nullish(),
+  "closingTime": zod.string().nullish(),
+  "slotDuration": zod.number().nullish(),
+  "googleConnected": zod.boolean(),
+  "googleConnectedEmail": zod.string().nullish(),
+  "googleCalendarId": zod.string().nullish(),
+  "googleLastSyncAt": zod.string().nullish()
 })
 
 
@@ -80,7 +145,25 @@ export const UpdateClinicBody = zod.object({
   "address": zod.string().optional(),
   "fee": zod.string().optional(),
   "timings": zod.string().optional(),
-  "logoUrl": zod.string().nullish()
+  "logoUrl": zod.string().nullish(),
+  "doctorName": zod.string().optional(),
+  "doctorQualification": zod.string().optional(),
+  "doctorSpecialization": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "clinicName": zod.string().optional(),
+  "contactEmail": zod.string().optional(),
+  "consultationFee": zod.string().optional(),
+  "operatingTimings": zod.string().optional(),
+  "clinicLogo": zod.string().nullish(),
+  "clinicPhoneNumber": zod.string().nullish(),
+  "workingSessions": zod.array(zod.object({
+  "start": zod.string(),
+  "end": zod.string()
+})).optional(),
+  "workingDays": zod.string().optional(),
+  "openingTime": zod.string().optional(),
+  "closingTime": zod.string().optional(),
+  "slotDuration": zod.number().optional()
 })
 
 export const UpdateClinicResponse = zod.object({
@@ -91,8 +174,65 @@ export const UpdateClinicResponse = zod.object({
   "fee": zod.string(),
   "timings": zod.string(),
   "logoUrl": zod.string().nullish(),
-  "createdAt": zod.string()
+  "doctorName": zod.string().nullish(),
+  "doctorQualification": zod.string().nullish(),
+  "doctorSpecialization": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "clinicName": zod.string().optional(),
+  "contactEmail": zod.string().optional(),
+  "consultationFee": zod.string().optional(),
+  "operatingTimings": zod.string().optional(),
+  "clinicLogo": zod.string().nullish(),
+  "clinicPhoneNumber": zod.string().nullish(),
+  "workingSessions": zod.array(zod.object({
+  "start": zod.string(),
+  "end": zod.string()
+})).optional(),
+  "createdAt": zod.string(),
+  "workingDays": zod.string().nullish(),
+  "openingTime": zod.string().nullish(),
+  "closingTime": zod.string().nullish(),
+  "slotDuration": zod.number().nullish(),
+  "googleConnected": zod.boolean(),
+  "googleConnectedEmail": zod.string().nullish(),
+  "googleCalendarId": zod.string().nullish(),
+  "googleLastSyncAt": zod.string().nullish()
 })
+
+
+/**
+ * @summary Connect Google Calendar using OAuth
+ */
+export const InitiateGoogleAuthParams = zod.object({
+  "clinicId": zod.coerce.number()
+})
+
+
+/**
+ * @summary Disconnect Google Calendar connection
+ */
+export const DisconnectGoogleAuthParams = zod.object({
+  "clinicId": zod.coerce.number()
+})
+
+export const DisconnectGoogleAuthResponse = zod.object({
+  "success": zod.boolean()
+})
+
+
+/**
+ * @summary Get available slots for a date
+ */
+export const ListAvailableSlotsParams = zod.object({
+  "clinicId": zod.coerce.number()
+})
+
+export const ListAvailableSlotsQueryParams = zod.object({
+  "date": zod.coerce.string()
+})
+
+export const ListAvailableSlotsResponseItem = zod.string()
+export const ListAvailableSlotsResponse = zod.array(ListAvailableSlotsResponseItem)
 
 
 /**
@@ -200,7 +340,9 @@ export const UpdateAppointmentStatusParams = zod.object({
 })
 
 export const UpdateAppointmentStatusBody = zod.object({
-  "status": zod.enum(['pending', 'pending_slot_selection', 'confirmed', 'booked', 'completed', 'cancelled'])
+  "status": zod.enum(['pending', 'pending_slot_selection', 'confirmed', 'booked', 'completed', 'cancelled']),
+  "appointmentDate": zod.string().optional(),
+  "selectedTimeSlot": zod.string().optional()
 })
 
 export const UpdateAppointmentStatusResponse = zod.object({
@@ -320,7 +462,8 @@ export const SendChatMessageBody = zod.object({
   "patientName": zod.string().nullish(),
   "patientPhone": zod.string().nullish(),
   "patientProblem": zod.string().nullish(),
-  "appointmentDate": zod.string().nullish()
+  "appointmentDate": zod.string().nullish(),
+  "selectedTimeSlot": zod.string().nullish()
 }).optional()
 })
 

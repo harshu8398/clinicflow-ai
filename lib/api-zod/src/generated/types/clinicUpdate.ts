@@ -5,6 +5,7 @@
  * ClinicFlow AI API
  * OpenAPI spec version: 0.1.0
  */
+import type { ClinicUpdateWorkingSessionsItem } from './clinicUpdateWorkingSessionsItem';
 
 export interface ClinicUpdate {
   name?: string;
@@ -14,4 +15,21 @@ export interface ClinicUpdate {
   timings?: string;
   /** @nullable */
   logoUrl?: string | null;
+  doctorName?: string;
+  doctorQualification?: string;
+  doctorSpecialization?: string;
+  phone?: string;
+  clinicName?: string;
+  contactEmail?: string;
+  consultationFee?: string;
+  operatingTimings?: string;
+  /** @nullable */
+  clinicLogo?: string | null;
+  /** @nullable */
+  clinicPhoneNumber?: string | null;
+  workingSessions?: ClinicUpdateWorkingSessionsItem[];
+  workingDays?: string;
+  openingTime?: string;
+  closingTime?: string;
+  slotDuration?: number;
 }

@@ -6,7 +6,7 @@ import { requireAuth, requireClinicOwnership } from "../middleware/auth";
 
 const router: IRouter = Router();
 
-function serializeAppt(a: Record<string, unknown>) {
+function serializeAppt(a: any) {
   return { ...a, createdAt: a.createdAt instanceof Date ? a.createdAt.toISOString() : a.createdAt };
 }
 

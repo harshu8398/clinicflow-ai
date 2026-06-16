@@ -1,6 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 import { seedAdminUsersIfEmpty } from "./lib/seed-admin-users";
+import { startGoogleSync } from "./lib/sync-scheduler";
 
 const rawPort = process.env["PORT"];
 
@@ -19,6 +20,8 @@ if (Number.isNaN(port) || port <= 0) {
 seedAdminUsersIfEmpty().catch((err) =>
   logger.error({ err }, "Failed to seed admin users")
 );
+
+startGoogleSync();
 
 app.listen(port, (err) => {
   if (err) {

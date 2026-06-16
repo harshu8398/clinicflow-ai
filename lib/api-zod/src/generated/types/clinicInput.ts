@@ -5,14 +5,34 @@
  * ClinicFlow AI API
  * OpenAPI spec version: 0.1.0
  */
+import type { ClinicInputWorkingSessionsItem } from './clinicInputWorkingSessionsItem';
 
 export interface ClinicInput {
   /** @minLength 1 */
   name: string;
   email: string;
+  /** @minLength 6 */
+  password: string;
   address: string;
   fee: string;
   timings: string;
   /** @nullable */
   logoUrl?: string | null;
+  doctorName?: string;
+  doctorQualification?: string;
+  doctorSpecialization?: string;
+  phone?: string;
+  clinicName?: string;
+  contactEmail?: string;
+  consultationFee?: string;
+  operatingTimings?: string;
+  /** @nullable */
+  clinicLogo?: string | null;
+  /** @nullable */
+  clinicPhoneNumber?: string | null;
+  workingSessions?: ClinicInputWorkingSessionsItem[];
+  workingDays?: string;
+  openingTime?: string;
+  closingTime?: string;
+  slotDuration?: number;
 }

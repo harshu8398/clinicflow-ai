@@ -15,4 +15,6 @@ export type ChatMessageInputContext = {
   patientProblem?: string | null;
   /** @nullable */
   appointmentDate?: string | null;
+  /** @nullable */
+  selectedTimeSlot?: string | null;
 };
