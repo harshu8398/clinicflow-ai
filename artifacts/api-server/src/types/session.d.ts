@@ -13,5 +13,10 @@ declare module "express-session" {
     resetOtpEmail?: string;
     resetOtpExpiresAt?: number;
     resetOtpLastSentAt?: number;
+    originalSystemOwnerUserId?: number;
+    originalUserId?: number;
+    originalClinicId?: number;
+    originalRole?: string;
   }
 }
+

@@ -33,9 +33,12 @@ if (!dbUrl) {
 const apiEnv = { ...process.env, ...env, NODE_ENV: 'development', PORT: '5000' };
 const clientEnv = { ...process.env, ...env, NODE_ENV: 'development', PORT: '3000' };
 
+const isWindows = process.platform === 'win32';
+const pnpmCmd = isWindows ? 'pnpm.cmd' : 'pnpm';
+
 console.log("Pushing database schema using drizzle-kit...");
 try {
-  execSync('pnpm --filter @workspace/db run push', {
+  execSync(`${pnpmCmd} --filter @workspace/db run push`, {
     stdio: 'inherit',
     env: apiEnv
   });
@@ -71,7 +74,7 @@ apiProcess.on('close', (code) => {
 });
 
 console.log("Starting Frontend Server on port 3000...");
-const clientProcess = spawn('pnpm', ['--filter', '@workspace/clinicflow', 'run', 'dev'], {
+const clientProcess = spawn(pnpmCmd, ['--filter', '@workspace/clinicflow', 'run', 'dev'], {
   env: clientEnv,
   shell: true
 });

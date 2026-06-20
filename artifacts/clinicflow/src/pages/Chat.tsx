@@ -9,6 +9,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Send, Loader2, Hospital, Bot, User, CheckCircle2, CalendarIcon, ShieldAlert, Download } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { format } from "date-fns";
+import { getImageUrl } from "@/lib/image";
 
 type Message = {
   id: string;
@@ -335,7 +336,7 @@ export default function Chat() {
 
       if (clinic.clinicLogo) {
         try {
-          const logoImg = await loadImage(clinic.clinicLogo);
+          const logoImg = await loadImage(getImageUrl(clinic.clinicLogo));
           ctx.save();
           ctx.beginPath();
           ctx.arc(logoX, logoY, logoRadius, 0, Math.PI * 2);

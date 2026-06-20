@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { sendOtpEmail } from "../lib/email";
 import crypto from "crypto";
+import { validateActiveClinicSubscription } from "./subscriptions";
 const router: IRouter = Router();
 
 router.post("/auth/login", async (req, res): Promise<void> => {
@@ -35,6 +36,15 @@ router.post("/auth/login", async (req, res): Promise<void> => {
   req.session.clinicId = user.clinicId;
   req.session.role = user.role;
 
+  // Validate/update subscription on login
+  if (user.clinicId && user.role !== "system_owner") {
+    try {
+      await validateActiveClinicSubscription(user.clinicId);
+    } catch (err) {
+      console.error("Subscription validation failed on login:", err);
+    }
+  }
+
   res.json({
     userId: user.id,
     clinicId: user.clinicId,
@@ -54,15 +64,26 @@ router.post("/auth/logout", (req, res): void => {
   });
 });
 
-router.get("/auth/me", (req, res): void => {
+router.get("/auth/me", async (req, res): Promise<void> => {
   if (!req.session.authenticated) {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
+  
+  const isSystemOwner = req.session.role === "system_owner" && !req.session.originalSystemOwnerUserId;
+  if (req.session.clinicId && !isSystemOwner) {
+    try {
+      await validateActiveClinicSubscription(req.session.clinicId);
+    } catch (err) {
+      console.error("Subscription validation failed on /auth/me:", err);
+    }
+  }
+
   res.json({
     userId: req.session.userId,
     clinicId: req.session.clinicId,
     role: req.session.role,
+    originalSystemOwnerUserId: req.session.originalSystemOwnerUserId || null,
   });
 });
 

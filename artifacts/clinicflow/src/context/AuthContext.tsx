@@ -4,6 +4,7 @@ type AuthUser = {
   userId: number;
   clinicId: number;
   role: string;
+  originalSystemOwnerUserId?: number | null;
 };
 
 type AuthContextValue = {
@@ -38,7 +39,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     const data = await res.json();
     if (!res.ok) return { error: data.error ?? "Login failed" };
-    setUser({ userId: data.userId, clinicId: data.clinicId, role: data.role });
+    setUser({ 
+      userId: data.userId, 
+      clinicId: data.clinicId, 
+      role: data.role,
+      originalSystemOwnerUserId: data.originalSystemOwnerUserId ?? null
+    });
     return {};
   }, []);
 

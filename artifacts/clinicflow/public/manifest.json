@@ -1,0 +1,35 @@
+{
+  "short_name": "ClinicFlow",
+  "name": "ClinicFlow — Smart Patient Receptionist & Scheduling Assistant",
+  "icons": [
+    {
+      "src": "/favicon.ico?v=1.0",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/favicon-16x16.png?v=1.0",
+      "type": "image/png",
+      "sizes": "16x16"
+    },
+    {
+      "src": "/favicon-32x32.png?v=1.0",
+      "type": "image/png",
+      "sizes": "32x32"
+    },
+    {
+      "src": "/android-chrome-192x192.png?v=1.0",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/android-chrome-512x512.png?v=1.0",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#0d9488",
+  "background_color": "#ffffff"
+}

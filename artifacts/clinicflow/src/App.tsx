@@ -13,6 +13,11 @@ import Appointments from "@/pages/admin/Appointments";
 import Settings from "@/pages/admin/Settings";
 import Faqs from "@/pages/admin/Faqs";
 import PublicBook from "@/pages/PublicBook";
+import SubscriptionManagement from "@/pages/admin/SubscriptionManagement";
+import SubscriptionRequests from "@/pages/admin/SubscriptionRequests";
+import SubscriptionSettings from "@/pages/admin/SubscriptionSettings";
+import PlatformOverview from "@/pages/admin/PlatformOverview";
+import AuditLogs from "@/pages/admin/AuditLogs";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { Loader2 } from "lucide-react";
 
@@ -68,6 +73,9 @@ function ProtectedAdminRoute({ children }: { children: React.ReactNode }) {
 }
 
 function Router() {
+  const { user } = useAuth();
+  const isSystemOwner = user?.role === "system_owner";
+
   return (
     <Switch>
       <Route path="/" component={Home} />
@@ -78,10 +86,33 @@ function Router() {
         <ProtectedAdminRoute>
           <AdminLayout>
             <Switch>
-              <Route path="/" component={Dashboard} />
-              <Route path="/appointments" component={Appointments} />
-              <Route path="/settings" component={Settings} />
-              <Route path="/faqs" component={Faqs} />
+              {isSystemOwner ? (
+                <>
+                  <Route path="/" component={PlatformOverview} />
+                  <Route path="/clinics" component={SubscriptionManagement} />
+                  <Route path="/subscription-management" component={SubscriptionManagement} />
+                  <Route path="/subscription-requests" component={SubscriptionRequests} />
+                  <Route path="/subscription-settings" component={SubscriptionSettings} />
+                  <Route path="/audit-logs" component={AuditLogs} />
+                  {/* Block other paths */}
+                  <Route path="/appointments" component={NotFound} />
+                  <Route path="/settings" component={NotFound} />
+                  <Route path="/faqs" component={NotFound} />
+                </>
+              ) : (
+                <>
+                  <Route path="/" component={Dashboard} />
+                  <Route path="/appointments" component={Appointments} />
+                  <Route path="/settings" component={Settings} />
+                  <Route path="/faqs" component={Faqs} />
+                  {/* Block platform paths */}
+                  <Route path="/clinics" component={NotFound} />
+                  <Route path="/subscription-management" component={NotFound} />
+                  <Route path="/subscription-requests" component={NotFound} />
+                  <Route path="/subscription-settings" component={NotFound} />
+                  <Route path="/audit-logs" component={NotFound} />
+                </>
+              )}
               <Route component={NotFound} />
             </Switch>
           </AdminLayout>

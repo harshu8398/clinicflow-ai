@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
-import { db, clinicsTable } from "@workspace/db";
+import { db, clinicsTable, usersTable } from "@workspace/db";
+import bcrypt from "bcryptjs";
 import {
   GetClinicParams,
   GetClinicResponse,
@@ -60,6 +61,34 @@ router.post("/clinics", async (req, res): Promise<void> => {
 
   const bodyData = { ...parsed.data } as any;
 
+  const emailLower = (bodyData.email || "").toLowerCase().trim();
+  if (emailLower) {
+    // Check if user already exists
+    const [existingUser] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, emailLower));
+
+    if (existingUser) {
+      res.status(400).json({ error: "Email address is already in use by another clinic admin." });
+      return;
+    }
+
+    // Check if clinic already exists with this email
+    const [existingClinic] = await db
+      .select()
+      .from(clinicsTable)
+      .where(eq(clinicsTable.email, emailLower));
+
+    if (existingClinic) {
+      res.status(400).json({ error: "A clinic with this email address is already registered." });
+      return;
+    }
+  }
+
+  const password = bodyData.password;
+  delete bodyData.password;
+
   if (bodyData.clinicName !== undefined) {
     bodyData.name = bodyData.clinicName;
     delete bodyData.clinicName;
@@ -92,6 +121,17 @@ router.post("/clinics", async (req, res): Promise<void> => {
   }
 
   const [clinic] = await db.insert(clinicsTable).values(bodyData).returning();
+
+  if (password && emailLower) {
+    const passwordHash = await bcrypt.hash(password, 12);
+    await db.insert(usersTable).values({
+      clinicId: clinic.id,
+      email: emailLower,
+      passwordHash,
+      role: "admin",
+    });
+  }
+
   res.status(201).json(GetClinicResponse.parse(serializeClinic(clinic)));
 });
 

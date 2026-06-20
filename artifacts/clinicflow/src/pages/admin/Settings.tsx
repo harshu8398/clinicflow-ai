@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, Save, Calendar, CheckCircle2, LogOut, Plus, Trash2, Link, Copy, ExternalLink, QrCode, Download } from "lucide-react";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 const DAYS_OF_WEEK = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 const DAYS_LABELS: Record<string, string> = {
@@ -312,7 +313,7 @@ export default function Settings() {
               <div className="flex items-center gap-4 p-4 bg-gray-50/50 rounded-xl border border-gray-100">
                 <div className="relative w-20 h-20 bg-gray-100 border border-gray-200 rounded-xl overflow-hidden flex items-center justify-center shrink-0">
                   {formData.clinicLogo ? (
-                    <img src={formData.clinicLogo} alt="Clinic Logo" className="w-full h-full object-cover" />
+                    <ImageWithFallback src={formData.clinicLogo} alt="Clinic Logo" className="w-full h-full object-cover" />
                   ) : (
                     <div className="text-gray-400 text-xs font-semibold text-center px-1">No Logo</div>
                   )}

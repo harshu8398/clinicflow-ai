@@ -27,6 +27,12 @@ export const clinicsTable = pgTable("clinics", {
   googleRefreshToken: text("google_refresh_token"),
   googleTokenExpiresAt: timestamp("google_token_expires_at"),
   googleLastSyncAt: timestamp("google_last_sync_at"),
+  planType: text("plan_type").default("Demo").notNull(),
+  subscriptionStatus: text("subscription_status").default("Trial").notNull(),
+  startDate: timestamp("subscription_start_date", { withTimezone: true }),
+  expiryDate: timestamp("subscription_expiry_date", { withTimezone: true }),
+  lastPaymentReference: text("last_payment_reference"),
+  subscriptionNotes: text("subscription_notes"),
 });
 
 export const insertClinicSchema = createInsertSchema(clinicsTable).omit({ id: true, createdAt: true });

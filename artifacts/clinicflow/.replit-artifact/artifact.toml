@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "ClinicFlow AI"
+title = "ClinicFlow"
 version = "1.0.0"
 id = "artifacts/clinicflow"
 router = "path"
