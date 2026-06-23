@@ -40,60 +40,60 @@ export default function AuditLogs() {
   );
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="space-y-6 animate-in fade-in duration-300 pb-12">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Audit Logs</h2>
-          <p className="text-gray-500 mt-1 text-sm">Monitor platform-wide administrative actions, system events, and impersonation logs.</p>
+          <h2 className="text-2xl font-bold text-slate-800 font-display tracking-tight">Audit Logs</h2>
+          <p className="text-xs text-slate-400 mt-1">Monitor platform-wide administrative actions, system events, and impersonation logs.</p>
         </div>
-        <Button variant="outline" onClick={fetchLogs} disabled={loading}>
-          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} /> Refresh
+        <Button variant="outline" onClick={fetchLogs} disabled={loading} className="h-10 border-slate-200 hover:bg-slate-50 font-semibold text-xs px-4 cursor-pointer">
+          <RefreshCw className={`w-3.5 h-3.5 mr-2 ${loading ? "animate-spin" : ""}`} /> Refresh Logs
         </Button>
       </div>
 
       {/* Search Filter */}
       <div className="relative w-full max-w-md">
-        <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+        <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
         <Input
           placeholder="Search by action, email, or details..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
+          className="pl-10.5 h-10 border-slate-200 focus:border-primary focus:ring-primary/20 rounded-lg text-xs"
         />
       </div>
 
       {loading ? (
-        <div className="min-h-[300px] flex items-center justify-center bg-white border border-gray-100 rounded-xl shadow-sm">
+        <div className="min-h-[300px] flex items-center justify-center bg-white border border-slate-100 rounded-xl shadow-sm">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       ) : filteredLogs.length === 0 ? (
-        <Card className="p-16 text-center border-dashed">
-          <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <FileClock className="w-8 h-8 text-slate-300" />
+        <Card className="p-16 text-center border-dashed border-slate-200 rounded-xl">
+          <div className="w-14 h-14 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <FileClock className="w-6 h-6 text-slate-350" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-1">No logs found</h3>
-          <p className="text-gray-500">
+          <h3 className="text-sm font-bold text-slate-800 font-display mb-1">No logs found</h3>
+          <p className="text-xs text-slate-400 leading-relaxed">
             {searchQuery ? "Try refining your search query." : "No platform actions have been recorded yet."}
           </p>
         </Card>
       ) : (
-        <Card className="bg-white border-gray-100 shadow-sm overflow-hidden">
+        <Card className="bg-white border-slate-100 shadow-sm rounded-xl overflow-hidden">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-gray-50/50">
-                    <TableHead className="w-[180px] font-semibold text-slate-700">Timestamp</TableHead>
-                    <TableHead className="w-[180px] font-semibold text-slate-700">User Email</TableHead>
-                    <TableHead className="w-[200px] font-semibold text-slate-700">Action</TableHead>
-                    <TableHead className="font-semibold text-slate-700">Details</TableHead>
+                  <TableRow className="bg-slate-50/50">
+                    <TableHead className="w-[180px] font-bold text-slate-500 py-3.5 px-6">Timestamp</TableHead>
+                    <TableHead className="w-[200px] font-bold text-slate-500 py-3.5">User Email</TableHead>
+                    <TableHead className="w-[180px] font-bold text-slate-500 py-3.5">Action</TableHead>
+                    <TableHead className="font-bold text-slate-500 py-3.5">Details</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredLogs.map((log) => (
-                    <TableRow key={log.id} className="hover:bg-gray-50/30">
-                      <TableCell className="text-slate-600 text-sm whitespace-nowrap">
-                        <span className="flex items-center gap-1.5">
+                    <TableRow key={log.id} className="hover:bg-slate-50/30 transition-colors">
+                      <TableCell className="text-slate-500 text-xs py-4 px-6 whitespace-nowrap">
+                        <span className="flex items-center gap-1.5 font-medium">
                           <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                           {new Date(log.createdAt).toLocaleString(undefined, {
                             year: "numeric",
@@ -105,19 +105,19 @@ export default function AuditLogs() {
                           })}
                         </span>
                       </TableCell>
-                      <TableCell className="text-slate-700 text-sm">
-                        <span className="flex items-center gap-1.5 font-medium">
+                      <TableCell className="text-slate-655 text-xs py-4">
+                        <span className="flex items-center gap-1.5 font-bold">
                           <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                           {log.userEmail || `User ID: ${log.userId}`}
                         </span>
                       </TableCell>
-                      <TableCell className="text-slate-900 text-sm font-semibold">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/5 text-primary border border-primary/10">
+                      <TableCell className="text-slate-800 text-xs py-4 font-semibold">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/5 text-primary border border-primary/10 uppercase tracking-wider">
                           {log.action}
                         </span>
                       </TableCell>
-                      <TableCell className="text-slate-600 text-sm">
-                        <span className="flex items-start gap-1.5">
+                      <TableCell className="text-slate-600 text-xs py-4">
+                        <span className="flex items-start gap-1.5 leading-relaxed pr-6">
                           <Info className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
                           <span>{log.details || "N/A"}</span>
                         </span>

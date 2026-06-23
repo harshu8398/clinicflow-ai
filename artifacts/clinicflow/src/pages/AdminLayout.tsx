@@ -120,16 +120,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isImpersonating = !!subData?.impersonating;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans">
       {/* Impersonation sticky top banner */}
       {isImpersonating && (
-        <div className="bg-amber-600 text-white text-xs font-semibold px-6 py-2.5 flex items-center justify-between z-50 sticky top-0 shadow-sm">
-          <span>
-            You are currently viewing: <strong className="underline font-bold">{clinic?.name || "Clinic"}</strong> as System Owner.
+        <div className="bg-amber-500 text-white text-xs font-semibold px-6 py-3 flex items-center justify-between z-50 sticky top-0 shadow-md">
+          <span className="flex items-center gap-2">
+            <span className="inline-block w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
+            <span>Viewing: <strong className="underline">{clinic?.name || "Clinic"}</strong> as System Owner.</span>
           </span>
           <button
             onClick={handleStopImpersonation}
-            className="bg-white hover:bg-slate-100 text-amber-900 rounded px-3 py-1 font-semibold transition-colors border-0 cursor-pointer text-xs"
+            className="bg-white hover:bg-slate-100 text-amber-900 rounded-lg px-3 py-1 font-semibold transition-all shadow-sm border-0 cursor-pointer text-xs"
           >
             Return To System Owner
           </button>
@@ -138,9 +139,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Global Subscription Warning Bar */}
       {isBlocked && (
-        <div className="bg-red-600 text-white text-xs font-semibold px-6 py-2 flex items-center justify-between z-40 shadow-sm">
+        <div className="bg-red-500 text-white text-xs font-semibold px-6 py-2.5 flex items-center justify-between z-40 shadow-sm sticky" style={{ top: isImpersonating ? "42px" : "0px" }}>
           <span className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <AlertTriangle className="w-4 h-4 shrink-0 animate-pulse" />
             {subStatus === "Suspended" ? (
               <span>Your account has been suspended. Please contact support.</span>
             ) : subStatus === "Pending Verification" ? (
@@ -152,7 +153,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {location !== "/" && !["Suspended", "Pending Verification"].includes(subStatus) && (
             <button
               onClick={() => setLocation("/")}
-              className="bg-white text-red-700 hover:bg-slate-100 rounded px-2.5 py-0.5 font-bold transition-colors border-0 cursor-pointer text-[10px] uppercase"
+              className="bg-white text-red-700 hover:bg-slate-100 rounded-lg px-3 py-1 font-semibold transition-colors border-0 cursor-pointer text-[10px] uppercase shadow-xs"
             >
               Renew Now
             </button>
@@ -162,56 +163,65 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       <div className="flex-1 flex">
         {/* Sidebar */}
-        <div className="w-64 bg-white border-r border-gray-200 flex flex-col fixed inset-y-0 left-0 z-30" style={{ top: isImpersonating ? "38px" : "0px" }}>
-          <div className="p-6 border-b border-gray-200">
-            {isSystemOwner ? (
-              <>
-                <h2 className="text-xl font-bold text-gray-900 truncate">ClinicFlow Admin</h2>
-                <p className="text-xs font-semibold text-primary bg-primary/5 px-2 py-1 rounded inline-block mt-1">
-                  System Owner Portal
-                </p>
-              </>
-            ) : (
-              <>
-                <h2 className="text-xl font-bold text-gray-900 truncate">{clinic?.name || "ClinicFlow"}</h2>
-                <p className="text-sm text-gray-500">Admin Portal</p>
-              </>
-            )}
+        <div className="w-64 bg-white border-r border-slate-100 flex flex-col fixed inset-y-0 left-0 z-30 shadow-xs" style={{ top: isImpersonating ? "42px" : "0px" }}>
+          <div className="p-6 border-b border-slate-50 flex items-center gap-3">
+            <img 
+              src="/logo.png" 
+              alt="ClinicFlow Logo" 
+              className="h-10 w-auto object-contain shrink-0"
+            />
+            <div className="truncate flex-1">
+              {isSystemOwner ? (
+                <>
+                  <h2 className="text-sm font-bold text-slate-800 truncate font-display">System Settings</h2>
+                  <span className="text-[9px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded tracking-wider uppercase inline-block mt-0.5 border border-primary/20">
+                    Owner Portal
+                  </span>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-sm font-bold text-slate-800 truncate font-display" title={clinic?.name}>{clinic?.name || "ClinicFlow"}</h2>
+                  <span className="text-[9px] font-bold text-slate-400 tracking-wider uppercase inline-block mt-0.5">
+                    Clinic Admin
+                  </span>
+                </>
+              )}
+            </div>
           </div>
-          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
             {links.map((link) => {
               const isActive = link.exact ? location === link.href : location.startsWith(link.href);
               return (
                 <Link key={link.href} href={link.href}>
                   <div
-                    className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
+                    className={`flex items-center px-3.5 py-2.5 text-xs font-semibold rounded-xl transition-all cursor-pointer border ${
                       isActive
-                        ? "bg-primary/10 text-primary"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                        ? "bg-primary/5 text-primary border-primary/10 shadow-xs"
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-800 border-transparent"
                     }`}
                   >
-                    <link.icon className={`w-5 h-5 mr-3 ${isActive ? "text-primary" : "text-gray-400"}`} />
+                    <link.icon className={`w-4.5 h-4.5 mr-3 shrink-0 ${isActive ? "text-primary" : "text-slate-400"}`} />
                     {link.label}
                   </div>
                 </Link>
               );
             })}
           </nav>
-          <div className="p-4 border-t border-gray-200">
+          <div className="p-4 border-t border-slate-50">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center px-4 py-3 text-sm font-medium text-gray-600 rounded-lg hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer bg-transparent border-0"
+              className="w-full flex items-center px-3.5 py-2.5 text-xs font-semibold text-slate-600 rounded-xl hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer bg-transparent border border-transparent"
             >
-              <LogOut className="w-5 h-5 mr-3 text-gray-400" />
-              Sign out
+              <LogOut className="w-4.5 h-4.5 mr-3 text-slate-400" />
+              Sign Out
             </button>
           </div>
         </div>
 
         {/* Main Content */}
         <div className="flex-1 ml-64 flex flex-col min-h-screen">
-          <header className="h-16 bg-white border-b border-gray-200 flex items-center px-8 justify-between sticky top-10 z-10">
-            <h1 className="text-lg font-medium text-gray-900">
+          <header className="h-16 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center px-8 justify-between sticky top-0 z-20">
+            <h1 className="text-base font-bold text-slate-800 font-display">
               {links.find((l) => (l.exact ? location === l.href : location.startsWith(l.href)))?.label || 
                (isSystemOwner ? "Platform Overview" : "Dashboard")}
             </h1>
@@ -221,9 +231,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   href={`/chat/${id}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-sm text-primary hover:underline font-medium"
+                  className="text-xs font-semibold text-primary hover:text-primary-hover border border-primary/20 bg-primary/5 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1"
                 >
-                  Open Patient Chat ↗
+                  Patient Chat Portal ↗
                 </a>
               </div>
             )}

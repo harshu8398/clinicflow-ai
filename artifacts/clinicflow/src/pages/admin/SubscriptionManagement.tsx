@@ -137,27 +137,27 @@ export default function SubscriptionManagement() {
   );
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="space-y-6 animate-in fade-in duration-300 pb-12">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Subscription Management</h2>
-          <p className="text-gray-500 mt-1 text-sm">Review, activate, extend, and troubleshoot platform clinics.</p>
+          <h2 className="text-2xl font-bold text-slate-800 font-display tracking-tight">Subscription Management</h2>
+          <p className="text-xs text-slate-400 mt-1">Review, activate, extend, and troubleshoot platform clinics.</p>
         </div>
       </div>
 
       {/* Search and Filters */}
-      <div className="flex gap-4">
+      <div className="flex gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
           <Input
             placeholder="Search by clinic name, owner email, or doctor name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="pl-10.5 h-10 border-slate-200 focus:border-primary focus:ring-primary/20 rounded-lg text-xs"
           />
         </div>
-        <Button variant="outline" onClick={fetchClinics}>
-          <RefreshCw className="w-4 h-4 mr-2" /> Refresh
+        <Button variant="outline" onClick={fetchClinics} className="h-10 border-slate-200 hover:bg-slate-50 font-semibold text-xs px-4 cursor-pointer">
+          <RefreshCw className="w-3.5 h-3.5 mr-2" /> Refresh List
         </Button>
       </div>
 
@@ -166,12 +166,12 @@ export default function SubscriptionManagement() {
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       ) : filteredClinics.length === 0 ? (
-        <Card className="p-16 text-center border-dashed">
-          <h3 className="text-lg font-medium text-gray-900 mb-1">No clinics found</h3>
-          <p className="text-gray-500">Check back later or register a new clinic to begin.</p>
+        <Card className="p-16 text-center border-dashed border-slate-200 rounded-xl">
+          <h3 className="text-sm font-bold text-slate-800 font-display mb-1">No clinics found</h3>
+          <p className="text-xs text-slate-400 leading-relaxed">Check back later or register a new clinic to begin.</p>
         </Card>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-4.5">
           {filteredClinics.map((clinic) => {
             const statusColors: any = {
               Trial: "bg-blue-50 text-blue-700 border-blue-100",
@@ -186,41 +186,41 @@ export default function SubscriptionManagement() {
             return (
               <Card
                 key={clinic.id}
-                className="bg-white border-gray-100 shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white border-slate-100 shadow-sm hover:shadow-md transition-all rounded-xl overflow-hidden"
               >
                 <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row justify-between md:items-center gap-6">
-                    <div className="space-y-2 flex-1">
+                  <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-6">
+                    <div className="space-y-3 flex-1">
                       <div className="flex items-center gap-3">
-                        <h4 className="font-bold text-gray-900 text-lg leading-tight">{clinic.name}</h4>
+                        <h4 className="font-bold text-slate-800 text-lg leading-tight font-display">{clinic.name}</h4>
                         <span
-                          className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
-                            statusColors[clinic.subscriptionStatus] || "bg-gray-50 border-gray-100"
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${
+                            statusColors[clinic.subscriptionStatus] || "bg-slate-50 border-slate-100 text-slate-550"
                           }`}
                         >
                           {clinic.subscriptionStatus}
                         </span>
                       </div>
-                      <div className="flex flex-wrap gap-x-8 gap-y-2 text-xs text-gray-500">
-                        <div className="min-w-[120px]">
-                          <span className="font-semibold text-gray-400 block uppercase tracking-wider text-[10px]">Doctor</span>
-                          <span className="text-gray-700 font-bold block mt-0.5">{clinic.doctorName || "N/A"}</span>
+                      <div className="flex flex-wrap gap-x-8 gap-y-3 text-xs">
+                        <div>
+                          <span className="font-bold text-slate-400 block uppercase tracking-wider text-[9px]">Doctor</span>
+                          <span className="text-slate-700 font-bold block mt-1">{clinic.doctorName || "N/A"}</span>
                         </div>
-                        <div className="min-w-[80px]">
-                          <span className="font-semibold text-gray-400 block uppercase tracking-wider text-[10px]">Plan</span>
-                          <span className="text-gray-700 font-bold block mt-0.5 uppercase">{clinic.planType}</span>
+                        <div>
+                          <span className="font-bold text-slate-400 block uppercase tracking-wider text-[9px]">Plan</span>
+                          <span className="text-slate-700 font-bold block mt-1 uppercase">{clinic.planType}</span>
                         </div>
-                        <div className="min-w-[120px]">
-                          <span className="font-semibold text-gray-400 block uppercase tracking-wider text-[10px]">Expiry Date</span>
-                          <span className="text-gray-700 font-bold block mt-0.5">
+                        <div>
+                          <span className="font-bold text-slate-400 block uppercase tracking-wider text-[9px]">Expiry Date</span>
+                          <span className="text-slate-700 font-bold block mt-1">
                             {clinic.expiryDate
                               ? new Date(clinic.expiryDate).toLocaleDateString()
                               : "Never (Lifetime)"}
                           </span>
                         </div>
-                        <div className="min-w-[120px]">
-                          <span className="font-semibold text-gray-400 block uppercase tracking-wider text-[10px]">Days Remaining</span>
-                          <span className="text-primary font-extrabold block mt-0.5">
+                        <div>
+                          <span className="font-bold text-slate-400 block uppercase tracking-wider text-[9px]">Days Remaining</span>
+                          <span className="text-primary font-extrabold block mt-1">
                             {clinic.subscriptionStatus === "Lifetime"
                               ? "Lifetime"
                               : `${clinic.daysRemaining} Days`}
@@ -234,6 +234,7 @@ export default function SubscriptionManagement() {
                       <Button
                         variant="outline"
                         size="sm"
+                        className="h-8 text-[11px] font-bold rounded-lg border-slate-200 hover:bg-slate-50 cursor-pointer"
                         onClick={() => {
                           setActiveClinic(clinic);
                           setPlanType(clinic.planType);
@@ -245,6 +246,7 @@ export default function SubscriptionManagement() {
                       <Button
                         variant="outline"
                         size="sm"
+                        className="h-8 text-[11px] font-bold rounded-lg border-slate-200 hover:bg-slate-50 cursor-pointer"
                         onClick={() => {
                           setActiveClinic(clinic);
                           setDialogType("extend");
@@ -255,6 +257,7 @@ export default function SubscriptionManagement() {
                       <Button
                         variant="outline"
                         size="sm"
+                        className="h-8 text-[11px] font-bold rounded-lg border-slate-200 hover:bg-slate-50 cursor-pointer"
                         onClick={() => {
                           setActiveClinic(clinic);
                           setPlanType(clinic.planType);
@@ -266,6 +269,7 @@ export default function SubscriptionManagement() {
                       <Button
                         variant="outline"
                         size="sm"
+                        className="h-8 text-[11px] font-bold rounded-lg border-slate-200 hover:bg-slate-50 cursor-pointer"
                         onClick={() => {
                           setActiveClinic(clinic);
                           handleAction("make-lifetime", null, "Access changed to Lifetime", clinic.id);
@@ -276,7 +280,7 @@ export default function SubscriptionManagement() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="h-8 text-[11px] font-bold rounded-lg border-slate-200 text-rose-600 hover:text-rose-700 hover:bg-rose-50/50 cursor-pointer"
                         onClick={() => {
                           if (confirm(`Are you sure you want to suspend ${clinic.name}?`)) {
                             setActiveClinic(clinic);
@@ -289,7 +293,7 @@ export default function SubscriptionManagement() {
                       <Button
                         size="sm"
                         onClick={() => handleImpersonate(clinic.id, clinic.name)}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                        className="h-8 text-[11px] font-bold bg-primary hover:bg-primary/90 text-white rounded-lg cursor-pointer"
                       >
                         Login As Clinic
                       </Button>
@@ -300,7 +304,7 @@ export default function SubscriptionManagement() {
                           setActiveClinic(clinic);
                           handleAction("expire-now", null, "Clinic status set to Expired", clinic.id);
                         }}
-                        className="bg-amber-600 hover:bg-amber-700"
+                        className="h-8 text-[11px] font-bold bg-amber-600 hover:bg-amber-700 rounded-lg cursor-pointer"
                         title="Force immediate expiry (Testing Action)"
                       >
                         Expire Now
@@ -316,17 +320,17 @@ export default function SubscriptionManagement() {
 
       {/* Dialog: Activate Subscription */}
       <Dialog open={dialogType === "activate"} onOpenChange={(open) => !open && setDialogType(null)}>
-        <DialogContent>
+        <DialogContent className="bg-white rounded-2xl border border-slate-100 shadow-2xl p-6 max-w-sm">
           <DialogHeader>
-            <DialogTitle>Activate Subscription - {activeClinic?.name}</DialogTitle>
+            <DialogTitle className="text-base font-bold text-slate-800 font-display">Activate Subscription</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label>Plan Type</Label>
+              <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Plan Type</Label>
               <select
                 value={planType}
                 onChange={(e) => setPlanType(e.target.value)}
-                className="w-full rounded-md border border-gray-200 p-2 text-sm"
+                className="w-full rounded-lg border border-slate-200 bg-white p-2.5 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary"
               >
                 <option value="Monthly">Monthly</option>
                 <option value="Quarterly">Quarterly</option>
@@ -335,20 +339,20 @@ export default function SubscriptionManagement() {
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label>Start Date</Label>
-              <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+              <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Start Date</Label>
+              <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="h-10 text-xs border-slate-200" />
             </div>
             <div className="space-y-1.5">
-              <Label>Expiry Date</Label>
-              <Input type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} />
+              <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Expiry Date</Label>
+              <Input type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} className="h-10 text-xs border-slate-200" />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogType(null)} disabled={submittingAction}>
+          <DialogFooter className="flex gap-2">
+            <Button variant="outline" onClick={() => setDialogType(null)} disabled={submittingAction} className="h-9.5 text-xs rounded-xl border-slate-200 cursor-pointer">
               Cancel
             </Button>
-            <Button onClick={handleActivate} disabled={submittingAction}>
-              {submittingAction && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            <Button onClick={handleActivate} disabled={submittingAction} className="h-9.5 text-xs font-bold rounded-xl cursor-pointer">
+              {submittingAction && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
               Activate
             </Button>
           </DialogFooter>
@@ -357,17 +361,17 @@ export default function SubscriptionManagement() {
 
       {/* Dialog: Extend Subscription */}
       <Dialog open={dialogType === "extend"} onOpenChange={(open) => !open && setDialogType(null)}>
-        <DialogContent>
+        <DialogContent className="bg-white rounded-2xl border border-slate-100 shadow-2xl p-6 max-w-sm">
           <DialogHeader>
-            <DialogTitle>Extend Subscription - {activeClinic?.name}</DialogTitle>
+            <DialogTitle className="text-base font-bold text-slate-800 font-display">Extend Subscription</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label>Extension Period</Label>
+              <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Extension Period</Label>
               <select
                 value={extendDays}
                 onChange={(e) => setExtendDays(Number(e.target.value))}
-                className="w-full rounded-md border border-gray-200 p-2 text-sm"
+                className="w-full rounded-lg border border-slate-200 bg-white p-2.5 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary"
               >
                 <option value={7}>+7 Days</option>
                 <option value={15}>+15 Days</option>
@@ -378,22 +382,23 @@ export default function SubscriptionManagement() {
             </div>
             {extendDays === 0 && (
               <div className="space-y-1.5">
-                <Label>Custom Days</Label>
+                <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Custom Days</Label>
                 <Input
                   type="number"
                   placeholder="Enter number of days"
                   value={customDays}
                   onChange={(e) => setCustomDays(e.target.value)}
+                  className="h-10 text-xs border-slate-200"
                 />
               </div>
             )}
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogType(null)} disabled={submittingAction}>
+          <DialogFooter className="flex gap-2">
+            <Button variant="outline" onClick={() => setDialogType(null)} disabled={submittingAction} className="h-9.5 text-xs rounded-xl border-slate-200 cursor-pointer">
               Cancel
             </Button>
-            <Button onClick={handleExtend} disabled={submittingAction}>
-              {submittingAction && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            <Button onClick={handleExtend} disabled={submittingAction} className="h-9.5 text-xs font-bold rounded-xl cursor-pointer">
+              {submittingAction && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
               Extend Expiry
             </Button>
           </DialogFooter>
@@ -402,17 +407,17 @@ export default function SubscriptionManagement() {
 
       {/* Dialog: Change Plan */}
       <Dialog open={dialogType === "change"} onOpenChange={(open) => !open && setDialogType(null)}>
-        <DialogContent>
+        <DialogContent className="bg-white rounded-2xl border border-slate-100 shadow-2xl p-6 max-w-sm">
           <DialogHeader>
-            <DialogTitle>Change Plan Type - {activeClinic?.name}</DialogTitle>
+            <DialogTitle className="text-base font-bold text-slate-800 font-display">Change Plan Type</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label>Select Plan</Label>
+              <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Select Plan</Label>
               <select
                 value={planType}
                 onChange={(e) => setPlanType(e.target.value)}
-                className="w-full rounded-md border border-gray-200 p-2 text-sm"
+                className="w-full rounded-lg border border-slate-200 bg-white p-2.5 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary"
               >
                 <option value="Demo">Demo</option>
                 <option value="Monthly">Monthly</option>
@@ -422,17 +427,17 @@ export default function SubscriptionManagement() {
                 <option value="Lifetime">Lifetime</option>
               </select>
             </div>
-            <p className="text-xs text-amber-600 flex items-start gap-1">
+            <p className="text-[10px] text-amber-600 flex items-start gap-1 leading-relaxed bg-amber-50/70 border border-amber-100 p-2.5 rounded-lg">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               Changing the plan will automatically update the clinic status and recalculate the expiration date based on standard plan durations.
             </p>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogType(null)} disabled={submittingAction}>
+          <DialogFooter className="flex gap-2">
+            <Button variant="outline" onClick={() => setDialogType(null)} disabled={submittingAction} className="h-9.5 text-xs rounded-xl border-slate-200 cursor-pointer">
               Cancel
             </Button>
-            <Button onClick={handleChangePlan} disabled={submittingAction}>
-              {submittingAction && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            <Button onClick={handleChangePlan} disabled={submittingAction} className="h-9.5 text-xs font-bold rounded-xl cursor-pointer">
+              {submittingAction && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
               Update Plan
             </Button>
           </DialogFooter>

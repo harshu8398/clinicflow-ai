@@ -671,15 +671,17 @@ ${clinicName}`;
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Calendar Card */}
         <div className="lg:col-span-5">
-          <Card className="bg-white border-gray-100 shadow-sm overflow-hidden h-full flex flex-col">
-            <CardHeader className="border-b border-gray-50 bg-gray-50/50">
-              <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <CalendarIcon className="w-5 h-5 text-primary" />
+          <Card className="bg-white border-slate-100 shadow-sm rounded-xl overflow-hidden h-full flex flex-col">
+            <CardHeader className="border-b border-slate-50 bg-slate-50/50 py-5 px-6">
+              <CardTitle className="text-base font-bold text-slate-800 flex items-center gap-2 font-display">
+                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+                  <CalendarIcon className="w-4 h-4" />
+                </div>
                 Appointment Calendar
               </CardTitle>
-              <p className="text-sm text-gray-500">Select a date to view and manage appointments</p>
+              <p className="text-xs text-slate-400 mt-1">Select a date to view and manage appointments</p>
             </CardHeader>
-            <CardContent className="p-4 flex-1 flex items-center justify-center">
+            <CardContent className="p-5 flex-1 flex items-center justify-center">
               <Calendar
                 mode="single"
                 selected={selectedDate}
@@ -691,7 +693,7 @@ ${clinicName}`;
                   }
                 }}
                 modifiersClassNames={{
-                  hasAppointment: "bg-primary/15 text-primary font-bold border-b-2 border-b-primary rounded-md"
+                  hasAppointment: "bg-primary/10 text-primary font-bold border-b-2 border-b-primary rounded-md"
                 }}
               />
             </CardContent>
@@ -700,20 +702,20 @@ ${clinicName}`;
 
         {/* Right Column: Appointments List */}
         <div className="lg:col-span-7">
-          <Card className="bg-white border-gray-100 shadow-sm overflow-hidden h-full flex flex-col">
-            <CardHeader className="border-b border-gray-50 bg-gray-50/50 flex flex-row items-center justify-between">
+          <Card className="bg-white border-slate-100 shadow-sm rounded-xl overflow-hidden h-full flex flex-col">
+            <CardHeader className="border-b border-slate-50 bg-slate-50/50 flex flex-row items-center justify-between py-4.5 px-6">
               <div>
-                <CardTitle className="text-lg font-semibold text-gray-900">
+                <CardTitle className="text-base font-bold text-slate-800 font-display">
                   Selected Date: {format(selectedDate, "dd MMMM yyyy")}
                 </CardTitle>
-                <p className="text-sm text-gray-500 mt-0.5">
+                <p className="text-xs text-slate-400 mt-1">
                   {appointmentsForSelectedDate.length} appointment(s) scheduled
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500 font-semibold">Filter:</span>
+              <div className="flex items-center gap-2.5">
+                <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Filter:</span>
                 <Select value={filter} onValueChange={setFilter}>
-                  <SelectTrigger className="w-36 h-8 text-xs">
+                  <SelectTrigger className="w-36 h-9 text-xs rounded-lg border-slate-200 bg-white">
                     <SelectValue placeholder="All Statuses" />
                   </SelectTrigger>
                   <SelectContent>
@@ -732,46 +734,46 @@ ${clinicName}`;
             <CardContent className="p-6 flex-1 overflow-y-auto">
               {isLoading ? (
                 <div className="space-y-4">
-                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full" />)}
+                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}
                 </div>
               ) : filteredAppointmentsForSelectedDate.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-12 text-center h-full min-h-[300px]">
-                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                    <CalendarX2 className="w-8 h-8 text-gray-300" />
+                  <div className="w-16 h-16 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center mb-4">
+                    <CalendarX2 className="w-8 h-8 text-slate-300" />
                   </div>
-                  <h3 className="text-base font-semibold text-gray-900 mb-1">No appointments</h3>
-                  <p className="text-xs text-gray-500 max-w-[250px]">
+                  <h3 className="text-sm font-bold text-slate-800 font-display mb-1">No appointments</h3>
+                  <p className="text-xs text-slate-400 max-w-[250px] leading-relaxed">
                     {appointmentsForSelectedDate.length === 0
                       ? "There are no appointments scheduled for this date."
                       : "No appointments match your status filter."}
                   </p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {filteredAppointmentsForSelectedDate.map((apt) => (
                     <div
                       key={apt.id}
-                      className="p-4 border border-gray-100 hover:border-primary/30 hover:shadow-md cursor-pointer transition-all bg-white rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                      className="p-4 border border-slate-100 hover:border-primary/20 hover:shadow-md cursor-pointer transition-all bg-white rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
                       onClick={() => handleRowClick(apt)}
                       data-testid={`row-appointment-${apt.id}`}
                     >
-                      <div className="space-y-1">
-                        <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-primary" />
+                      <div className="space-y-1.5">
+                        <h4 className="font-semibold text-slate-800 flex items-center gap-2 group-hover:text-primary transition-colors font-display">
+                          <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
                           {apt.patientName}
                         </h4>
-                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3.5 h-3.5 text-gray-400" />
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                          <span className="flex items-center gap-1.5">
+                            <Clock className="w-3.5 h-3.5 text-slate-450" />
                             {apt.selectedTimeSlot || "No slot assigned"}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <Phone className="w-3.5 h-3.5 text-gray-400" />
+                          <span className="flex items-center gap-1.5">
+                            <Phone className="w-3.5 h-3.5 text-slate-450" />
                             {apt.patientPhone}
                           </span>
                         </div>
                         {apt.patientProblem && (
-                          <p className="text-xs text-gray-600 mt-1 italic line-clamp-1">
+                          <p className="text-xs text-slate-500 mt-1 italic line-clamp-1 max-w-sm">
                             "{apt.patientProblem}"
                           </p>
                         )}
@@ -781,18 +783,18 @@ ${clinicName}`;
                           {apt.prescriptionGenerated ? (
                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-200">
                               <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                              🟢 Prescription Generated
+                              Prescription Generated
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
                               <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-                              🔴 Prescription Not Generated
+                              Prescription Missing
                             </span>
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 justify-between sm:justify-end">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${STATUS_COLORS[apt.status] ?? STATUS_COLORS.pending}`}>
+                      <div className="flex items-center gap-2.5 justify-between sm:justify-end shrink-0">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${STATUS_COLORS[apt.status] ?? STATUS_COLORS.pending}`}>
                           {STATUS_LABELS[apt.status] ?? apt.status}
                         </span>
                         <Button
@@ -849,20 +851,20 @@ ${clinicName}`;
       {/* Appointment Edit & Slot Assignment Dialog */}
       {selectedAppointment && (
         <Dialog open={!!selectedAppointment} onOpenChange={(open) => !open && setSelectedAppointment(null)}>
-          <DialogContent className={`transition-all duration-300 ${activeTab !== "details" ? "max-w-3xl" : "max-w-md"} bg-white rounded-2xl p-6 shadow-xl border border-gray-100`}>
-            <DialogHeader className="pb-3 border-b border-gray-50 flex flex-row items-center justify-between">
-              <DialogTitle className="text-lg font-bold text-gray-900">Appointment Details</DialogTitle>
+          <DialogContent className={`transition-all duration-300 ${activeTab !== "details" ? "max-w-3xl" : "max-w-md"} bg-white rounded-2xl p-6 shadow-xl border border-slate-100/80 max-h-[90vh] overflow-y-auto`}>
+            <DialogHeader className="pb-3 border-b border-slate-100/60 flex flex-row items-center justify-between">
+              <DialogTitle className="text-base font-bold text-slate-800 font-display">Appointment Details</DialogTitle>
             </DialogHeader>
 
-            {/* Navigation Tabs */}
-            <div className="flex border-b border-gray-100 mb-4 gap-2">
+            {/* Navigation Tabs (Sleek pill style) */}
+            <div className="bg-slate-100/70 p-1 rounded-xl flex gap-1 mb-4">
               <button
                 type="button"
                 onClick={() => setActiveTab("details")}
-                className={`pb-2 px-3 text-sm font-semibold transition-all border-b-2 ${
+                className={`flex-1 py-1.5 px-3 text-xs font-bold transition-all rounded-lg ${
                   activeTab === "details"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-gray-400 hover:text-gray-600"
+                    ? "bg-white text-slate-800 shadow-sm"
+                    : "text-slate-500 hover:text-slate-800"
                 }`}
               >
                 Appointment
@@ -872,10 +874,10 @@ ${clinicName}`;
                 <button
                   type="button"
                   onClick={() => setActiveTab("prescription")}
-                  className={`pb-2 px-3 text-sm font-semibold transition-all border-b-2 ${
+                  className={`flex-1 py-1.5 px-3 text-xs font-bold transition-all rounded-lg ${
                     activeTab === "prescription"
-                      ? "border-primary text-primary"
-                      : "border-transparent text-gray-400 hover:text-gray-600"
+                      ? "bg-white text-slate-800 shadow-sm"
+                      : "text-slate-500 hover:text-slate-800"
                   }`}
                 >
                   Prescription
@@ -885,10 +887,10 @@ ${clinicName}`;
               <button
                 type="button"
                 onClick={() => setActiveTab("history")}
-                className={`pb-2 px-3 text-sm font-semibold transition-all border-b-2 ${
+                className={`flex-1 py-1.5 px-3 text-xs font-bold transition-all rounded-lg ${
                   activeTab === "history"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-gray-400 hover:text-gray-600"
+                    ? "bg-white text-slate-800 shadow-sm"
+                    : "text-slate-500 hover:text-slate-800"
                 }`}
               >
                 History
@@ -898,39 +900,39 @@ ${clinicName}`;
             {/* Tab 1: Details / Rescheduling */}
             {activeTab === "details" && (
               <form onSubmit={handleConfirmReschedule} className="space-y-5">
-                <div className="bg-gray-50/70 rounded-xl p-4 border border-gray-100 space-y-2.5 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Patient</span>
-                    <span className="font-semibold text-gray-900">{selectedAppointment.patientName}</span>
+                <div className="bg-slate-50/70 rounded-xl p-4 border border-slate-100 space-y-3 text-xs">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-450 font-medium">Patient</span>
+                    <span className="font-bold text-slate-800">{selectedAppointment.patientName}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Phone</span>
-                    <span className="font-semibold text-gray-900">{selectedAppointment.patientPhone}</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-450 font-medium">Phone</span>
+                    <span className="font-semibold text-slate-700">{selectedAppointment.patientPhone}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Reason</span>
-                    <span className="font-semibold text-gray-900 text-right truncate max-w-[200px]" title={selectedAppointment.patientProblem}>
-                      {selectedAppointment.patientProblem}
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-450 font-medium">Reason</span>
+                    <span className="font-semibold text-slate-700 text-right truncate max-w-[200px]" title={selectedAppointment.patientProblem}>
+                      {selectedAppointment.patientProblem || "General consultation"}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                    <span className="text-gray-500">Prescription Status</span>
+                  <div className="flex justify-between items-center pt-2.5 border-t border-slate-200/50">
+                    <span className="text-slate-450 font-medium">Prescription Status</span>
                     {prescription ? (
-                      <span className="text-xs font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded border border-green-150">
+                      <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-green-50 text-green-700 border border-green-200 uppercase tracking-wider">
                         Generated
                       </span>
                     ) : (
-                      <span className="text-xs font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-200">
-                        Not Generated
+                      <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-rose-50 text-rose-700 border border-rose-200 uppercase tracking-wider">
+                        Pending
                       </span>
                     )}
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="rescheduleStatus" className="text-xs text-gray-500 font-semibold">Appointment Status</Label>
+                  <Label htmlFor="rescheduleStatus" className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Appointment Status</Label>
                   <Select value={rescheduleStatus} onValueChange={(val) => setRescheduleStatus(val as AppointmentStatus)}>
-                    <SelectTrigger id="rescheduleStatus" className="w-full text-xs h-10 border-gray-200">
+                    <SelectTrigger id="rescheduleStatus" className="w-full text-xs h-10 border-slate-200 bg-white">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent>
@@ -946,7 +948,7 @@ ${clinicName}`;
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="rescheduleDate" className="text-xs text-gray-500 font-semibold">Select Date</Label>
+                    <Label htmlFor="rescheduleDate" className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Select Date</Label>
                     <Input
                       id="rescheduleDate"
                       type="date"
@@ -955,18 +957,18 @@ ${clinicName}`;
                         setRescheduleDate(e.target.value);
                         setRescheduleSlot("");
                       }}
-                      className="text-xs h-10 border-gray-200 bg-transparent focus-visible:bg-white"
+                      className="text-xs h-10 border-slate-200 bg-white focus-visible:bg-white"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="rescheduleSlot" className="text-xs text-gray-500 font-semibold">Assign Time Slot</Label>
+                    <Label htmlFor="rescheduleSlot" className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Assign Time Slot</Label>
                     <Select
                       value={rescheduleSlot}
                       onValueChange={setRescheduleSlot}
                       disabled={loadingSlots || !rescheduleDate}
                     >
-                      <SelectTrigger id="rescheduleSlot" className="w-full text-xs h-10 border-gray-200">
+                      <SelectTrigger id="rescheduleSlot" className="w-full text-xs h-10 border-slate-200 bg-white">
                         <SelectValue placeholder={loadingSlots ? "Loading..." : "Select Slot"} />
                       </SelectTrigger>
                       <SelectContent>
@@ -988,7 +990,7 @@ ${clinicName}`;
 
                 <Button
                   type="submit"
-                  className="w-full text-xs font-semibold h-10 mt-2"
+                  className="w-full text-xs font-bold h-10.5 mt-2 rounded-xl shadow-md shadow-primary/5 active:scale-[0.99] cursor-pointer"
                   disabled={updateStatus.isPending || (rescheduleStatus === "confirmed" && !rescheduleSlot)}
                 >
                   {updateStatus.isPending && <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />}
@@ -998,22 +1000,22 @@ ${clinicName}`;
             )}
 
             {activeTab === "details" && selectedAppointment && selectedAppointment.status !== "cancelled" && (
-              <div className="pt-3.5 mt-3.5 border-t border-gray-100 space-y-2.5">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Prescription Quick Actions</span>
+              <div className="pt-4 mt-4 border-t border-slate-100 space-y-3">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Prescription Quick Actions</span>
                 {prescription ? (
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2.5">
                     <Button
                       type="button"
                       variant="outline"
                       onClick={() => setActiveTab("prescription")}
-                      className="text-xs h-9 border-primary/30 text-primary hover:bg-primary/5 gap-1.5 font-semibold col-span-2 justify-center"
+                      className="text-xs h-9.5 border-primary/20 text-primary hover:bg-primary/5 gap-1.5 font-bold col-span-2 justify-center rounded-xl cursor-pointer"
                     >
-                      <FileText className="w-4 h-4" /> View Prescription
+                      <FileText className="w-4 h-4" /> View Prescription Details
                     </Button>
                     <Button
                       type="button"
                       onClick={() => generatePrescriptionPDF(clinic, selectedAppointment, prescription, "download")}
-                      className="text-xs h-9 font-semibold gap-1.5 justify-center"
+                      className="text-xs h-9.5 font-bold gap-1.5 justify-center rounded-xl cursor-pointer shadow-sm"
                     >
                       <Download className="w-3.5 h-3.5" /> Download PDF
                     </Button>
@@ -1021,7 +1023,7 @@ ${clinicName}`;
                       type="button"
                       variant="secondary"
                       onClick={() => generatePrescriptionPDF(clinic, selectedAppointment, prescription, "print")}
-                      className="text-xs h-9 font-semibold gap-1.5 justify-center"
+                      className="text-xs h-9.5 font-bold gap-1.5 justify-center rounded-xl border border-slate-200/80 cursor-pointer shadow-sm"
                     >
                       <Printer className="w-3.5 h-3.5" /> Print
                     </Button>
@@ -1033,7 +1035,7 @@ ${clinicName}`;
                           type="button"
                           onClick={handleSendPrescriptionWhatsApp}
                           disabled={!!phoneError}
-                          className="text-xs h-9 bg-[#25D366] hover:bg-[#20ba56] text-white shadow-sm hover:shadow-md transition-all rounded-xl flex items-center justify-center gap-1.5 font-bold col-span-2 disabled:opacity-50 disabled:pointer-events-none"
+                          className="text-xs h-9.5 bg-[#25D366] hover:bg-[#20ba56] text-white shadow-sm hover:shadow-md transition-all rounded-xl flex items-center justify-center gap-1.5 font-bold col-span-2 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
                         >
                           <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.458 5.704 1.459h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
@@ -1046,7 +1048,7 @@ ${clinicName}`;
                   <Button
                     type="button"
                     onClick={handleStartAddPrescription}
-                    className="w-full text-xs font-semibold h-10 gap-1.5 justify-center"
+                    className="w-full text-xs font-bold h-10 gap-1.5 justify-center rounded-xl cursor-pointer"
                   >
                     <Plus className="w-4 h-4" /> Add Prescription
                   </Button>
@@ -1062,98 +1064,98 @@ ${clinicName}`;
                     <Loader2 className="w-6 h-6 animate-spin text-primary" />
                   </div>
                 ) : isEditingPrescription ? (
-                  <form onSubmit={handleSavePrescription} className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+                  <form onSubmit={handleSavePrescription} className="space-y-4 max-h-[55vh] overflow-y-auto pr-1">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <Label htmlFor="diag" className="text-xs text-gray-500 font-semibold">Diagnosis</Label>
+                        <Label htmlFor="diag" className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Diagnosis</Label>
                         <Input
                           id="diag"
                           value={prescriptionForm.diagnosis}
                           onChange={(e) => setPrescriptionForm({ ...prescriptionForm, diagnosis: e.target.value })}
-                          className="h-10 border-gray-200 text-xs"
+                          className="h-10 border-slate-200 text-xs bg-white focus-visible:bg-white"
                           placeholder="e.g. Acute Tonsillitis"
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <Label htmlFor="complaint" className="text-xs text-gray-500 font-semibold">Chief Complaint</Label>
+                        <Label htmlFor="complaint" className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Chief Complaint</Label>
                         <Input
                           id="complaint"
                           value={prescriptionForm.chiefComplaint}
                           onChange={(e) => setPrescriptionForm({ ...prescriptionForm, chiefComplaint: e.target.value })}
-                          className="h-10 border-gray-200 text-xs"
-                          placeholder="e.g. Sore throat, high fever"
+                          className="h-10 border-slate-200 text-xs bg-white focus-visible:bg-white"
+                          placeholder="e.g. Sore throat, fever"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2.5">
-                      <div className="flex items-center justify-between border-b border-gray-100 pb-1.5">
-                        <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">Rx - Medicines</span>
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                        <span className="text-xs font-bold text-slate-700 uppercase tracking-wider font-display">Rx - Medicines</span>
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
                           onClick={addMedicineRow}
-                          className="h-7 text-[11px] border-dashed text-primary border-primary/20 hover:bg-primary/5 px-2.5"
+                          className="h-7 text-[10px] border-dashed text-primary border-primary/20 hover:bg-primary/5 px-2.5 rounded-lg cursor-pointer font-bold"
                         >
                           <Plus className="w-3 h-3 mr-1" /> Add Medicine
                         </Button>
                       </div>
 
-                      <div className="space-y-3">
+                      <div className="space-y-3.5">
                         {prescriptionForm.medicines.map((med, index) => (
-                          <div key={index} className="p-3 bg-gray-50/50 border border-gray-150 rounded-xl space-y-3">
+                          <div key={index} className="p-4 bg-slate-50/50 border border-slate-150 rounded-xl space-y-3.5">
                             <div className="grid grid-cols-12 gap-2">
-                              <div className="col-span-12 md:col-span-4 space-y-1">
-                                <Label className="text-[9px] text-gray-400 font-bold uppercase">Name</Label>
+                              <div className="col-span-12 md:col-span-4 space-y-1.5">
+                                <Label className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Medicine Name</Label>
                                 <Input
                                   value={med.name}
                                   onChange={(e) => updateMedicineRow(index, "name", e.target.value)}
-                                  placeholder="Medicine Name (e.g. Paracetamol)"
-                                  className="h-8 text-xs border-gray-200 bg-white"
+                                  placeholder="e.g. Paracetamol"
+                                  className="h-8.5 text-xs border-slate-250 bg-white"
                                   required
                                 />
                               </div>
-                              <div className="col-span-4 md:col-span-2 space-y-1">
-                                <Label className="text-[9px] text-gray-400 font-bold uppercase">Dosage</Label>
+                              <div className="col-span-4 md:col-span-2 space-y-1.5">
+                                <Label className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Dosage</Label>
                                 <Input
                                   value={med.dosage}
                                   onChange={(e) => updateMedicineRow(index, "dosage", e.target.value)}
-                                  placeholder="e.g. 1 Tab"
-                                  className="h-8 text-xs border-gray-200 bg-white"
+                                  placeholder="e.g. 500mg"
+                                  className="h-8.5 text-xs border-slate-250 bg-white"
                                 />
                               </div>
-                              <div className="col-span-4 md:col-span-3 space-y-1">
-                                <Label className="text-[9px] text-gray-400 font-bold uppercase">Frequency</Label>
+                              <div className="col-span-4 md:col-span-3 space-y-1.5">
+                                <Label className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Frequency</Label>
                                 <Input
                                   value={med.frequency}
                                   onChange={(e) => updateMedicineRow(index, "frequency", e.target.value)}
                                   placeholder="e.g. 1-0-1"
-                                  className="h-8 text-xs border-gray-200 bg-white"
+                                  className="h-8.5 text-xs border-slate-250 bg-white"
                                 />
                               </div>
-                              <div className="col-span-4 md:col-span-3 space-y-1">
-                                <Label className="text-[9px] text-gray-400 font-bold uppercase">Duration</Label>
+                              <div className="col-span-4 md:col-span-3 space-y-1.5">
+                                <Label className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Duration</Label>
                                 <Input
                                   value={med.duration}
                                   onChange={(e) => updateMedicineRow(index, "duration", e.target.value)}
                                   placeholder="e.g. 5 Days"
-                                  className="h-8 text-xs border-gray-200 bg-white"
+                                  className="h-8.5 text-xs border-slate-250 bg-white"
                                 />
                               </div>
                             </div>
 
-                            <div className="grid grid-cols-12 gap-2 items-center">
-                              <div className="col-span-8 md:col-span-7 space-y-1">
-                                <Label className="text-[9px] text-gray-400 font-bold uppercase">Instructions</Label>
+                            <div className="grid grid-cols-12 gap-2.5 items-center">
+                              <div className="col-span-8 md:col-span-7 space-y-1.5">
+                                <Label className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Instructions</Label>
                                 <Input
                                   value={med.instructions}
                                   onChange={(e) => updateMedicineRow(index, "instructions", e.target.value)}
                                   placeholder="e.g. After Food"
-                                  className="h-8 text-xs border-gray-200 bg-white"
+                                  className="h-8.5 text-xs border-slate-250 bg-white"
                                 />
                               </div>
-                              <div className="col-span-4 md:col-span-5 flex items-end justify-end gap-1.5 pt-4">
+                              <div className="col-span-4 md:col-span-5 flex items-end justify-end gap-1.5 pt-4 shrink-0">
                                 <Select
                                   value=""
                                   onValueChange={(val) => {
@@ -1161,7 +1163,7 @@ ${clinicName}`;
                                     if (t) selectTemplateForMedicine(index, t);
                                   }}
                                 >
-                                  <SelectTrigger className="h-8 text-[10px] border-gray-200 px-2.5 max-w-[120px] bg-white">
+                                  <SelectTrigger className="h-8 text-[9px] font-bold border-slate-250 px-2 max-w-[110px] bg-white rounded-lg">
                                     <SelectValue placeholder="TEMPLATES" />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -1179,7 +1181,7 @@ ${clinicName}`;
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => removeMedicineRow(index)}
-                                    className="text-gray-400 hover:text-red-600 hover:bg-red-50 h-8 w-8 rounded-lg shrink-0"
+                                    className="text-slate-400 hover:text-rose-600 hover:bg-rose-50/50 h-8 w-8 rounded-lg shrink-0 cursor-pointer"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </Button>
@@ -1192,69 +1194,69 @@ ${clinicName}`;
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="advice" className="text-xs text-gray-500 font-semibold">Additional Advice</Label>
+                      <Label htmlFor="advice" className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Additional Advice</Label>
                       <textarea
                         id="advice"
                         value={prescriptionForm.additionalAdvice}
                         onChange={(e) => setPrescriptionForm({ ...prescriptionForm, additionalAdvice: e.target.value })}
-                        className="flex min-h-[50px] w-full rounded-xl border border-gray-200 bg-transparent px-3 py-1.5 text-xs shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
-                        placeholder="e.g. Avoid cold drinks"
+                        className="flex min-h-[60px] w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary"
+                        placeholder="e.g. Avoid cold drinks and take bed rest."
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <Label htmlFor="followUp" className="text-xs text-gray-500 font-semibold">Follow-Up Date</Label>
+                        <Label htmlFor="followUp" className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Follow-Up Date</Label>
                         <Input
                           id="followUp"
                           type="date"
                           value={prescriptionForm.followUpDate}
                           onChange={(e) => setPrescriptionForm({ ...prescriptionForm, followUpDate: e.target.value })}
-                          className="h-10 border-gray-200 text-xs"
+                          className="h-10 border-slate-200 text-xs bg-white"
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <Label htmlFor="docNotes" className="text-xs text-gray-500 font-semibold">Doctor Notes (Internal)</Label>
+                        <Label htmlFor="docNotes" className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Doctor Notes (Internal Only)</Label>
                         <textarea
                           id="docNotes"
                           value={prescriptionForm.doctorNotes}
                           onChange={(e) => setPrescriptionForm({ ...prescriptionForm, doctorNotes: e.target.value })}
-                          className="flex min-h-[50px] w-full rounded-xl border border-gray-200 bg-transparent px-3 py-1.5 text-xs shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
-                          placeholder="e.g. Patient showed signs of dehydration"
+                          className="flex min-h-[60px] w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary"
+                          placeholder="e.g. Signs of mild allergy observed"
                         />
                       </div>
                     </div>
 
-                    <div className="flex gap-3 pt-2">
-                      <Button type="submit" className="flex-1 h-10 text-xs font-semibold">
+                    <div className="flex gap-3 pt-2.5">
+                      <Button type="submit" className="flex-1 h-10 text-xs font-bold rounded-xl shadow-sm cursor-pointer">
                         Save Prescription
                       </Button>
                       <Button
                         type="button"
                         variant="outline"
                         onClick={() => setIsEditingPrescription(false)}
-                        className="flex-1 h-10 text-xs font-semibold border-gray-200"
+                        className="flex-1 h-10 text-xs font-semibold border-slate-200 hover:bg-slate-50 rounded-xl cursor-pointer"
                       >
                         Cancel
                       </Button>
                     </div>
                   </form>
                 ) : prescription ? (
-                  <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-                    <div className="bg-gray-50/70 border border-gray-100 rounded-2xl p-4 space-y-3">
-                      <div className="grid grid-cols-2 gap-4 text-xs border-b border-gray-100 pb-3">
+                  <div className="space-y-4 max-h-[55vh] overflow-y-auto pr-1">
+                    <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-4.5 space-y-4">
+                      <div className="grid grid-cols-2 gap-4 text-xs border-b border-slate-200/40 pb-3.5">
                         <div>
-                          <span className="text-gray-400 font-semibold block uppercase tracking-wider text-[10px]">Diagnosis</span>
-                          <span className="font-bold text-gray-900 mt-0.5 block">{prescription.diagnosis || "N/A"}</span>
+                          <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Diagnosis</span>
+                          <span className="font-extrabold text-slate-800 mt-1 block font-display text-sm">{prescription.diagnosis || "General evaluation"}</span>
                         </div>
                         <div>
-                          <span className="text-gray-400 font-semibold block uppercase tracking-wider text-[10px]">Chief Complaint</span>
-                          <span className="font-bold text-gray-900 mt-0.5 block">{prescription.chiefComplaint || "N/A"}</span>
+                          <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Chief Complaint</span>
+                          <span className="font-bold text-slate-700 mt-1 block text-xs">{prescription.chiefComplaint || "Routine checkup"}</span>
                         </div>
                       </div>
 
                       <div className="space-y-2">
-                        <span className="text-[10px] text-gray-400 font-bold block uppercase tracking-wider">Medicines (Rx)</span>
+                        <span className="text-[9px] text-slate-400 font-bold block uppercase tracking-wider">Medicines (Rx)</span>
                         <div className="space-y-2">
                           {(() => {
                             let medsList = [];
@@ -1264,15 +1266,15 @@ ${clinicName}`;
                               medsList = [];
                             }
                             return medsList.map((med: any, idx: number) => (
-                              <div key={idx} className="bg-white rounded-xl p-3 border border-gray-100 text-xs space-y-1 shadow-sm">
+                              <div key={idx} className="bg-white rounded-xl p-3 border border-slate-150 text-xs space-y-1.5 shadow-sm">
                                 <div className="flex justify-between items-center">
-                                  <span className="font-bold text-gray-900 text-sm">{med.name}</span>
-                                  <span className="text-primary font-semibold">{med.dosage}</span>
+                                  <span className="font-bold text-slate-800 text-xs">{med.name}</span>
+                                  <span className="text-primary font-bold text-[10px] bg-primary/5 px-2 py-0.5 rounded-md border border-primary/10">{med.dosage}</span>
                                 </div>
-                                <div className="grid grid-cols-3 gap-2 text-gray-500 font-medium text-[10px] pt-1 border-t border-gray-50">
+                                <div className="grid grid-cols-3 gap-2 text-slate-450 font-semibold text-[10px] pt-1.5 border-t border-slate-50">
                                   <div>Freq: {med.frequency}</div>
                                   <div>Dur: {med.duration}</div>
-                                  <div>Inst: {med.instructions}</div>
+                                  <div>Inst: {med.instructions || "None"}</div>
                                 </div>
                               </div>
                             ));
@@ -1280,15 +1282,15 @@ ${clinicName}`;
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4 text-xs border-t border-gray-100 pt-3">
+                      <div className="grid grid-cols-2 gap-4 text-xs border-t border-slate-200/40 pt-3.5">
                         <div>
-                          <span className="text-gray-400 font-semibold block uppercase tracking-wider text-[10px]">Additional Advice</span>
-                          <span className="font-semibold text-gray-800 mt-0.5 block whitespace-pre-wrap">{prescription.additionalAdvice || "None"}</span>
+                          <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Additional Advice</span>
+                          <span className="font-medium text-slate-700 mt-1 block whitespace-pre-wrap leading-relaxed">{prescription.additionalAdvice || "No additional guidelines"}</span>
                         </div>
                         {prescription.followUpDate && (
                           <div>
-                            <span className="text-gray-400 font-semibold block uppercase tracking-wider text-[10px]">Follow-Up Date</span>
-                            <span className="font-bold text-teal-600 bg-teal-50 px-2 py-0.5 rounded text-[11px] inline-block mt-1">
+                            <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Follow-Up Date</span>
+                            <span className="font-bold text-teal-700 bg-teal-50 px-2.5 py-0.5 rounded-full border border-teal-200 text-[10px] inline-block mt-1 uppercase tracking-wider">
                               {(() => {
                                 try {
                                   return format(new Date(prescription.followUpDate + "T00:00:00"), "dd MMMM yyyy");
@@ -1302,9 +1304,9 @@ ${clinicName}`;
                       </div>
 
                       {prescription.doctorNotes && (
-                        <div className="text-xs border-t border-gray-100 pt-3">
-                          <span className="text-gray-400 font-semibold block uppercase tracking-wider text-[10px]">Doctor Notes (Internal)</span>
-                          <span className="font-normal text-gray-600 mt-0.5 block italic">{prescription.doctorNotes}</span>
+                        <div className="text-xs border-t border-slate-200/40 pt-3.5">
+                          <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Doctor Notes (Internal)</span>
+                          <span className="font-normal text-slate-500 mt-1 block italic leading-relaxed">{prescription.doctorNotes}</span>
                         </div>
                       )}
                     </div>
@@ -1321,16 +1323,16 @@ ${clinicName}`;
                               </div>
                             )}
 
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+                            <div className="grid grid-cols-2 gap-2.5">
                               <Button
                                 onClick={() => generatePrescriptionPDF(clinic, selectedAppointment, prescription, "download")}
-                                className="text-xs h-10 rounded-xl flex items-center justify-center gap-1.5 font-semibold"
+                                className="text-xs h-10 rounded-xl flex items-center justify-center gap-1.5 font-bold cursor-pointer shadow-sm"
                               >
                                 <Download className="w-3.5 h-3.5" /> Download PDF
                               </Button>
                               <Button
                                 onClick={() => generatePrescriptionPDF(clinic, selectedAppointment, prescription, "print")}
-                                className="text-xs h-10 rounded-xl flex items-center justify-center gap-1.5 font-semibold"
+                                className="text-xs h-10 rounded-xl flex items-center justify-center gap-1.5 font-bold cursor-pointer border border-slate-200"
                                 variant="secondary"
                               >
                                 <Printer className="w-3.5 h-3.5" /> Print
@@ -1338,15 +1340,15 @@ ${clinicName}`;
                               <Button
                                 onClick={handleSendPrescriptionWhatsApp}
                                 disabled={!!phoneError}
-                                className="text-xs h-10 bg-[#25D366] hover:bg-[#20ba56] text-white shadow-sm hover:shadow-md transition-all rounded-xl flex items-center justify-center gap-1.5 font-bold disabled:opacity-50 disabled:pointer-events-none"
+                                className="text-xs h-10 bg-[#25D366] hover:bg-[#20ba56] text-white shadow-sm hover:shadow-md transition-all rounded-xl flex items-center justify-center gap-1.5 font-bold col-span-2 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
                               >
                                 <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.458 5.704 1.459h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                                </svg> WhatsApp
+                                </svg> Send via WhatsApp
                               </Button>
                               <Button
                                 onClick={handleStartAddPrescription}
-                                className="text-xs h-10 rounded-xl flex items-center justify-center gap-1.5 font-semibold"
+                                className="text-xs h-10 rounded-xl flex items-center justify-center gap-1.5 font-bold cursor-pointer"
                                 variant="outline"
                               >
                                 Edit Prescription
@@ -1358,9 +1360,9 @@ ${clinicName}`;
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center p-8 text-center bg-gray-50/50 border border-dashed border-gray-200 rounded-2xl">
-                    <span className="text-xs text-gray-500 mb-4 font-semibold">No prescription created yet for this appointment.</span>
-                    <Button onClick={handleStartAddPrescription} className="text-xs h-9 font-semibold rounded-lg px-4 gap-1.5">
+                  <div className="flex flex-col items-center justify-center p-8 text-center bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl">
+                    <span className="text-xs text-slate-500 mb-4 font-semibold">No prescription created yet for this appointment.</span>
+                    <Button onClick={handleStartAddPrescription} className="text-xs h-9 font-bold rounded-xl px-4 gap-1.5 cursor-pointer">
                       <Plus className="w-4 h-4" /> Add Prescription
                     </Button>
                   </div>
@@ -1376,30 +1378,30 @@ ${clinicName}`;
                     <Loader2 className="w-6 h-6 animate-spin text-primary" />
                   </div>
                 ) : patientHistory.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center p-8 text-center bg-gray-50/50 border border-dashed border-gray-200 rounded-2xl">
-                    <span className="text-xs text-gray-500">No previous prescriptions found for this patient.</span>
+                  <div className="flex flex-col items-center justify-center p-8 text-center bg-slate-50/50 border border-dashed border-slate-200 rounded-2xl">
+                    <span className="text-xs text-slate-450 font-semibold">No previous prescriptions found for this patient.</span>
                   </div>
                 ) : (
-                  <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                  <div className="space-y-3.5 max-h-[55vh] overflow-y-auto pr-1">
                     {patientHistory.map((histPresc) => (
-                      <div key={histPresc.id} className="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm space-y-3">
+                      <div key={histPresc.id} className="p-4 bg-white border border-slate-150 rounded-xl shadow-sm space-y-3 transition-all hover:border-slate-300">
                         <div className="flex justify-between items-center">
-                          <span className="text-xs font-bold text-gray-900 bg-gray-100 px-2.5 py-1 rounded-md">
+                          <span className="text-xs font-bold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-lg">
                             {format(new Date(histPresc.createdAt), "dd MMMM yyyy")}
                           </span>
-                          <span className="text-xs font-medium text-teal-600 bg-teal-50 px-2 py-0.5 rounded">
+                          <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md border border-teal-150">
                             {histPresc.followUpDate ? `Follow-Up: ${formatDateDisplay(histPresc.followUpDate)}` : "No Follow-Up"}
                           </span>
                         </div>
 
-                        <div className="text-xs space-y-1">
-                          <div>
-                            <span className="text-gray-400 font-semibold">Diagnosis:</span>{" "}
-                            <span className="font-semibold text-gray-800">{histPresc.diagnosis || "N/A"}</span>
+                        <div className="text-xs space-y-1.5">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-slate-400 font-semibold">Diagnosis:</span>{" "}
+                            <span className="font-bold text-slate-800">{histPresc.diagnosis || "N/A"}</span>
                           </div>
                           <div className="mt-2">
-                            <span className="text-gray-400 font-semibold block">Medicines (Rx):</span>
-                            <div className="flex flex-wrap gap-1.5 mt-1.5">
+                            <span className="text-slate-400 font-semibold block mb-1">Medicines (Rx):</span>
+                            <div className="flex flex-wrap gap-1.5">
                               {(() => {
                                 let medsList = [];
                                 try {
@@ -1408,7 +1410,7 @@ ${clinicName}`;
                                   medsList = [];
                                 }
                                 return medsList.map((m: any, i: number) => (
-                                  <span key={i} className="text-[10px] font-bold text-slate-700 bg-slate-100/70 border border-slate-200/50 px-2 py-0.5 rounded-md font-sans">
+                                  <span key={i} className="text-[9px] font-bold text-slate-600 bg-slate-50 border border-slate-200/50 px-2 py-0.5 rounded-md">
                                     {m.name} ({m.dosage})
                                   </span>
                                 ));
@@ -1417,7 +1419,7 @@ ${clinicName}`;
                           </div>
                         </div>
 
-                        <div className="flex gap-2 pt-2 justify-end">
+                        <div className="flex gap-2 pt-1.5 justify-end border-t border-slate-100 mt-2">
                           <Button
                             size="sm"
                             variant="secondary"
@@ -1425,14 +1427,14 @@ ${clinicName}`;
                               setPrescription(histPresc);
                               setActiveTab("prescription");
                             }}
-                            className="h-8 text-xs font-semibold rounded-lg px-3 gap-1"
+                            className="h-8 text-xs font-bold rounded-lg px-3 gap-1 border border-slate-200 cursor-pointer"
                           >
                             <FileText className="w-3.5 h-3.5" /> View Details
                           </Button>
                           <Button
                             size="sm"
                             onClick={() => generatePrescriptionPDF(clinic, selectedAppointment, histPresc, "download")}
-                            className="h-8 text-xs font-semibold rounded-lg px-3 gap-1"
+                            className="h-8 text-xs font-bold rounded-lg px-3 gap-1 cursor-pointer"
                           >
                             <Download className="w-3.5 h-3.5" /> Download PDF
                           </Button>
@@ -1447,49 +1449,49 @@ ${clinicName}`;
         </Dialog>
       )}
 
-      {/* Success Modal */}
+      {/* Success Rescheduling Modal */}
       {successModalData && (
         <Dialog open={!!successModalData} onOpenChange={(open) => !open && setSuccessModalData(null)}>
-          <DialogContent className="max-w-md bg-white rounded-2xl p-6 shadow-2xl border border-gray-100 animate-in fade-in zoom-in-95 duration-200">
-            <DialogHeader className="pb-4 border-b border-gray-100">
-              <DialogTitle className="text-xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
+          <DialogContent className="max-w-md bg-white rounded-2xl p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <DialogHeader className="pb-4 border-b border-slate-100">
+              <DialogTitle className="text-lg font-extrabold text-slate-800 tracking-tight flex items-center gap-2 font-display">
                 <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                Appointment Rescheduled Successfully
+                Reschedule Success
               </DialogTitle>
             </DialogHeader>
 
-            <div className="py-4 space-y-6">
+            <div className="py-4 space-y-5">
               {/* Success Indicators */}
-              <div className="space-y-2.5">
-                <div className="flex items-center gap-2.5 text-sm text-emerald-700 font-medium bg-emerald-50/70 px-3.5 py-2.5 rounded-xl border border-emerald-100/50">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-                  <span>Appointment Updated Successfully</span>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2.5 text-xs text-emerald-800 font-bold bg-emerald-50/70 px-3.5 py-2.5 rounded-xl border border-emerald-100/50">
+                  <CheckCircle2 className="w-4.5 h-4.5 text-emerald-500 shrink-0" />
+                  <span>Clinic Calendar Synced</span>
                 </div>
-                <div className="flex items-center gap-2.5 text-sm text-emerald-700 font-medium bg-emerald-50/70 px-3.5 py-2.5 rounded-xl border border-emerald-100/50">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-                  <span>Google Calendar Updated Successfully</span>
+                <div className="flex items-center gap-2.5 text-xs text-emerald-800 font-bold bg-emerald-50/70 px-3.5 py-2.5 rounded-xl border border-emerald-100/50">
+                  <CheckCircle2 className="w-4.5 h-4.5 text-emerald-500 shrink-0" />
+                  <span>Google Calendar Synced</span>
                 </div>
               </div>
 
               {/* Appointment details */}
-              <div className="bg-gray-50/80 rounded-2xl p-5 border border-gray-100/70 space-y-4">
-                <div className="grid grid-cols-3 gap-2 py-0.5 border-b border-gray-100/50 pb-3">
-                  <span className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Patient</span>
-                  <span className="col-span-2 text-sm font-bold text-gray-900">{successModalData.patientName}</span>
+              <div className="bg-slate-50/80 rounded-xl p-5 border border-slate-100 space-y-4">
+                <div className="grid grid-cols-3 gap-2 py-0.5 border-b border-slate-200/50 pb-3 text-xs">
+                  <span className="text-slate-400 font-bold uppercase tracking-wider">Patient</span>
+                  <span className="col-span-2 font-bold text-slate-800">{successModalData.patientName}</span>
                 </div>
-                <div className="grid grid-cols-3 gap-2 py-0.5 border-b border-gray-100/50 pb-3">
-                  <span className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Doctor</span>
-                  <span className="col-span-2 text-sm font-semibold text-gray-800">{successModalData.doctorName}</span>
+                <div className="grid grid-cols-3 gap-2 py-0.5 border-b border-slate-200/50 pb-3 text-xs">
+                  <span className="text-slate-400 font-bold uppercase tracking-wider">Doctor</span>
+                  <span className="col-span-2 font-semibold text-slate-700">Dr. {successModalData.doctorName}</span>
                 </div>
-                <div className="grid grid-cols-3 gap-2 py-0.5">
-                  <span className="text-xs text-gray-400 font-semibold uppercase tracking-wider mt-0.5">New Appointment</span>
+                <div className="grid grid-cols-3 gap-2 py-0.5 text-xs">
+                  <span className="text-slate-400 font-bold uppercase tracking-wider mt-0.5">New Slot</span>
                   <div className="col-span-2 space-y-1">
-                    <div className="text-sm font-bold text-primary flex items-center gap-1.5">
-                      <CalendarIcon className="w-4 h-4" />
+                    <div className="font-bold text-primary flex items-center gap-1.5">
+                      <CalendarIcon className="w-3.5 h-3.5" />
                       {formatDateDisplay(successModalData.newDate)}
                     </div>
-                    <div className="text-sm font-bold text-primary flex items-center gap-1.5">
-                      <Clock className="w-4 h-4" />
+                    <div className="font-bold text-primary flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5" />
                       {successModalData.newTime}
                     </div>
                   </div>
@@ -1513,17 +1515,17 @@ ${clinicName}`;
                         <Button
                           onClick={handleWhatsAppNotify}
                           disabled={!!phoneError}
-                          className="flex-1 text-xs font-bold h-11 bg-[#25D366] hover:bg-[#20ba56] text-white shadow-md hover:shadow-lg transition-all rounded-xl gap-2 active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
+                          className="flex-1 text-xs font-bold h-11 bg-[#25D366] hover:bg-[#20ba56] text-white shadow-md hover:shadow-lg transition-all rounded-xl gap-2 active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
                         >
                           <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.458 5.704 1.459h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                           </svg>
-                          Notify on WhatsApp
+                          WhatsApp Patient
                         </Button>
                         <Button
                           variant="outline"
                           onClick={() => setSuccessModalData(null)}
-                          className="flex-1 text-xs font-semibold h-11 border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl"
+                          className="flex-1 text-xs font-semibold h-11 border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl cursor-pointer"
                         >
                           Close
                         </Button>

@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Loader2, Save, Calendar, CheckCircle2, LogOut, Plus, Trash2, Link, Copy, ExternalLink, QrCode, Download } from "lucide-react";
+import { Loader2, Save, Calendar, CheckCircle2, LogOut, Plus, Trash2, Link, Copy, ExternalLink, QrCode, Download, Image as ImageIcon, MapPin, Mail, Phone, IndianRupee, Clock, ShieldCheck, HelpCircle } from "lucide-react";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 const DAYS_OF_WEEK = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
@@ -291,8 +291,8 @@ export default function Settings() {
   if (isLoading) {
     return (
       <div className="max-w-2xl space-y-6">
-        <Skeleton className="h-[200px] w-full rounded-xl" />
-        <Skeleton className="h-[250px] w-full rounded-xl" />
+        <Skeleton className="h-[200px] w-full rounded-xl animate-pulse" />
+        <Skeleton className="h-[250px] w-full rounded-xl animate-pulse" />
       </div>
     );
   }
@@ -300,31 +300,36 @@ export default function Settings() {
   return (
     <div className="max-w-2xl space-y-8 animate-in fade-in duration-500 pb-12">
       <form onSubmit={handleSubmit} className="space-y-8">
+        
         {/* Card 1: Profile settings */}
-        <Card className="bg-white border-gray-100 shadow-sm overflow-hidden">
-          <CardHeader className="border-b border-gray-50 bg-gray-50/50">
-            <CardTitle className="text-lg font-semibold text-gray-900">Clinic Profile</CardTitle>
-            <CardDescription>Update your clinic's public information.</CardDescription>
+        <Card className="bg-white border-slate-100 shadow-sm rounded-xl overflow-hidden">
+          <CardHeader className="border-b border-slate-50 bg-slate-50/50 py-5 px-6">
+            <CardTitle className="text-base font-bold text-slate-800 font-display">Clinic Profile</CardTitle>
+            <CardDescription className="text-xs text-slate-400 mt-1">Configure your clinic's public profile and metadata details.</CardDescription>
           </CardHeader>
-          <CardContent className="p-6 space-y-4">
-            {/* Clinic Logo */}
-            <div className="grid gap-2">
-              <Label className="text-sm font-semibold text-gray-700">Clinic Logo</Label>
-              <div className="flex items-center gap-4 p-4 bg-gray-50/50 rounded-xl border border-gray-100">
-                <div className="relative w-20 h-20 bg-gray-100 border border-gray-200 rounded-xl overflow-hidden flex items-center justify-center shrink-0">
+          <CardContent className="p-6 space-y-5">
+            
+            {/* Clinic Logo Upload Box */}
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold text-slate-550 uppercase tracking-wider">Clinic Branding Logo</Label>
+              <div className="flex items-center gap-4 p-4.5 bg-slate-50/50 rounded-xl border border-slate-100/80 transition-all hover:bg-slate-50">
+                <div className="relative w-20 h-20 bg-white border border-slate-200/80 rounded-xl overflow-hidden flex items-center justify-center shrink-0 shadow-sm">
                   {formData.clinicLogo ? (
                     <ImageWithFallback src={formData.clinicLogo} alt="Clinic Logo" className="w-full h-full object-cover" />
                   ) : (
-                    <div className="text-gray-400 text-xs font-semibold text-center px-1">No Logo</div>
+                    <div className="text-slate-400 text-[10px] font-bold text-center px-1 uppercase tracking-wider flex flex-col items-center gap-1">
+                      <ImageIcon className="w-5 h-5 opacity-70" />
+                      No Logo
+                    </div>
                   )}
                 </div>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-2">
                     <Label
                       htmlFor="logo-upload"
-                      className="h-9 px-4 text-xs font-semibold rounded-xl border border-gray-200 hover:bg-gray-50 flex items-center justify-center cursor-pointer transition-all duration-200"
+                      className="h-8.5 px-3.5 text-xs font-bold rounded-xl border border-slate-250 bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center cursor-pointer transition-all shadow-sm active:scale-97"
                     >
-                      Upload Image
+                      Choose file
                     </Label>
                     <input
                       id="logo-upload"
@@ -338,132 +343,161 @@ export default function Settings() {
                         type="button"
                         variant="ghost"
                         onClick={handleRemoveLogo}
-                        className="h-9 px-4 text-xs font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl transition-all duration-200"
+                        className="h-8.5 px-3.5 text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50/50 rounded-xl transition-all"
                       >
-                        Remove
+                        Remove Logo
                       </Button>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 font-medium">PNG, JPG or GIF. Max size 1MB.</p>
+                  <p className="text-[10px] text-slate-400 font-medium">Supported file types: PNG, JPG, or WEBP. Max size 1MB.</p>
                 </div>
               </div>
             </div>
 
-            {/* Clinic Name */}
-            <div className="grid gap-2">
-              <Label htmlFor="clinicName">Clinic Name *</Label>
-              <Input
-                id="clinicName"
-                value={formData.clinicName}
-                onChange={e => setFormData({ ...formData, clinicName: e.target.value })}
-                className="bg-gray-50/50 focus-visible:bg-white"
-              />
+            {/* Form Fields Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              
+              {/* Clinic Name */}
+              <div className="space-y-1.5 md:col-span-2">
+                <Label htmlFor="clinicName" className="text-xs font-semibold text-slate-550 uppercase tracking-wider">Clinic Name *</Label>
+                <Input
+                  id="clinicName"
+                  value={formData.clinicName}
+                  onChange={e => setFormData({ ...formData, clinicName: e.target.value })}
+                  className="bg-white border-slate-200 focus:border-primary focus:ring-primary/20 rounded-lg text-xs h-10"
+                  required
+                />
+              </div>
+
+              {/* Doctor Name */}
+              <div className="space-y-1.5">
+                <Label htmlFor="doctorName" className="text-xs font-semibold text-slate-550 uppercase tracking-wider">Doctor Name *</Label>
+                <Input
+                  id="doctorName"
+                  value={formData.doctorName}
+                  onChange={e => setFormData({ ...formData, doctorName: e.target.value })}
+                  className="bg-white border-slate-200 focus:border-primary focus:ring-primary/20 rounded-lg text-xs h-10"
+                  placeholder="e.g. Dr. Raj Sharma"
+                  required
+                />
+              </div>
+
+              {/* Doctor Qualification */}
+              <div className="space-y-1.5">
+                <Label htmlFor="doctorQualification" className="text-xs font-semibold text-slate-550 uppercase tracking-wider">Doctor Qualification</Label>
+                <Input
+                  id="doctorQualification"
+                  value={formData.doctorQualification}
+                  onChange={e => setFormData({ ...formData, doctorQualification: e.target.value })}
+                  className="bg-white border-slate-200 focus:border-primary focus:ring-primary/20 rounded-lg text-xs h-10"
+                  placeholder="e.g. MBBS, MD"
+                />
+              </div>
+
+              {/* Doctor Specialization */}
+              <div className="space-y-1.5">
+                <Label htmlFor="doctorSpecialization" className="text-xs font-semibold text-slate-550 uppercase tracking-wider">Doctor Specialization</Label>
+                <Input
+                  id="doctorSpecialization"
+                  value={formData.doctorSpecialization}
+                  onChange={e => setFormData({ ...formData, doctorSpecialization: e.target.value })}
+                  className="bg-white border-slate-200 focus:border-primary focus:ring-primary/20 rounded-lg text-xs h-10"
+                  placeholder="e.g. General Physician"
+                />
+              </div>
+
+              {/* Clinic Phone Number */}
+              <div className="space-y-1.5">
+                <Label htmlFor="clinicPhoneNumber" className="text-xs font-semibold text-slate-550 uppercase tracking-wider">Clinic Phone Number *</Label>
+                <div className="relative">
+                  <Input
+                    id="clinicPhoneNumber"
+                    value={formData.clinicPhoneNumber}
+                    onChange={e => setFormData({ ...formData, clinicPhoneNumber: e.target.value })}
+                    className="bg-white border-slate-200 focus:border-primary focus:ring-primary/20 rounded-lg text-xs h-10 pl-8.5"
+                    placeholder="e.g. 9812345678"
+                    required
+                  />
+                  <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3.5" />
+                </div>
+              </div>
+
+              {/* Contact Email */}
+              <div className="space-y-1.5">
+                <Label htmlFor="contactEmail" className="text-xs font-semibold text-slate-550 uppercase tracking-wider">Contact Email</Label>
+                <div className="relative">
+                  <Input
+                    id="contactEmail"
+                    type="email"
+                    value={formData.contactEmail}
+                    onChange={e => setFormData({ ...formData, contactEmail: e.target.value })}
+                    className="bg-white border-slate-200 focus:border-primary focus:ring-primary/20 rounded-lg text-xs h-10 pl-8.5"
+                    placeholder="e.g. clinic@domain.com"
+                  />
+                  <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3.5" />
+                </div>
+              </div>
+
+              {/* Consultation Fee */}
+              <div className="space-y-1.5">
+                <Label htmlFor="consultationFee" className="text-xs font-semibold text-slate-550 uppercase tracking-wider">Consultation Fee (₹)</Label>
+                <div className="relative">
+                  <Input
+                    id="consultationFee"
+                    value={formData.consultationFee}
+                    onChange={e => setFormData({ ...formData, consultationFee: e.target.value })}
+                    className="bg-white border-slate-200 focus:border-primary focus:ring-primary/20 rounded-lg text-xs h-10 pl-8.5"
+                    placeholder="e.g. 500"
+                  />
+                  <IndianRupee className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3.5" />
+                </div>
+              </div>
+
+              {/* Address */}
+              <div className="space-y-1.5 md:col-span-2">
+                <Label htmlFor="address" className="text-xs font-semibold text-slate-550 uppercase tracking-wider">Address</Label>
+                <div className="relative">
+                  <Input
+                    id="address"
+                    value={formData.address}
+                    onChange={e => setFormData({ ...formData, address: e.target.value })}
+                    className="bg-white border-slate-200 focus:border-primary focus:ring-primary/20 rounded-lg text-xs h-10 pl-8.5"
+                    placeholder="e.g. Sector-15, Rohini, New Delhi"
+                  />
+                  <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3.5" />
+                </div>
+              </div>
+
+              {/* Operating Timings */}
+              <div className="space-y-1.5 md:col-span-2">
+                <Label htmlFor="operatingTimings" className="text-xs font-semibold text-slate-550 uppercase tracking-wider">Operating Timings Text (Display Only)</Label>
+                <div className="relative">
+                  <Input
+                    id="operatingTimings"
+                    value={formData.operatingTimings}
+                    onChange={e => setFormData({ ...formData, operatingTimings: e.target.value })}
+                    className="bg-white border-slate-200 focus:border-primary focus:ring-primary/20 rounded-lg text-xs h-10 pl-8.5"
+                    placeholder="e.g. Mon-Sat: 9 AM - 6 PM"
+                  />
+                  <Clock className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3.5" />
+                </div>
+              </div>
             </div>
 
-            {/* Doctor Name */}
-            <div className="grid gap-2">
-              <Label htmlFor="doctorName">Doctor Name *</Label>
-              <Input
-                id="doctorName"
-                value={formData.doctorName}
-                onChange={e => setFormData({ ...formData, doctorName: e.target.value })}
-                className="bg-gray-50/50 focus-visible:bg-white"
-                placeholder="e.g. Dr. Raj Sharma"
-              />
-            </div>
-
-            {/* Doctor Qualification */}
-            <div className="grid gap-2">
-              <Label htmlFor="doctorQualification">Doctor Qualification</Label>
-              <Input
-                id="doctorQualification"
-                value={formData.doctorQualification}
-                onChange={e => setFormData({ ...formData, doctorQualification: e.target.value })}
-                className="bg-gray-50/50 focus-visible:bg-white"
-                placeholder="e.g. MBBS, MD"
-              />
-            </div>
-
-            {/* Doctor Specialization */}
-            <div className="grid gap-2">
-              <Label htmlFor="doctorSpecialization">Doctor Specialization</Label>
-              <Input
-                id="doctorSpecialization"
-                value={formData.doctorSpecialization}
-                onChange={e => setFormData({ ...formData, doctorSpecialization: e.target.value })}
-                className="bg-gray-50/50 focus-visible:bg-white"
-                placeholder="e.g. General Physician"
-              />
-            </div>
-
-            {/* Clinic Phone Number */}
-            <div className="grid gap-2">
-              <Label htmlFor="clinicPhoneNumber">Clinic Phone Number *</Label>
-              <Input
-                id="clinicPhoneNumber"
-                value={formData.clinicPhoneNumber}
-                onChange={e => setFormData({ ...formData, clinicPhoneNumber: e.target.value })}
-                className="bg-gray-50/50 focus-visible:bg-white"
-                placeholder="e.g. 9812345678"
-              />
-            </div>
-
-            {/* Contact Email */}
-            <div className="grid gap-2">
-              <Label htmlFor="contactEmail">Contact Email</Label>
-              <Input
-                id="contactEmail"
-                type="email"
-                value={formData.contactEmail}
-                onChange={e => setFormData({ ...formData, contactEmail: e.target.value })}
-                className="bg-gray-50/50 focus-visible:bg-white"
-              />
-            </div>
-
-            {/* Address */}
-            <div className="grid gap-2">
-              <Label htmlFor="address">Address</Label>
-              <Input
-                id="address"
-                value={formData.address}
-                onChange={e => setFormData({ ...formData, address: e.target.value })}
-                className="bg-gray-50/50 focus-visible:bg-white"
-              />
-            </div>
-
-            {/* Consultation Fee */}
-            <div className="grid gap-2">
-              <Label htmlFor="consultationFee">Consultation Fee</Label>
-              <Input
-                id="consultationFee"
-                value={formData.consultationFee}
-                onChange={e => setFormData({ ...formData, consultationFee: e.target.value })}
-                className="bg-gray-50/50 focus-visible:bg-white"
-              />
-            </div>
-
-            {/* Operating Timings */}
-            <div className="grid gap-2">
-              <Label htmlFor="operatingTimings">Operating Timings Text (Display Only)</Label>
-              <Input
-                id="operatingTimings"
-                value={formData.operatingTimings}
-                onChange={e => setFormData({ ...formData, operatingTimings: e.target.value })}
-                className="bg-gray-50/50 focus-visible:bg-white"
-              />
-            </div>
           </CardContent>
         </Card>
-
+ 
         {/* Card 2: Scheduler & Timing Settings */}
-        <Card className="bg-white border-gray-100 shadow-sm overflow-hidden">
-          <CardHeader className="border-b border-gray-50 bg-gray-50/50">
-            <CardTitle className="text-lg font-semibold text-gray-900">Scheduler & Timing Settings</CardTitle>
-            <CardDescription>Configure working hours and booking slots for automated scheduling.</CardDescription>
+        <Card className="bg-white border-slate-100 shadow-sm rounded-xl overflow-hidden">
+          <CardHeader className="border-b border-slate-50 bg-slate-50/50 py-5 px-6">
+            <CardTitle className="text-base font-bold text-slate-800 font-display">Scheduler & Timing Settings</CardTitle>
+            <CardDescription className="text-xs text-slate-400 mt-1">Configure working hours and booking slots for automated scheduling.</CardDescription>
           </CardHeader>
-          <CardContent className="p-6 space-y-4">
-            <div className="grid gap-3">
-              <Label className="text-sm font-semibold text-gray-700">Working Days</Label>
+          <CardContent className="p-6 space-y-6">
+            
+            {/* Working Days */}
+            <div className="space-y-3">
+              <Label className="text-xs font-semibold text-slate-550 uppercase tracking-wider">Working Days</Label>
               <div className="flex flex-wrap gap-2">
                 {(() => {
                   const selectedDays = formData.workingDays
@@ -472,14 +506,13 @@ export default function Settings() {
                   return DAYS_OF_WEEK.map((day) => {
                     const isSelected = selectedDays.includes(day);
                     return (
-                      <Button
+                      <button
                         key={day}
                         type="button"
-                        variant={isSelected ? "default" : "outline"}
-                        className={`h-11 px-4 text-sm font-semibold rounded-xl transition-all duration-200 ${
+                        className={`h-9 px-4.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                           isSelected
-                            ? "bg-primary text-primary-foreground shadow-sm hover:opacity-90 scale-[1.02]"
-                            : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900"
+                            ? "bg-primary text-white shadow-sm shadow-primary/10"
+                            : "bg-slate-50 text-slate-600 border border-slate-200/60 hover:bg-slate-100"
                         }`}
                         onClick={() => {
                           let updatedDays;
@@ -497,21 +530,38 @@ export default function Settings() {
                         }}
                       >
                         {DAYS_LABELS[day]}
-                      </Button>
+                      </button>
                     );
                   });
                 })()}
               </div>
-              <p className="text-xs text-gray-500 font-medium">Select the working days when the clinic is open and accepting bookings.</p>
+              <p className="text-[10px] text-slate-400">Select the working days when the clinic is open and accepting bookings.</p>
             </div>
-            <div className="space-y-4">
-              <Label className="text-sm font-semibold text-gray-700">Working Sessions</Label>
-              <div className="space-y-3">
+
+            {/* Working Sessions */}
+            <div className="space-y-4 pt-2">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                <Label className="text-xs font-semibold text-slate-550 uppercase tracking-wider">Working Sessions</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSessions([...sessions, { start: "09:00", end: "17:00" }]);
+                  }}
+                  className="text-xs font-bold h-7.5 border-dashed border-primary/20 text-primary hover:bg-primary/5 px-2.5 rounded-lg"
+                >
+                  <Plus className="w-3.5 h-3.5 mr-1" />
+                  Add Session
+                </Button>
+              </div>
+              
+              <div className="space-y-3.5">
                 {sessions.map((session, index) => (
-                  <div key={index} className="flex items-end gap-4 p-4 bg-gray-50/50 rounded-xl border border-gray-100">
+                  <div key={index} className="flex items-end gap-3.5 p-4 bg-slate-50/50 rounded-xl border border-slate-100">
                     <div className="flex-1 grid grid-cols-2 gap-4">
-                      <div className="grid gap-1.5">
-                        <Label htmlFor={`session-start-${index}`} className="text-xs text-gray-500 font-semibold">
+                      <div className="space-y-1.5">
+                        <Label htmlFor={`session-start-${index}`} className="text-[10px] font-bold text-slate-450 uppercase">
                           Start Time (24h format)
                         </Label>
                         <Input
@@ -524,11 +574,11 @@ export default function Settings() {
                             newSessions[index].start = e.target.value;
                             setSessions(newSessions);
                           }}
-                          className="bg-white border-gray-200 text-xs h-10"
+                          className="bg-white border-slate-200 text-xs h-9 rounded-lg focus-visible:ring-1 focus-visible:ring-primary/20 focus-visible:border-primary"
                         />
                       </div>
-                      <div className="grid gap-1.5">
-                        <Label htmlFor={`session-end-${index}`} className="text-xs text-gray-500 font-semibold">
+                      <div className="space-y-1.5">
+                        <Label htmlFor={`session-end-${index}`} className="text-[10px] font-bold text-slate-450 uppercase">
                           End Time (24h format)
                         </Label>
                         <Input
@@ -541,7 +591,7 @@ export default function Settings() {
                             newSessions[index].end = e.target.value;
                             setSessions(newSessions);
                           }}
-                          className="bg-white border-gray-200 text-xs h-10"
+                          className="bg-white border-slate-200 text-xs h-9 rounded-lg focus-visible:ring-1 focus-visible:ring-primary/20 focus-visible:border-primary"
                         />
                       </div>
                     </div>
@@ -554,7 +604,7 @@ export default function Settings() {
                           const newSessions = sessions.filter((_, i) => i !== index);
                           setSessions(newSessions);
                         }}
-                        className="text-gray-400 hover:text-red-600 hover:bg-red-50 h-10 w-10 rounded-lg shrink-0"
+                        className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 h-9 w-9 rounded-lg shrink-0"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -562,35 +612,39 @@ export default function Settings() {
                   </div>
                 ))}
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setSessions([...sessions, { start: "09:00", end: "17:00" }]);
-                }}
-                className="text-xs font-semibold h-10 px-4 rounded-xl border-dashed border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-              >
-                <Plus className="w-3.5 h-3.5 mr-1.5 text-gray-500" />
-                Add Session
-              </Button>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="slotDuration">Slot Duration (Minutes)</Label>
+
+            {/* Slot Duration */}
+            <div className="space-y-1.5 pt-2">
+              <Label htmlFor="slotDuration" className="text-xs font-semibold text-slate-550 uppercase tracking-wider">Slot Duration (Minutes)</Label>
               <Input
                 id="slotDuration"
                 type="number"
                 value={formData.slotDuration}
                 onChange={e => setFormData({ ...formData, slotDuration: parseInt(e.target.value) || 30 })}
                 placeholder="30"
-                className="bg-gray-50/50 focus-visible:bg-white"
+                className="bg-white border-slate-200 focus:border-primary focus:ring-primary/20 rounded-lg text-xs h-10"
               />
             </div>
 
-            <div className="pt-4 border-t border-gray-100 flex justify-end">
-              <Button type="submit" disabled={updateClinic.isPending} className="w-full sm:w-auto">
-                {updateClinic.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                Save Settings
+            {/* Action Bar */}
+            <div className="pt-4 border-t border-slate-100 flex justify-end">
+              <Button 
+                type="submit" 
+                disabled={updateClinic.isPending} 
+                className="w-full sm:w-auto h-10 px-5 text-xs font-bold rounded-xl shadow-md shadow-primary/5 active:scale-97 cursor-pointer"
+              >
+                {updateClinic.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving Changes…
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Configuration
+                  </>
+                )}
               </Button>
             </div>
           </CardContent>
@@ -598,54 +652,55 @@ export default function Settings() {
       </form>
 
       {/* Public Booking Link Card */}
-      <Card className="bg-white border-gray-100 shadow-sm overflow-hidden">
-        <CardHeader className="border-b border-gray-50 bg-gray-50/50">
-          <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <Link className="w-5 h-5 text-primary" />
-            Public Booking Link
+      <Card className="bg-white border-slate-100 shadow-sm rounded-xl overflow-hidden">
+        <CardHeader className="border-b border-slate-50 bg-slate-50/50 py-5 px-6">
+          <CardTitle className="text-base font-bold text-slate-800 font-display flex items-center gap-2">
+            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary shrink-0">
+              <Link className="w-4 h-4" />
+            </div>
+            Public Booking Interface
           </CardTitle>
-          <CardDescription>
-            Share this link on Google Business Profile, WhatsApp, Instagram Bio, Facebook, or your website to let patients book appointments directly.
+          <CardDescription className="text-xs text-slate-400 mt-1">
+            Publish this portal link on your Google profile, Whatsapp status, or social media bio to collect patient bookings seamlessly.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6 space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="publicBookingUrl" className="text-sm font-semibold text-gray-700">Public URL</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="publicBookingUrl" className="text-xs font-semibold text-slate-550 uppercase tracking-wider">Patient Booking URL</Label>
             <div className="flex gap-2">
               <Input
                 id="publicBookingUrl"
                 readOnly
                 value={publicUrl}
-                className="bg-gray-50 text-gray-600 cursor-text focus-visible:ring-0 flex-1 h-10 border-gray-200"
+                className="bg-slate-55 border-slate-200 text-slate-500 font-mono text-[11px] h-10 rounded-lg select-all"
               />
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleCopyLink}
-                className="h-10 px-4 font-semibold gap-1.5 border-gray-200 hover:bg-gray-50"
-                title="Copy Link"
+                className="h-10 px-4 text-xs font-bold border-slate-250 hover:bg-slate-50 rounded-lg gap-1.5 cursor-pointer shadow-sm active:scale-97"
               >
-                <Copy className="w-4 h-4" /> Copy Link
+                <Copy className="w-3.5 h-3.5" /> Copy Link
               </Button>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3 pt-2">
+          <div className="flex flex-wrap gap-3 pt-1">
             <Button
               type="button"
               onClick={() => window.open(publicUrl, "_blank")}
-              className="h-10 text-xs font-semibold rounded-xl flex-1 sm:flex-initial gap-1.5"
+              className="h-9.5 text-xs font-bold rounded-xl flex-1 sm:flex-initial gap-1.5 shadow-sm cursor-pointer"
             >
-              <ExternalLink className="w-4 h-4" /> Open Link
+              <ExternalLink className="w-3.5 h-3.5" /> Open Booking Page
             </Button>
 
             <Button
               type="button"
               variant="outline"
               onClick={() => setQrOpen(true)}
-              className="h-10 text-xs font-semibold rounded-xl flex-1 sm:flex-initial gap-1.5 border-gray-200 hover:bg-gray-50"
+              className="h-9.5 text-xs font-bold rounded-xl flex-1 sm:flex-initial gap-1.5 border-slate-250 bg-white hover:bg-slate-50 cursor-pointer shadow-sm"
             >
-              <QrCode className="w-4 h-4" /> Generate QR Code
+              <QrCode className="w-3.5 h-3.5" /> Get Portal QR Code
             </Button>
           </div>
         </CardContent>
@@ -654,13 +709,13 @@ export default function Settings() {
       {/* QR Code Dialog */}
       {qrOpen && (
         <Dialog open={qrOpen} onOpenChange={setQrOpen}>
-          <DialogContent className="max-w-xs bg-white rounded-2xl p-6 shadow-2xl border border-gray-100 flex flex-col items-center">
-            <DialogHeader className="w-full border-b border-gray-50 pb-3">
-              <DialogTitle className="text-center text-lg font-bold text-gray-900">Clinic QR Code</DialogTitle>
+          <DialogContent className="max-w-xs bg-white rounded-2xl p-6 shadow-2xl border border-slate-100 flex flex-col items-center">
+            <DialogHeader className="w-full border-b border-slate-150 pb-3">
+              <DialogTitle className="text-center text-base font-bold text-slate-800 font-display">Clinic Booking QR Code</DialogTitle>
             </DialogHeader>
 
-            <div className="py-6 flex flex-col items-center gap-4">
-              <div className="p-3 bg-white border border-gray-150 rounded-2xl shadow-inner">
+            <div className="py-5 flex flex-col items-center gap-4">
+              <div className="p-3 bg-white border border-slate-150 rounded-2xl shadow-inner">
                 {qrUrl ? (
                   <img
                     src={qrUrl}
@@ -668,29 +723,29 @@ export default function Settings() {
                     className="w-48 h-48 object-contain"
                   />
                 ) : (
-                  <div className="w-48 h-48 flex items-center justify-center text-xs text-gray-400">
-                    Generating...
+                  <div className="w-48 h-48 flex items-center justify-center text-xs text-slate-400 animate-pulse">
+                    Generating QR...
                   </div>
                 )}
               </div>
-              <p className="text-[11px] text-gray-400 font-semibold uppercase text-center tracking-wider max-w-[200px]">
-                Scan to book an appointment
+              <p className="text-[10px] text-slate-450 font-bold uppercase text-center tracking-wider max-w-[200px]">
+                Scan to book an appointment instantly
               </p>
             </div>
 
-            <div className="w-full flex gap-2 pt-2">
+            <div className="w-full flex gap-2 pt-1">
               <Button
                 type="button"
                 onClick={downloadQRCode}
-                className="flex-1 text-xs font-semibold h-10 gap-1.5 rounded-xl"
+                className="flex-1 text-xs font-bold h-9.5 gap-1.5 rounded-xl cursor-pointer"
               >
-                <Download className="w-4 h-4" /> Download QR
+                <Download className="w-3.5 h-3.5" /> Download QR
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setQrOpen(false)}
-                className="flex-1 text-xs font-semibold h-10 border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl"
+                className="flex-1 text-xs font-semibold h-9.5 border-slate-250 hover:bg-slate-50 text-slate-650 rounded-xl cursor-pointer"
               >
                 Close
               </Button>
@@ -700,20 +755,27 @@ export default function Settings() {
       )}
 
       {/* Card 3: Google Calendar Connection */}
-      <Card className="bg-white border-gray-100 shadow-sm overflow-hidden">
-        <CardHeader className="border-b border-gray-50 bg-gray-50/50">
-          <CardTitle className="text-lg font-semibold text-gray-900">Google Calendar Sync</CardTitle>
-          <CardDescription>Automatically block slots from your Google Calendar and write confirmed bookings.</CardDescription>
+      <Card className="bg-white border-slate-100 shadow-sm rounded-xl overflow-hidden">
+        <CardHeader className="border-b border-slate-50 bg-slate-50/50 py-5 px-6">
+          <CardTitle className="text-base font-bold text-slate-800 font-display flex items-center gap-2">
+            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary shrink-0">
+              <Calendar className="w-4 h-4" />
+            </div>
+            Google Calendar Integration
+          </CardTitle>
+          <CardDescription className="text-xs text-slate-400 mt-1">Automatically block slots from your personal Google Calendar and sync confirmed sessions.</CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           {clinic?.googleConnected ? (
-            <div className="space-y-6">
-              <div className="flex items-start gap-3 p-4 bg-green-50 border border-green-100 rounded-xl">
-                <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-semibold text-green-950">Synchronized Successfully</h4>
-                  <p className="text-sm text-green-800 mt-1">
-                    Your scheduling assistant is connected to Google account: <span className="font-medium">{clinic.googleConnectedEmail}</span>.
+            <div className="space-y-5">
+              <div className="flex items-start gap-3.5 p-4.5 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-900">
+                <div className="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-600 shrink-0">
+                  <ShieldCheck className="w-4.5 h-4.5" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="font-bold text-xs uppercase tracking-wider text-emerald-800">Synchronized Successfully</h4>
+                  <p className="text-xs text-emerald-700 leading-relaxed">
+                    Your digital receptionist assistant is authorized and connected to your Google account: <span className="font-bold text-emerald-950">{clinic.googleConnectedEmail}</span>.
                   </p>
                 </div>
               </div>
@@ -722,28 +784,30 @@ export default function Settings() {
                   onClick={handleDisconnectGoogle}
                   disabled={disconnecting}
                   variant="destructive"
-                  className="w-full sm:w-auto text-xs font-semibold h-10"
+                  className="w-full sm:w-auto text-xs font-semibold h-10 px-4 rounded-xl cursor-pointer"
                 >
                   {disconnecting ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <LogOut className="w-3.5 h-3.5 mr-2" />}
-                  Disconnect Google Calendar
+                  Disconnect Calendar
                 </Button>
               </div>
             </div>
           ) : (
-            <div className="space-y-6">
-              <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-100 rounded-xl">
-                <Calendar className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-semibold text-amber-950">Calendar Sync Disabled</h4>
-                  <p className="text-sm text-amber-800 mt-1">
-                    Connect your clinic Google Calendar account. The receptionist chatbot will query your calendar's busy events in real-time, preventing double bookings.
+            <div className="space-y-5">
+              <div className="flex items-start gap-3.5 p-4.5 bg-amber-50 border border-amber-100 rounded-xl text-amber-900">
+                <div className="w-8 h-8 bg-amber-500/10 rounded-lg flex items-center justify-center text-amber-600 shrink-0">
+                  <HelpCircle className="w-4.5 h-4.5 animate-pulse" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="font-bold text-xs uppercase tracking-wider text-amber-800">Calendar Sync Inactive</h4>
+                  <p className="text-xs text-amber-700 leading-relaxed">
+                    Connecting your Google Calendar enables real-time slot checking. The ClinicFlow receptionist chatbot blocks busy events from your calendar, preventing scheduling conflicts.
                   </p>
                 </div>
               </div>
               <div className="flex justify-end">
                 <Button
                   onClick={handleConnectGoogle}
-                  className="w-full sm:w-auto text-xs font-semibold h-10"
+                  className="w-full sm:w-auto text-xs font-bold h-10 px-5 rounded-xl shadow-sm cursor-pointer"
                 >
                   <Calendar className="w-3.5 h-3.5 mr-2" />
                   Connect Google Calendar

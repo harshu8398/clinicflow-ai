@@ -172,50 +172,50 @@ export default function Dashboard() {
   };
 
   const statusColors: Record<string, string> = {
-    pending: "bg-amber-100 text-amber-800 border-amber-200",
-    pending_slot_selection: "bg-orange-100 text-orange-800 border-orange-200",
-    confirmed: "bg-primary/10 text-primary border-primary/20",
-    booked: "bg-blue-100 text-blue-800 border-blue-200",
-    completed: "bg-green-100 text-green-800 border-green-200",
-    cancelled: "bg-red-100 text-red-800 border-red-200",
+    pending: "bg-amber-50 text-amber-700 border-amber-100",
+    pending_slot_selection: "bg-orange-50 text-orange-700 border-orange-100",
+    confirmed: "bg-blue-50 text-blue-700 border-blue-100",
+    booked: "bg-sky-50 text-sky-700 border-sky-100",
+    completed: "bg-green-50 text-green-700 border-green-100",
+    cancelled: "bg-red-50 text-red-700 border-red-100",
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500 font-sans">
       {/* Expiry Alert Warning Banner */}
       {showExpiryWarning && (
-        <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-100 rounded-xl text-amber-800 text-sm font-semibold shadow-sm">
+        <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-100 rounded-xl text-amber-800 text-xs font-semibold shadow-xs">
           <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 animate-bounce" />
           <span>Your subscription expires in {daysRemaining} days. Please renew to avoid system restrictions.</span>
         </div>
       )}
 
       {/* Subscription Card Banner */}
-      <Card className="bg-gradient-to-r from-primary/5 via-slate-50 to-primary/5 border border-primary/10 overflow-hidden shadow-sm">
+      <Card className="bg-gradient-to-r from-primary/5 via-white to-primary/5 border border-primary/10 overflow-hidden shadow-xs rounded-xl">
         <CardContent className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1 flex-1">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
+            <h3 className="text-base font-bold text-slate-800 flex items-center gap-2 font-display">
+              <Sparkles className="w-4.5 h-4.5 text-primary" />
               Subscription Status: {subStatus === "Lifetime" ? "Lifetime Plan" : `${planType} Plan`}
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs text-gray-600 pt-2 font-medium">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-[11px] text-slate-600 pt-3 font-medium">
               <div>
-                <span className="text-gray-400 font-semibold block uppercase tracking-wider text-[10px]">Current Plan:</span>
-                <span className="text-slate-800 text-sm font-bold uppercase">{planType}</span>
+                <span className="text-slate-400 font-semibold block uppercase tracking-wider text-[9px] mb-0.5">Current Plan:</span>
+                <span className="text-slate-800 text-xs font-bold uppercase">{planType}</span>
               </div>
               <div>
-                <span className="text-gray-400 font-semibold block uppercase tracking-wider text-[10px]">Status:</span>
-                <span className="text-slate-800 text-sm font-bold">{subStatus}</span>
+                <span className="text-slate-400 font-semibold block uppercase tracking-wider text-[9px] mb-0.5">Status:</span>
+                <span className="text-slate-800 text-xs font-bold">{subStatus}</span>
               </div>
               <div>
-                <span className="text-gray-400 font-semibold block uppercase tracking-wider text-[10px]">Expiry Date:</span>
-                <span className="text-slate-800 text-sm font-bold">
+                <span className="text-slate-400 font-semibold block uppercase tracking-wider text-[9px] mb-0.5">Expiry Date:</span>
+                <span className="text-slate-800 text-xs font-bold">
                   {subStatus === "Lifetime" ? "Never" : expiryDate ? new Date(expiryDate).toLocaleDateString() : "N/A"}
                 </span>
               </div>
               <div>
-                <span className="text-gray-400 font-semibold block uppercase tracking-wider text-[10px]">Days Remaining:</span>
-                <span className="text-primary text-sm font-extrabold">
+                <span className="text-slate-400 font-semibold block uppercase tracking-wider text-[9px] mb-0.5">Days Remaining:</span>
+                <span className="text-primary text-xs font-extrabold">
                   {subStatus === "Lifetime" ? "Lifetime" : `${daysRemaining} Days`}
                 </span>
               </div>
@@ -229,7 +229,7 @@ export default function Dashboard() {
                 setNotes("");
                 setShowUpgradeModal(true);
               }}
-              className="px-6 py-5 bg-primary hover:bg-primary/95 text-white shadow-md transition-all font-semibold rounded-xl shrink-0"
+              className="px-5 py-2.5 bg-primary hover:bg-primary/95 text-white shadow-sm transition-all font-semibold rounded-lg shrink-0 text-xs"
             >
               Upgrade Plan
             </Button>
@@ -239,108 +239,113 @@ export default function Dashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card className="bg-white border-gray-100 shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
-                <Users className="w-5 h-5 text-gray-600" />
+        <Card className="bg-white border-slate-100 hover:border-slate-200 transition-all duration-300 rounded-xl overflow-hidden shadow-xs hover:shadow-md relative pl-1.5 select-none">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-slate-300" />
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-8.5 h-8.5 rounded-lg bg-slate-50 border border-slate-100 text-slate-500 flex items-center justify-center">
+                <Users className="w-4 h-4" />
               </div>
             </div>
-            <p className="text-sm font-medium text-gray-500 mb-1">Total</p>
-            <h3 className="text-3xl font-bold text-gray-900">{stats.totalAppointments}</h3>
+            <p className="text-xs font-semibold text-slate-400 mb-0.5">Total</p>
+            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.totalAppointments}</h3>
           </CardContent>
         </Card>
         
-        <Card className="bg-white border-gray-100 shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-blue-600" />
+        <Card className="bg-white border-slate-100 hover:border-slate-200 transition-all duration-300 rounded-xl overflow-hidden shadow-xs hover:shadow-md relative pl-1.5 select-none">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500" />
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-8.5 h-8.5 rounded-lg bg-blue-50 border border-blue-100 text-blue-500 flex items-center justify-center">
+                <Calendar className="w-4 h-4" />
               </div>
             </div>
-            <p className="text-sm font-medium text-gray-500 mb-1">Today</p>
-            <h3 className="text-3xl font-bold text-gray-900">{stats.todayAppointments}</h3>
+            <p className="text-xs font-semibold text-slate-400 mb-0.5">Today</p>
+            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.todayAppointments}</h3>
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-gray-100 shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
-                <Clock className="w-5 h-5 text-amber-600" />
+        <Card className="bg-white border-slate-100 hover:border-slate-200 transition-all duration-300 rounded-xl overflow-hidden shadow-xs hover:shadow-md relative pl-1.5 select-none">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500" />
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-8.5 h-8.5 rounded-lg bg-amber-50 border border-amber-100 text-amber-500 flex items-center justify-center">
+                <Clock className="w-4 h-4" />
               </div>
             </div>
-            <p className="text-sm font-medium text-gray-500 mb-1">Pending</p>
-            <h3 className="text-3xl font-bold text-gray-900">{stats.pendingCount}</h3>
+            <p className="text-xs font-semibold text-slate-400 mb-0.5">Pending</p>
+            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.pendingCount}</h3>
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-gray-100 shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <CalendarCheck className="w-5 h-5 text-primary" />
+        <Card className="bg-white border-slate-100 hover:border-slate-200 transition-all duration-300 rounded-xl overflow-hidden shadow-xs hover:shadow-md relative pl-1.5 select-none">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-8.5 h-8.5 rounded-lg bg-primary/5 border border-primary/10 text-primary flex items-center justify-center">
+                <CalendarCheck className="w-4 h-4" />
               </div>
             </div>
-            <p className="text-sm font-medium text-gray-500 mb-1">Confirmed</p>
-            <h3 className="text-3xl font-bold text-gray-900">{stats.confirmedCount}</h3>
+            <p className="text-xs font-semibold text-slate-400 mb-0.5">Confirmed</p>
+            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.confirmedCount}</h3>
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-gray-100 shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
-                <CheckCircle2 className="w-5 h-5 text-green-600" />
+        <Card className="bg-white border-slate-100 hover:border-slate-200 transition-all duration-300 rounded-xl overflow-hidden shadow-xs hover:shadow-md relative pl-1.5 select-none">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500" />
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-8.5 h-8.5 rounded-lg bg-green-50 border border-green-100 text-green-500 flex items-center justify-center">
+                <CheckCircle2 className="w-4 h-4" />
               </div>
             </div>
-            <p className="text-sm font-medium text-gray-500 mb-1">Completed</p>
-            <h3 className="text-3xl font-bold text-gray-900">{stats.completedCount}</h3>
+            <p className="text-xs font-semibold text-slate-400 mb-0.5">Completed</p>
+            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.completedCount}</h3>
           </CardContent>
         </Card>
       </div>
 
       {/* Table Card */}
-      <Card className="bg-white border-gray-100 shadow-sm overflow-hidden">
-        <CardHeader className="border-b border-gray-50 bg-gray-50/50">
-          <CardTitle className="text-lg font-semibold text-gray-900">Recent Appointments</CardTitle>
+      <Card className="bg-white border-slate-100 shadow-sm rounded-xl overflow-hidden">
+        <CardHeader className="border-b border-slate-50 bg-slate-50/50 py-4 px-6">
+          <CardTitle className="text-sm font-bold text-slate-850 font-display">Recent Appointments</CardTitle>
         </CardHeader>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="bg-gray-50/30 hover:bg-gray-50/30">
-                <TableHead className="font-medium text-gray-500">Patient</TableHead>
-                <TableHead className="font-medium text-gray-500">Date & Time</TableHead>
-                <TableHead className="font-medium text-gray-500">Problem</TableHead>
-                <TableHead className="font-medium text-gray-500">Phone</TableHead>
-                <TableHead className="font-medium text-gray-500">Status</TableHead>
+              <TableRow className="bg-slate-50/30 hover:bg-slate-50/30">
+                <TableHead className="font-semibold text-slate-500 py-3 text-xs">Patient</TableHead>
+                <TableHead className="font-semibold text-slate-500 py-3 text-xs">Date & Time</TableHead>
+                <TableHead className="font-semibold text-slate-500 py-3 text-xs">Problem</TableHead>
+                <TableHead className="font-semibold text-slate-500 py-3 text-xs">Phone</TableHead>
+                <TableHead className="font-semibold text-slate-500 py-3 text-xs">Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {stats.recentAppointments.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-32 text-center text-gray-500">
+                  <TableCell colSpan={5} className="h-32 text-center text-slate-400 py-8 text-xs">
                     No recent appointments
                   </TableCell>
                 </TableRow>
               ) : (
                 stats.recentAppointments.map((apt) => (
-                  <TableRow key={apt.id} className="hover:bg-gray-50/50 transition-colors">
-                    <TableCell className="font-medium text-gray-900">{apt.patientName}</TableCell>
-                    <TableCell className="text-gray-600">
+                  <TableRow key={apt.id} className="hover:bg-slate-50/50 transition-colors">
+                    <TableCell className="font-semibold text-slate-800 py-3 text-xs">{apt.patientName}</TableCell>
+                    <TableCell className="text-slate-500 font-medium py-3 text-xs">
                       {(() => { const d = new Date(apt.appointmentDate); return isNaN(d.getTime()) ? apt.appointmentDate : format(d, "MMM d, yyyy"); })()}
                     </TableCell>
-                    <TableCell className="text-gray-600 max-w-[200px] truncate" title={apt.patientProblem}>
+                    <TableCell className="text-slate-500 max-w-[200px] truncate py-3 text-xs" title={apt.patientProblem}>
                       {apt.patientProblem}
                     </TableCell>
-                    <TableCell className="text-gray-600">{apt.patientPhone}</TableCell>
-                    <TableCell>
+                    <TableCell className="text-slate-500 font-medium py-3 text-xs">{apt.patientPhone}</TableCell>
+                    <TableCell className="py-2.5">
                       <Select 
                         value={apt.status} 
                         onValueChange={(val: any) => handleStatusChange(apt.id, val)}
                         disabled={updateStatus.isPending}
                       >
-                        <SelectTrigger className={`w-32 h-8 border shadow-none ${statusColors[apt.status]}`}>
+                        <SelectTrigger className={`w-28 h-7.5 border rounded-lg shadow-none text-xs font-semibold px-2.5 ${statusColors[apt.status]}`}>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -360,9 +365,9 @@ export default function Dashboard() {
 
       {/* Upgrade Plan Wizard Dialog Modal */}
       <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle>Upgrade Subscription Plan</DialogTitle>
+            <DialogTitle className="text-lg font-bold text-slate-850 font-display">Upgrade Subscription Plan</DialogTitle>
           </DialogHeader>
 
           {upgradeStep === "plans" && (
@@ -372,45 +377,45 @@ export default function Dashboard() {
                   <button
                     key={plan}
                     onClick={() => setSelectedPlan(plan)}
-                    className={`p-3 rounded-lg border text-center transition-all cursor-pointer ${
+                    className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
                       selectedPlan === plan
                         ? "border-primary bg-primary/5 ring-2 ring-primary/15"
-                        : "border-gray-200 hover:border-gray-300"
+                        : "border-slate-200 hover:border-slate-300"
                     }`}
                   >
-                    <div className="text-[10px] font-semibold text-slate-500 uppercase">{plan}</div>
-                    <div className="text-base font-bold text-slate-900 mt-1">₹{getPlanPrice(plan)}</div>
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{plan}</div>
+                    <div className="text-sm font-extrabold text-slate-800 mt-1 font-display">₹{getPlanPrice(plan)}</div>
                   </button>
                 ))}
               </div>
 
               <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-3">
-                <h4 className="font-semibold text-slate-800 text-xs">Payment Information</h4>
+                <h4 className="font-semibold text-slate-700 text-xs">Payment Information</h4>
                 <div className="space-y-2 text-xs">
-                  <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
-                    <span className="text-slate-500">UPI ID:</span>
-                    <span className="font-semibold text-slate-800 select-all">{subData?.settings?.upiId || "8178141497@jio"}</span>
+                  <div className="flex justify-between border-b border-slate-200/60 pb-2">
+                    <span className="text-slate-400 font-medium">UPI ID:</span>
+                    <span className="font-bold text-slate-800 select-all">{subData?.settings?.upiId || "8178141497@jio"}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Payable Amount:</span>
-                    <span className="font-bold text-slate-900">₹{getPlanPrice(selectedPlan)}</span>
+                  <div className="flex justify-between pt-0.5">
+                    <span className="text-slate-400 font-medium">Payable Amount:</span>
+                    <span className="font-extrabold text-primary text-sm">₹{getPlanPrice(selectedPlan)}</span>
                   </div>
                 </div>
 
                 {subData?.settings?.upiQrCodeUrl && (
                   <div className="flex flex-col items-center pt-2">
-                    <div className="bg-white p-2 rounded border border-slate-200">
+                    <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-xs">
                       <ImageWithFallback src={subData.settings.upiQrCodeUrl} alt="UPI QR" className="w-24 h-24 object-contain" />
                     </div>
                   </div>
                 )}
               </div>
 
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setShowUpgradeModal(false)}>
+              <DialogFooter className="gap-2">
+                <Button variant="outline" onClick={() => setShowUpgradeModal(false)} className="rounded-lg">
                   Cancel
                 </Button>
-                <Button onClick={() => setUpgradeStep("upload")}>Continue</Button>
+                <Button onClick={() => setUpgradeStep("upload")} className="rounded-lg">Continue</Button>
               </DialogFooter>
             </div>
           )}
@@ -418,23 +423,23 @@ export default function Dashboard() {
           {upgradeStep === "upload" && (
             <form onSubmit={handleSubmitProof} className="space-y-4 py-2">
               {submitError && (
-                <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 text-xs border border-red-100 rounded-lg">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
+                <div className="flex items-start gap-2.5 p-3 bg-red-50 text-red-750 text-xs border border-red-100 rounded-xl">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{submitError}</span>
                 </div>
               )}
 
               <div className="space-y-1">
-                <Label className="text-xs text-slate-500">Upgrade Request Plan</Label>
-                <div className="bg-slate-50 border border-slate-100 rounded p-2.5 flex justify-between text-xs font-semibold text-slate-700">
+                <Label className="text-xs text-slate-400">Upgrade Request Plan</Label>
+                <div className="bg-slate-50 border border-slate-100 rounded-lg p-2.5 flex justify-between text-xs font-bold text-slate-700">
                   <span>{selectedPlan} Plan</span>
-                  <span>₹{getPlanPrice(selectedPlan)}</span>
+                  <span className="text-primary font-extrabold">₹{getPlanPrice(selectedPlan)}</span>
                 </div>
               </div>
 
               <div className="space-y-1.5">
                 <Label className="text-xs text-slate-500">Upload Transaction Screenshot</Label>
-                <div className="border border-dashed border-slate-200 rounded-lg p-5 flex flex-col items-center justify-center relative hover:bg-slate-50/50 h-32">
+                <div className="border border-dashed border-slate-200 rounded-xl p-5 flex flex-col items-center justify-center relative hover:bg-slate-50/50 h-32 transition-colors">
                   <input
                     type="file"
                     accept="image/*"
@@ -445,7 +450,7 @@ export default function Dashboard() {
                   {screenshotBase64 ? (
                     <div className="text-center space-y-1">
                       <CheckCircle className="w-7 h-7 text-green-600 mx-auto" />
-                      <span className="text-xs text-green-700 font-semibold block">Screenshot uploaded!</span>
+                      <span className="text-xs text-green-700 font-bold block">Screenshot uploaded!</span>
                       <button
                         type="button"
                         onClick={(e) => {
@@ -458,7 +463,7 @@ export default function Dashboard() {
                       </button>
                     </div>
                   ) : (
-                    <div className="text-center space-y-1">
+                    <div className="text-center space-y-1.5">
                       <UploadCloud className="w-8 h-8 text-slate-400 mx-auto" />
                       <span className="text-xs font-semibold text-slate-700 block">Click to select file</span>
                       <span className="text-[10px] text-slate-400 block">PNG, JPG, JPEG up to 5MB</span>
@@ -475,14 +480,15 @@ export default function Dashboard() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
+                  className="rounded-lg resize-none"
                 />
               </div>
 
               <DialogFooter className="gap-2">
-                <Button type="button" variant="outline" onClick={() => setUpgradeStep("plans")} disabled={isSubmitting}>
+                <Button type="button" variant="outline" onClick={() => setUpgradeStep("plans")} disabled={isSubmitting} className="rounded-lg">
                   Back
                 </Button>
-                <Button type="submit" disabled={isSubmitting || !screenshotBase64}>
+                <Button type="submit" disabled={isSubmitting || !screenshotBase64} className="rounded-lg">
                   {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                   Submit Upgrade Request
                 </Button>
@@ -493,12 +499,12 @@ export default function Dashboard() {
           {upgradeStep === "success" && (
             <div className="text-center space-y-4 py-4">
               <CheckCircle className="w-12 h-12 text-green-600 mx-auto" />
-              <h3 className="text-lg font-bold text-slate-900">Proof Submitted Successfully</h3>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                Your payment is currently **Awaiting Verification**. Once verified by the platform system owner, your subscription will be activated automatically.
+              <h3 className="text-lg font-bold text-slate-850 font-display">Proof Submitted</h3>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+                Your payment proof is currently **Awaiting Verification**. Once verified by the platform system owner, your subscription will be activated automatically.
               </p>
               <div className="pt-4">
-                <Button onClick={() => setShowUpgradeModal(false)} className="w-full">
+                <Button onClick={() => setShowUpgradeModal(false)} className="w-full rounded-lg">
                   Close
                 </Button>
               </div>
