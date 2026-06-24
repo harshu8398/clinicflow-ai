@@ -15,6 +15,7 @@ export interface ClinicUpdate {
   timings?: string;
   /** @nullable */
   logoUrl?: string | null;
+  doctorSignatureUrl?: string;
   doctorName?: string;
   doctorQualification?: string;
   doctorSpecialization?: string;

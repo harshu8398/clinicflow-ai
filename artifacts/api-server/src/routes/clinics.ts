@@ -2,6 +2,8 @@ import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
 import { db, clinicsTable, usersTable } from "@workspace/db";
 import bcrypt from "bcryptjs";
+import fs from "fs";
+import path from "path";
 import {
   GetClinicParams,
   GetClinicResponse,
@@ -40,6 +42,7 @@ function serializeClinic(c: Record<string, unknown>) {
     operatingTimings: c.timings,
     clinicLogo: c.logoUrl,
     clinicPhoneNumber: c.phone,
+    doctorSignatureUrl: c.doctorSignatureUrl || null,
     workingSessions,
     createdAt: c.createdAt instanceof Date ? c.createdAt.toISOString() : c.createdAt,
     googleTokenExpiresAt: c.googleTokenExpiresAt instanceof Date ? c.googleTokenExpiresAt.toISOString() : c.googleTokenExpiresAt,
@@ -164,6 +167,16 @@ router.put("/clinics/:clinicId", requireAuth, requireClinicOwnership, async (req
     return;
   }
 
+  const [existingClinic] = await db
+    .select()
+    .from(clinicsTable)
+    .where(eq(clinicsTable.id, params.data.clinicId));
+
+  if (!existingClinic) {
+    res.status(404).json({ error: "Clinic not found" });
+    return;
+  }
+
   const bodyData = { ...parsed.data } as any;
 
   if (bodyData.clinicName !== undefined) {
@@ -195,6 +208,62 @@ router.put("/clinics/:clinicId", requireAuth, requireClinicOwnership, async (req
     bodyData.openingTime = JSON.stringify(sessions);
     bodyData.closingTime = sessions[sessions.length - 1]?.end || "17:00";
     delete bodyData.workingSessions;
+  }
+
+  if (bodyData.doctorSignatureUrl !== undefined) {
+    if (bodyData.doctorSignatureUrl && bodyData.doctorSignatureUrl.startsWith("data:image/")) {
+      const matches = bodyData.doctorSignatureUrl.match(/^data:image\/([a-zA-Z+]+);base64,(.+)$/);
+      if (!matches || matches.length !== 3) {
+        res.status(400).json({ error: "Invalid signature image format" });
+        return;
+      }
+
+      const ext = matches[1].toLowerCase();
+      const allowedExtensions = ["png", "jpg", "jpeg", "webp"];
+      if (!allowedExtensions.includes(ext)) {
+        res.status(400).json({ error: "Supported signature file types are PNG, JPG, JPEG, or WEBP." });
+        return;
+      }
+
+      const dataBuffer = Buffer.from(matches[2], "base64");
+      if (dataBuffer.length > 2 * 1024 * 1024) {
+        res.status(400).json({ error: "Signature image size must be smaller than 2MB." });
+        return;
+      }
+
+      // Delete old signature file if it exists
+      if (existingClinic.doctorSignatureUrl && existingClinic.doctorSignatureUrl.startsWith("/uploads/")) {
+        const oldFilepath = path.join(process.cwd(), existingClinic.doctorSignatureUrl);
+        if (fs.existsSync(oldFilepath)) {
+          try {
+            fs.unlinkSync(oldFilepath);
+          } catch (e) {
+            console.error("Failed to delete old signature:", e);
+          }
+        }
+      }
+
+      const filename = `signature-${params.data.clinicId}-${Date.now()}.${ext}`;
+      const filepath = path.join(process.cwd(), "uploads", filename);
+      if (!fs.existsSync(path.join(process.cwd(), "uploads"))) {
+        fs.mkdirSync(path.join(process.cwd(), "uploads"), { recursive: true });
+      }
+      fs.writeFileSync(filepath, dataBuffer);
+      bodyData.doctorSignatureUrl = `/uploads/${filename}`;
+    } else if (!bodyData.doctorSignatureUrl) {
+      // User removed the signature
+      if (existingClinic.doctorSignatureUrl && existingClinic.doctorSignatureUrl.startsWith("/uploads/")) {
+        const oldFilepath = path.join(process.cwd(), existingClinic.doctorSignatureUrl);
+        if (fs.existsSync(oldFilepath)) {
+          try {
+            fs.unlinkSync(oldFilepath);
+          } catch (e) {
+            console.error("Failed to delete old signature:", e);
+          }
+        }
+      }
+      bodyData.doctorSignatureUrl = null;
+    }
   }
 
   const [clinic] = await db

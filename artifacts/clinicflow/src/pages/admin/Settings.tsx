@@ -46,6 +46,7 @@ export default function Settings() {
     workingDays: "",
     slotDuration: 30,
     clinicLogo: "",
+    doctorSignatureUrl: "",
     doctorName: "",
     doctorQualification: "",
     doctorSpecialization: "",
@@ -131,6 +132,7 @@ export default function Settings() {
         workingDays: clinic.workingDays || "monday,tuesday,wednesday,thursday,friday",
         slotDuration: clinic.slotDuration || 30,
         clinicLogo: (clinic as any).clinicLogo || "",
+        doctorSignatureUrl: clinic.doctorSignatureUrl || "",
         doctorName: (clinic as any).doctorName || "",
         doctorQualification: (clinic as any).doctorQualification || "",
         doctorSpecialization: (clinic as any).doctorSpecialization || "",
@@ -161,6 +163,40 @@ export default function Settings() {
 
   const handleRemoveLogo = () => {
     setFormData(prev => ({ ...prev, clinicLogo: "" }));
+  };
+
+  const handleSignatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: "Validation Error",
+        description: "Signature image must be smaller than 2MB.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Validation Error",
+        description: "Supported file types are PNG, JPG, JPEG, or WEBP.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData(prev => ({ ...prev, doctorSignatureUrl: reader.result as string }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveSignature = () => {
+    setFormData(prev => ({ ...prev, doctorSignatureUrl: "" }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -350,6 +386,51 @@ export default function Settings() {
                     )}
                   </div>
                   <p className="text-[10px] text-slate-400 font-medium">Supported file types: PNG, JPG, or WEBP. Max size 1MB.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Doctor Signature Upload Box */}
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold text-slate-550 uppercase tracking-wider">Doctor Signature</Label>
+              <div className="flex items-center gap-4 p-4.5 bg-slate-50/50 rounded-xl border border-slate-100/80 transition-all hover:bg-slate-50">
+                <div className="relative w-32 h-16 bg-white border border-slate-200/80 rounded-xl overflow-hidden flex items-center justify-center shrink-0 shadow-sm">
+                  {formData.doctorSignatureUrl ? (
+                    <ImageWithFallback src={formData.doctorSignatureUrl} alt="Doctor Signature" className="w-full h-full object-contain p-1" />
+                  ) : (
+                    <div className="text-slate-400 text-[10px] font-bold text-center px-1 uppercase tracking-wider flex flex-col items-center gap-1">
+                      <ImageIcon className="w-5 h-5 opacity-70" />
+                      No Signature
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center gap-2">
+                    <Label
+                      htmlFor="signature-upload"
+                      className="h-8.5 px-3.5 text-xs font-bold rounded-xl border border-slate-250 bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center cursor-pointer transition-all shadow-sm active:scale-97"
+                    >
+                      Choose file
+                    </Label>
+                    <input
+                      id="signature-upload"
+                      type="file"
+                      accept="image/png, image/jpeg, image/jpg, image/webp"
+                      className="hidden"
+                      onChange={handleSignatureChange}
+                    />
+                    {formData.doctorSignatureUrl && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={handleRemoveSignature}
+                        className="h-8.5 px-3.5 text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50/50 rounded-xl transition-all"
+                      >
+                        Remove Signature
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-slate-400 font-medium">Supported file types: PNG, JPG, JPEG, or WEBP. Max size 2MB.</p>
                 </div>
               </div>
             </div>

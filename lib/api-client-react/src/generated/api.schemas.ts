@@ -24,6 +24,8 @@ export interface Clinic {
   /** @nullable */
   logoUrl?: string | null;
   /** @nullable */
+  doctorSignatureUrl?: string | null;
+  /** @nullable */
   doctorName?: string | null;
   /** @nullable */
   doctorQualification?: string | null;
@@ -74,6 +76,7 @@ export interface ClinicInput {
   timings: string;
   /** @nullable */
   logoUrl?: string | null;
+  doctorSignatureUrl?: string;
   doctorName?: string;
   doctorQualification?: string;
   doctorSpecialization?: string;
@@ -106,6 +109,7 @@ export interface ClinicUpdate {
   timings?: string;
   /** @nullable */
   logoUrl?: string | null;
+  doctorSignatureUrl?: string;
   doctorName?: string;
   doctorQualification?: string;
   doctorSpecialization?: string;

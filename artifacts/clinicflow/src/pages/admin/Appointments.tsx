@@ -482,6 +482,29 @@ Thank you.`;
     doc.setTextColor(100, 116, 139);
     doc.text(clinic.doctorQualification || "", 15, footerY + 12);
 
+    if (clinic.doctorSignatureUrl) {
+      try {
+        const sigImg = await loadImage(clinic.doctorSignatureUrl);
+        let sigW = 40;
+        let sigH = 10;
+        if (sigImg.width && sigImg.height) {
+          const ratio = sigImg.width / sigImg.height;
+          if (ratio > 4) {
+            sigW = 40;
+            sigH = 40 / ratio;
+          } else {
+            sigH = 10;
+            sigW = 10 * ratio;
+          }
+        }
+        const sigX = 170 - (sigW / 2);
+        const sigY = (footerY + 11) - sigH;
+        doc.addImage(sigImg, "PNG", sigX, sigY, sigW, sigH);
+      } catch (e) {
+        console.error("Failed to load doctor signature image:", e);
+      }
+    }
+
     doc.setDrawColor(148, 163, 184);
     doc.line(145, footerY + 12, 195, footerY + 12);
     doc.text("Authorized Signature", 145, footerY + 17);

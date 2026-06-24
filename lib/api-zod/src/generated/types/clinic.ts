@@ -17,6 +17,8 @@ export interface Clinic {
   /** @nullable */
   logoUrl?: string | null;
   /** @nullable */
+  doctorSignatureUrl?: string | null;
+  /** @nullable */
   doctorName?: string | null;
   /** @nullable */
   doctorQualification?: string | null;

@@ -10,6 +10,7 @@ export const clinicsTable = pgTable("clinics", {
   fee: text("fee").notNull(),
   timings: text("timings").notNull(),
   logoUrl: text("logo_url"),
+  doctorSignatureUrl: text("doctor_signature_url"),
   doctorName: text("doctor_name"),
   doctorQualification: text("doctor_qualification"),
   doctorSpecialization: text("doctor_specialization"),

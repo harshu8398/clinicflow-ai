@@ -393,6 +393,8 @@ components:
           type: string
         logoUrl:
           type: ["string", "null"]
+        doctorSignatureUrl:
+          type: ["string", "null"]
         doctorName:
           type: ["string", "null"]
         doctorQualification:
@@ -462,6 +464,8 @@ components:
           type: string
         logoUrl:
           type: ["string", "null"]
+        doctorSignatureUrl:
+          type: string
         doctorName:
           type: string
         doctorQualification:
@@ -517,6 +521,8 @@ components:
           type: string
         logoUrl:
           type: ["string", "null"]
+        doctorSignatureUrl:
+          type: string
         doctorName:
           type: string
         doctorQualification:
