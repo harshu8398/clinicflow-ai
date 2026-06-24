@@ -9,6 +9,7 @@ import authRouter from "./auth";
 import googleOAuthRouter from "./google-oauth";
 import prescriptionsRouter from "./prescriptions";
 import subscriptionsRouter from "./subscriptions";
+import demoRequestsRouter from "./demo-requests";
 
 const router: IRouter = Router();
 
@@ -19,6 +20,7 @@ router.use(healthRouter);
 router.use(clinicsRouter);
 router.use(chatRouter);
 router.use(subscriptionsRouter);
+router.use(demoRequestsRouter);
 
 // Protected clinic admin routes (middleware applied per-route inside each file)
 router.use(appointmentsRouter);

@@ -40,3 +40,54 @@ export async function sendOtpEmail(toEmail: string, otp: string): Promise<void> 
 
   await transporter.sendMail(mailOptions);
 }
+
+export async function sendDemoRequestEmail(lead: {
+  fullName: string;
+  clinicName: string;
+  mobileNumber: string;
+  email: string;
+  city: string;
+}): Promise<void> {
+  const transporter = getTransporter();
+
+  const mailOptions = {
+    from: `"ClinicFlow AI" <${process.env.SMTP_USER}>`,
+    to: "jha753430@gmail.com",
+    subject: "New ClinicFlow Demo Request",
+    text: `New demo request details:\n\nName: ${lead.fullName}\nClinic Name: ${lead.clinicName}\nMobile Number: ${lead.mobileNumber}\nEmail: ${lead.email}\nCity: ${lead.city}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #f0f0f0; border-radius: 8px;">
+        <h2 style="color: #0f172a; text-align: center;">New Demo Request</h2>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold; color: #475569; width: 130px;">Name:</td>
+            <td style="padding: 8px 0; color: #0f172a;">${lead.fullName}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold; color: #475569;">Clinic Name:</td>
+            <td style="padding: 8px 0; color: #0f172a;">${lead.clinicName}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold; color: #475569;">Mobile Number:</td>
+            <td style="padding: 8px 0; color: #0f172a;">${lead.mobileNumber}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold; color: #475569;">Email Address:</td>
+            <td style="padding: 8px 0; color: #0f172a;">${lead.email}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold; color: #475569;">City:</td>
+            <td style="padding: 8px 0; color: #0f172a;">${lead.city}</td>
+          </tr>
+        </table>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (err) {
+    console.error("Failed to send demo request email:", err);
+  }
+}
+

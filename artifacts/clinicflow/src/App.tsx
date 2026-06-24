@@ -18,6 +18,7 @@ import SubscriptionRequests from "@/pages/admin/SubscriptionRequests";
 import SubscriptionSettings from "@/pages/admin/SubscriptionSettings";
 import PlatformOverview from "@/pages/admin/PlatformOverview";
 import AuditLogs from "@/pages/admin/AuditLogs";
+import DemoRequests from "@/pages/admin/DemoRequests";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { Loader2 } from "lucide-react";
 
@@ -93,6 +94,7 @@ function Router() {
                   <Route path="/subscription-management" component={SubscriptionManagement} />
                   <Route path="/subscription-requests" component={SubscriptionRequests} />
                   <Route path="/subscription-settings" component={SubscriptionSettings} />
+                  <Route path="/demo-requests" component={DemoRequests} />
                   <Route path="/audit-logs" component={AuditLogs} />
                   {/* Block other paths */}
                   <Route path="/appointments" component={NotFound} />
@@ -110,6 +112,7 @@ function Router() {
                   <Route path="/subscription-management" component={NotFound} />
                   <Route path="/subscription-requests" component={NotFound} />
                   <Route path="/subscription-settings" component={NotFound} />
+                  <Route path="/demo-requests" component={NotFound} />
                   <Route path="/audit-logs" component={NotFound} />
                 </>
               )}

@@ -6,4 +6,5 @@ export * from "./chat-sessions";
 export * from "./session";
 export * from "./prescriptions";
 export * from "./subscriptions";
+export * from "./demo-requests";
 

@@ -14,7 +14,8 @@ import {
   Loader2,
   Hospital,
   FileText,
-  FileClock
+  FileClock,
+  Users
 } from "lucide-react";
 import ExpiredOverlay from "@/components/ExpiredOverlay";
 
@@ -104,6 +105,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         { href: "/subscription-management", label: "Subscription Management", icon: ShieldCheck },
         { href: "/subscription-requests", label: "Subscription Requests", icon: FileText },
         { href: "/subscription-settings", label: "Subscription Settings", icon: SettingsIcon },
+        { href: "/demo-requests", label: "Demo Requests", icon: Users },
         { href: "/audit-logs", label: "Audit Logs", icon: FileClock },
       ]
     : [
