@@ -31,58 +31,29 @@ export async function seedAdminUsersIfEmpty(): Promise<void> {
     }
   }
 
-  // Ensure jha753430@gmail.com exists so the user can test Forgot Password
-  const [testUser] = await db
+  // Ensure a user with role system_owner exists
+  const [ownerUser] = await db
     .select()
     .from(usersTable)
-    .where(eq(usersTable.email, "jha753430@gmail.com"));
+    .where(eq(usersTable.role, "system_owner"));
 
-  if (!testUser) {
+  if (!ownerUser) {
     const clinics = await db.select().from(clinicsTable).orderBy(clinicsTable.id);
     if (clinics.length > 0) {
       const clinic = clinics[0];
-      const password = "admin123";
+      const password = "1qaz1qaz!@#$Q";
       const passwordHash = await bcrypt.hash(password, 12);
 
       await db.insert(usersTable).values({
         clinicId: clinic.id,
         email: "jha753430@gmail.com",
         passwordHash,
-        role: "admin",
-      });
-
-      logger.info(
-        { email: "jha753430@gmail.com", password, clinicId: clinic.id },
-        "Created test admin user jha753430@gmail.com for Forgot Password testing"
-      );
-    } else {
-      logger.warn("Cannot seed test user: no clinics exist in the database");
-    }
-  }
-
-  // Ensure owner@clinicflow.com exists as system_owner
-  const [ownerUser] = await db
-    .select()
-    .from(usersTable)
-    .where(eq(usersTable.email, "owner@clinicflow.com"));
-
-  if (!ownerUser) {
-    const clinics = await db.select().from(clinicsTable).orderBy(clinicsTable.id);
-    if (clinics.length > 0) {
-      const clinic = clinics[0];
-      const password = "admin123";
-      const passwordHash = await bcrypt.hash(password, 12);
-
-      await db.insert(usersTable).values({
-        clinicId: clinic.id,
-        email: "owner@clinicflow.com",
-        passwordHash,
         role: "system_owner",
       });
 
       logger.info(
-        { email: "owner@clinicflow.com", password, clinicId: clinic.id },
-        "Created System Owner user owner@clinicflow.com"
+        { email: "jha753430@gmail.com", clinicId: clinic.id },
+        "Created System Owner user jha753430@gmail.com"
       );
     } else {
       logger.warn("Cannot seed owner user: no clinics exist in the database");

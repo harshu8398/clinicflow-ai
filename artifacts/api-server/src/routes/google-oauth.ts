@@ -26,10 +26,10 @@ router.get("/clinics/:clinicId/auth/google/callback", async (req, res) => {
   const stateClinicId = state ? Number(state) : NaN;
   const targetClinicId = !isNaN(stateClinicId) ? stateClinicId : clinicId;
 
-  const host = req.headers.host || "localhost:5173";
+  const host = req.headers.host || "localhost:3000";
   const isLocalhost = host.includes("localhost") || host.includes("127.0.0.1");
   const baseRedirect = isLocalhost
-    ? `http://localhost:5173/admin/${targetClinicId}/settings`
+    ? `http://localhost:3000/admin/${targetClinicId}/settings`
     : `/admin/${targetClinicId}/settings`;
 
   if (error || !code) {
