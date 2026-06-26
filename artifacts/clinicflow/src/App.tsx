@@ -19,6 +19,10 @@ import SubscriptionSettings from "@/pages/admin/SubscriptionSettings";
 import PlatformOverview from "@/pages/admin/PlatformOverview";
 import AuditLogs from "@/pages/admin/AuditLogs";
 import DemoRequests from "@/pages/admin/DemoRequests";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import TermsAndConditions from "@/pages/TermsAndConditions";
+import ContactUs from "@/pages/ContactUs";
+import ContactMessages from "@/pages/admin/ContactMessages";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { Loader2 } from "lucide-react";
 
@@ -83,6 +87,9 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/chat/:clinicId" component={Chat} />
       <Route path="/book/:slug" component={PublicBook} />
+      <Route path="/privacy-policy" component={PrivacyPolicy} />
+      <Route path="/terms-and-conditions" component={TermsAndConditions} />
+      <Route path="/contact-us" component={ContactUs} />
       <Route path="/admin/:clinicId" nest>
         <ProtectedAdminRoute>
           <AdminLayout>
@@ -95,6 +102,7 @@ function Router() {
                   <Route path="/subscription-requests" component={SubscriptionRequests} />
                   <Route path="/subscription-settings" component={SubscriptionSettings} />
                   <Route path="/demo-requests" component={DemoRequests} />
+                  <Route path="/contact-messages" component={ContactMessages} />
                   <Route path="/audit-logs" component={AuditLogs} />
                   {/* Block other paths */}
                   <Route path="/appointments" component={NotFound} />
@@ -113,6 +121,7 @@ function Router() {
                   <Route path="/subscription-requests" component={NotFound} />
                   <Route path="/subscription-settings" component={NotFound} />
                   <Route path="/demo-requests" component={NotFound} />
+                  <Route path="/contact-messages" component={NotFound} />
                   <Route path="/audit-logs" component={NotFound} />
                 </>
               )}

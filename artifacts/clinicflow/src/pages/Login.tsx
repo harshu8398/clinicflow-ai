@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -218,7 +218,7 @@ export default function Login() {
         {/* Feature Highlights Text */}
         <div className="space-y-6 relative z-10 my-auto">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 text-xs font-semibold tracking-wide text-primary-foreground">
-            ✨ Admin Portal v2.0
+            ✨ Clinic Login v2.0
           </div>
           <h2 className="text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight font-display">
             Your Clinical Operations, <br/>
@@ -246,15 +246,15 @@ export default function Login() {
               className="h-12 w-auto mx-auto mb-3 object-contain"
             />
             <h1 className="text-2xl font-bold text-slate-900 font-display">ClinicFlow</h1>
-            <p className="text-slate-500 text-xs">Admin Portal</p>
+            <p className="text-slate-500 text-xs">Clinic Login</p>
           </div>
 
           <Card className="border-slate-100 shadow-lg bg-white rounded-2xl overflow-hidden">
             {view === "login" && (
               <>
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-xl font-bold text-slate-800 font-display">Sign In</CardTitle>
-                  <CardDescription className="text-xs">Use your administrator credentials to access the clinic.</CardDescription>
+                  <CardTitle className="text-xl font-bold text-slate-800 font-display">Sign in to your ClinicFlow account</CardTitle>
+                  <CardDescription className="text-xs">Use your credentials to access the clinic.</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleSubmitLogin} className="space-y-4">
@@ -489,7 +489,12 @@ export default function Login() {
           </Card>
 
           <p className="text-center text-xs text-slate-400">
-            Patient check-ins? <a href="/" className="text-primary hover:underline font-semibold">Book appointment</a>
+            Don't have a ClinicFlow account yet?{" "}
+            <Link href="/?register=true">
+              <span className="text-primary hover:underline font-semibold cursor-pointer">
+                Register Your Clinic
+              </span>
+            </Link>
           </p>
         </div>
       </div>

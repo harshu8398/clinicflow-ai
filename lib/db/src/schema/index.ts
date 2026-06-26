@@ -7,4 +7,6 @@ export * from "./session";
 export * from "./prescriptions";
 export * from "./subscriptions";
 export * from "./demo-requests";
+export * from "./contact-messages";
+
 

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
+import { useState, useEffect } from "react";
+import { useLocation, Link } from "wouter";
 import { useCreateClinic } from "@workspace/api-client-react";
 import { useMutation } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -34,6 +34,13 @@ export default function Home() {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [openDemo, setOpenDemo] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("register") === "true") {
+      setOpen(true);
+    }
+  }, []);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -157,7 +164,7 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-3">
             <Button variant="ghost" className="text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium" onClick={() => setLocation("/login")}>
-              Admin Portal
+              Clinic Login
             </Button>
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
@@ -557,6 +564,26 @@ export default function Home() {
           </div>
         </section>
       </main>
+
+      {/* Footer */}
+      <footer className="w-full bg-white border-t border-slate-100 py-8 mt-16 relative z-10">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500 font-medium">
+          <div>
+            © {new Date().getFullYear()} ClinicFlow. All rights reserved.
+          </div>
+          <div className="flex items-center gap-6">
+            <Link href="/privacy-policy">
+              <span className="hover:text-primary transition-colors cursor-pointer">Privacy Policy</span>
+            </Link>
+            <Link href="/terms-and-conditions">
+              <span className="hover:text-primary transition-colors cursor-pointer">Terms & Conditions</span>
+            </Link>
+            <Link href="/contact-us">
+              <span className="hover:text-primary transition-colors cursor-pointer">Contact Us</span>
+            </Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -91,3 +91,49 @@ export async function sendDemoRequestEmail(lead: {
   }
 }
 
+export async function sendContactMessageEmail(message: {
+  name: string;
+  email: string;
+  message: string;
+  createdAt: Date;
+}): Promise<void> {
+  const transporter = getTransporter();
+
+  const mailOptions = {
+    from: `"ClinicFlow AI" <${process.env.SMTP_USER}>`,
+    to: "jha753430@gmail.com",
+    subject: "New Contact Message - ClinicFlow",
+    text: `New contact message details:\n\nName: ${message.name}\nEmail: ${message.email}\nMessage: ${message.message}\nSubmitted Date: ${message.createdAt.toLocaleString()}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #f0f0f0; border-radius: 8px;">
+        <h2 style="color: #0f172a; text-align: center;">New Contact Message</h2>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold; color: #475569; width: 130px;">Name:</td>
+            <td style="padding: 8px 0; color: #0f172a;">${message.name}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold; color: #475569;">Email:</td>
+            <td style="padding: 8px 0; color: #0f172a;">${message.email}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold; color: #475569;">Submitted Date:</td>
+            <td style="padding: 8px 0; color: #0f172a;">${message.createdAt.toLocaleString()}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold; color: #475569; vertical-align: top;">Message:</td>
+            <td style="padding: 8px 0; color: #0f172a; white-space: pre-wrap;">${message.message}</td>
+          </tr>
+        </table>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (err) {
+    console.error("Failed to send contact message email:", err);
+  }
+}
+
+
