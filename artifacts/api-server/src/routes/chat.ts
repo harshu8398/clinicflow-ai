@@ -253,7 +253,7 @@ router.post("/clinics/:clinicId/chat/message", async (req, res): Promise<void> =
         res.json(SendChatMessageResponse.parse({
           sessionId,
           step: STEPS.ASK_DATE,
-          botMessage: "No available slots remain for this date.\n\nPlease select another appointment date.",
+          botMessage: "No appointments are available on this date.",
           isComplete: false,
         }));
         return;
@@ -276,7 +276,7 @@ router.post("/clinics/:clinicId/chat/message", async (req, res): Promise<void> =
         res.json(SendChatMessageResponse.parse({
           sessionId,
           step: STEPS.ASK_DATE,
-          botMessage: "No available slots remain for this date.\n\nPlease select another appointment date.",
+          botMessage: "No appointments are available on this date.",
           isComplete: false,
         }));
         return;

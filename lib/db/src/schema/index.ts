@@ -8,5 +8,5 @@ export * from "./prescriptions";
 export * from "./subscriptions";
 export * from "./demo-requests";
 export * from "./contact-messages";
-
-
+export * from "./blocked-slots";
+export * from "./blocked-days";

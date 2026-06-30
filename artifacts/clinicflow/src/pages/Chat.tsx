@@ -55,7 +55,7 @@ export default function Chat() {
         })
         .then((data) => {
           if (Array.isArray(data) && data.length === 0) {
-            const botMessage = "No available slots remain for this date.\n\nPlease select another appointment date.";
+            const botMessage = "No appointments are available on this date.";
             const botMsgObj: Message = {
               id: (Date.now() + 1).toString(),
               type: "bot",
@@ -699,10 +699,10 @@ export default function Chat() {
                             const day = String(now.getDate()).padStart(2, "0");
                             const todayStr = `${year}-${month}-${day}`;
                             if (appointmentDateStr === todayStr) {
-                              return "No available slots remain for today. Please select another date.";
+                              return "No appointments are available on this date.";
                             }
                           }
-                          return "No available slots for this date. Please select another date.";
+                          return "No appointments are available on this date.";
                         })()}
                       </p>
                     )}

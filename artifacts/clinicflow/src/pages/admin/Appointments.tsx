@@ -1,6 +1,19 @@
 import { useState, useEffect } from "react";
 import { useParams } from "wouter";
-import { useListAppointments, useUpdateAppointmentStatus, useDeleteAppointment, getListAppointmentsQueryKey, useGetClinic } from "@workspace/api-client-react";
+import {
+  useListAppointments,
+  useUpdateAppointmentStatus,
+  useDeleteAppointment,
+  getListAppointmentsQueryKey,
+  useGetClinic,
+  useListBlockedSlots,
+  useCreateBlockedSlot,
+  useDeleteBlockedSlot,
+  useListBlockedDays,
+  useCreateBlockedDay,
+  useDeleteBlockedDay,
+  useCreateAppointment
+} from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -54,6 +67,214 @@ export default function Appointments() {
   const [rescheduleStatus, setRescheduleStatus] = useState<AppointmentStatus>("pending");
   const [slots, setSlots] = useState<string[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+
+  // Dialog Open States
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isBlockSlotOpen, setIsBlockSlotOpen] = useState(false);
+  const [isBlockDayOpen, setIsBlockDayOpen] = useState(false);
+
+  // Add Appointment Form State
+  const [addForm, setAddForm] = useState({
+    patientName: "",
+    patientPhone: "",
+    patientProblem: "",
+    appointmentDate: "",
+    selectedTimeSlot: "",
+    appointmentSource: "Manual",
+    patientAge: "",
+    patientGender: "male",
+    visitType: "New Consultation",
+    notes: ""
+  });
+
+  // Block Slot Form State
+  const [blockSlotForm, setBlockSlotForm] = useState({
+    date: "",
+    startTime: "",
+    endTime: "",
+    reason: ""
+  });
+
+  // Block Day Form State
+  const [blockDayForm, setBlockDayForm] = useState({
+    date: "",
+    reason: ""
+  });
+
+  // Available Slots for Manual Booking
+  const [manualSlots, setManualSlots] = useState<string[]>([]);
+  const [loadingManualSlots, setLoadingManualSlots] = useState(false);
+
+  // Queries & Mutations using api-client-react
+  const createAppointmentMutation = useCreateAppointment();
+  const createBlockedSlotMutation = useCreateBlockedSlot();
+  const deleteBlockedSlotMutation = useDeleteBlockedSlot();
+  const createBlockedDayMutation = useCreateBlockedDay();
+  const deleteBlockedDayMutation = useDeleteBlockedDay();
+
+  const { data: blockedSlots, refetch: refetchBlockedSlots } = useListBlockedSlots(id);
+  const { data: blockedDays, refetch: refetchBlockedDays } = useListBlockedDays(id);
+
+  // Trigger manual slots loading when manual booking date changes
+  useEffect(() => {
+    if (!addForm.appointmentDate || !id) {
+      setManualSlots([]);
+      return;
+    }
+    setLoadingManualSlots(true);
+    fetch(`/api/clinics/${id}/slots?date=${addForm.appointmentDate}`)
+      .then(res => res.json())
+      .then(data => {
+        setManualSlots(Array.isArray(data) ? data : []);
+        setLoadingManualSlots(false);
+      })
+      .catch(() => {
+        setManualSlots([]);
+        setLoadingManualSlots(false);
+      });
+  }, [addForm.appointmentDate, id]);
+
+  const handleAddSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!addForm.patientName || !addForm.patientPhone || !addForm.appointmentDate || !addForm.selectedTimeSlot) {
+      toast({ title: "Please fill all required fields", variant: "destructive" });
+      return;
+    }
+
+    createAppointmentMutation.mutate(
+      {
+        clinicId: id,
+        data: {
+          patientName: addForm.patientName,
+          patientPhone: addForm.patientPhone,
+          patientProblem: addForm.patientProblem || "General consultation",
+          appointmentDate: addForm.appointmentDate,
+          selectedTimeSlot: addForm.selectedTimeSlot,
+          appointmentSource: addForm.appointmentSource as any,
+          patientAge: addForm.patientAge ? Number(addForm.patientAge) : undefined,
+          patientGender: addForm.patientGender,
+          visitType: addForm.visitType,
+          notes: addForm.notes || undefined,
+        }
+      },
+      {
+        onSuccess: () => {
+          toast({ title: "Manual appointment created and synced with calendar" });
+          setIsAddOpen(false);
+          setAddForm({
+            patientName: "",
+            patientPhone: "",
+            patientProblem: "",
+            appointmentDate: "",
+            selectedTimeSlot: "",
+            appointmentSource: "Manual",
+            patientAge: "",
+            patientGender: "male",
+            visitType: "New Consultation",
+            notes: ""
+          });
+          queryClient.invalidateQueries({ queryKey: getListAppointmentsQueryKey(id) });
+        },
+        onError: (err: any) => {
+          toast({ title: "Failed to create appointment", description: err.message, variant: "destructive" });
+        }
+      }
+    );
+  };
+
+  const handleBlockSlotSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!blockSlotForm.date || !blockSlotForm.startTime || !blockSlotForm.endTime) {
+      toast({ title: "Please fill all required fields", variant: "destructive" });
+      return;
+    }
+
+    createBlockedSlotMutation.mutate(
+      {
+        clinicId: id,
+        data: {
+          date: blockSlotForm.date,
+          startTime: blockSlotForm.startTime,
+          endTime: blockSlotForm.endTime,
+          reason: blockSlotForm.reason || undefined,
+        }
+      },
+      {
+        onSuccess: () => {
+          toast({ title: "Time slot blocked successfully" });
+          setIsBlockSlotOpen(false);
+          setBlockSlotForm({ date: "", startTime: "", endTime: "", reason: "" });
+          refetchBlockedSlots();
+        },
+        onError: (err: any) => {
+          toast({ title: "Failed to block slot", description: err.message, variant: "destructive" });
+        }
+      }
+    );
+  };
+
+  const handleBlockDaySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!blockDayForm.date) {
+      toast({ title: "Please select a date", variant: "destructive" });
+      return;
+    }
+
+    createBlockedDayMutation.mutate(
+      {
+        clinicId: id,
+        data: {
+          date: blockDayForm.date,
+          reason: blockDayForm.reason || undefined,
+        }
+      },
+      {
+        onSuccess: () => {
+          toast({ title: "Day blocked successfully" });
+          setIsBlockDayOpen(false);
+          setBlockDayForm({ date: "", reason: "" });
+          refetchBlockedDays();
+        },
+        onError: (err: any) => {
+          toast({ title: "Failed to block day", description: err.message, variant: "destructive" });
+        }
+      }
+    );
+  };
+
+  const handleUnblockSlot = (slotId: number) => {
+    if (confirm("Are you sure you want to unblock this slot?")) {
+      deleteBlockedSlotMutation.mutate(
+        { clinicId: id, id: slotId },
+        {
+          onSuccess: () => {
+            toast({ title: "Slot unblocked successfully" });
+            refetchBlockedSlots();
+          },
+          onError: (err: any) => {
+            toast({ title: "Failed to unblock slot", description: err.message, variant: "destructive" });
+          }
+        }
+      );
+    }
+  };
+
+  const handleUnblockDay = (dayId: number) => {
+    if (confirm("Are you sure you want to unblock this day?")) {
+      deleteBlockedDayMutation.mutate(
+        { clinicId: id, id: dayId },
+        {
+          onSuccess: () => {
+            toast({ title: "Day unblocked successfully" });
+            refetchBlockedDays();
+          },
+          onError: (err: any) => {
+            toast({ title: "Failed to unblock day", description: err.message, variant: "destructive" });
+          }
+        }
+      );
+    }
+  };
 
   // Prescription UI State
   const [activeTab, setActiveTab] = useState<"details" | "prescription" | "history">("details");
@@ -689,6 +910,122 @@ ${clinicName}`;
     filter === "all" || apt.status === filter
   );
 
+  // Filter blocked slots for the selected date
+  const blockedSlotsForSelectedDate = blockedSlots?.filter(bs =>
+    isSameDay(selectedDate, bs.date)
+  ) || [];
+
+  // Filter blocked days for the selected date
+  const blockedDaysForSelectedDate = blockedDays?.filter(bd =>
+    isSameDay(selectedDate, bd.date)
+  ) || [];
+
+  const blockedDayForSelectedDate = blockedDays?.find(bd =>
+    isSameDay(selectedDate, bd.date)
+  );
+
+  // Helper to extract slot minutes for sorting
+  const getSlotMinutes = (slotStr: string | null | undefined) => {
+    if (!slotStr) return 9999;
+    try {
+      const match = slotStr.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+      if (!match) return 9999;
+      let hour = parseInt(match[1], 10);
+      const min = parseInt(match[2], 10);
+      const modifier = match[3];
+      if (hour === 12 && modifier && modifier.toUpperCase() === "AM") hour = 0;
+      if (hour !== 12 && modifier && modifier.toUpperCase() === "PM") hour += 12;
+      return hour * 60 + min;
+    } catch {
+      return 9999;
+    }
+  };
+
+  // Build unified sorted list of appointments and blocked slots
+  const unifiedList = [
+    ...filteredAppointmentsForSelectedDate.map(apt => ({
+      type: "appointment",
+      id: apt.id,
+      patientName: apt.patientName,
+      patientPhone: apt.patientPhone,
+      selectedTimeSlot: apt.selectedTimeSlot,
+      patientProblem: apt.patientProblem,
+      status: apt.status,
+      appointmentSource: apt.appointmentSource || "Online",
+      prescriptionGenerated: apt.prescriptionGenerated,
+      raw: apt
+    })),
+    // Only include blocked slots if filter is 'all' or 'blocked'
+    ...(filter === "all" || filter === "blocked" ? blockedSlotsForSelectedDate.map(bs => ({
+      type: "blocked_slot",
+      id: bs.id,
+      patientName: `Blocked Slot: ${bs.reason || "No reason specified"}`,
+      patientPhone: `Time: ${bs.startTime} - ${bs.endTime}`,
+      selectedTimeSlot: bs.startTime,
+      status: "blocked",
+      appointmentSource: "Manual",
+      prescriptionGenerated: false,
+      raw: bs
+    })) : [])
+  ];
+
+  const sortedUnifiedList = [...unifiedList].sort((a, b) => {
+    return getSlotMinutes(a.selectedTimeSlot) - getSlotMinutes(b.selectedTimeSlot);
+  });
+
+  const formatTime24to12 = (timeStr: string): string => {
+    if (!timeStr) return "";
+    const [hoursStr, minutesStr] = timeStr.trim().split(":");
+    const h = parseInt(hoursStr, 10);
+    if (isNaN(h)) return timeStr;
+    const m = minutesStr ? parseInt(minutesStr, 10) : 0;
+    const ampm = h >= 12 ? "PM" : "AM";
+    const displayHours = h % 12 === 0 ? 12 : h % 12;
+    const displayMinutes = m.toString().padStart(2, "0");
+    const displayHoursStr = displayHours.toString().padStart(2, "0");
+    return `${displayHoursStr}:${displayMinutes} ${ampm}`;
+  };
+
+  const getDotColor = (item: any) => {
+    if (item.type === "blocked_slot") return "bg-rose-500";
+    if (item.status === "completed") return "bg-purple-500";
+    if (item.status === "cancelled") return "bg-slate-700";
+    if (item.appointmentSource === "Online") return "bg-blue-500";
+    return "bg-orange-500";
+  };
+
+  const getItemStatusColor = (item: any) => {
+    if (item.type === "blocked_slot") {
+      return "bg-red-100 text-red-800 border-red-200";
+    }
+    if (item.status === "completed") {
+      return "bg-purple-100 text-purple-800 border-purple-200";
+    }
+    if (item.status === "cancelled") {
+      return "bg-slate-100 text-slate-800 border-slate-200";
+    }
+    if (item.appointmentSource === "Online") {
+      return "bg-blue-100 text-blue-800 border-blue-200";
+    }
+    return "bg-orange-100 text-orange-800 border-orange-200";
+  };
+
+  const getItemStatusLabel = (item: any) => {
+    if (item.type === "blocked_slot") {
+      return "Blocked";
+    }
+    if (item.status === "completed") {
+      return "Completed";
+    }
+    if (item.status === "cancelled") {
+      return "Cancelled";
+    }
+    if (item.appointmentSource === "Online") {
+      return "Online";
+    }
+    return item.appointmentSource || "Manual";
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-12">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -726,7 +1063,7 @@ ${clinicName}`;
         {/* Right Column: Appointments List */}
         <div className="lg:col-span-7">
           <Card className="bg-white border-slate-100 shadow-sm rounded-xl overflow-hidden h-full flex flex-col">
-            <CardHeader className="border-b border-slate-50 bg-slate-50/50 flex flex-row items-center justify-between py-4.5 px-6">
+            <CardHeader className="border-b border-slate-50 bg-slate-50/50 flex flex-col md:flex-row md:items-center md:justify-between py-4.5 px-6 gap-4">
               <div>
                 <CardTitle className="text-base font-bold text-slate-800 font-display">
                   Selected Date: {format(selectedDate, "dd MMMM yyyy")}
@@ -734,8 +1071,42 @@ ${clinicName}`;
                 <p className="text-xs text-slate-400 mt-1">
                   {appointmentsForSelectedDate.length} appointment(s) scheduled
                 </p>
+                <div className="flex flex-wrap items-center gap-2 mt-3">
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setAddForm(f => ({ ...f, appointmentDate: format(selectedDate, "yyyy-MM-dd") }));
+                      setIsAddOpen(true);
+                    }}
+                    className="gap-1 bg-primary text-white font-bold h-8.5 text-xs rounded-lg shadow-sm cursor-pointer hover:opacity-90"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Add Appointment
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setBlockSlotForm(f => ({ ...f, date: format(selectedDate, "yyyy-MM-dd") }));
+                      setIsBlockSlotOpen(true);
+                    }}
+                    variant="outline"
+                    className="gap-1 border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800 font-bold h-8.5 text-xs rounded-lg cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Block Slot
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setBlockDayForm(f => ({ ...f, date: format(selectedDate, "yyyy-MM-dd") }));
+                      setIsBlockDayOpen(true);
+                    }}
+                    variant="outline"
+                    className="gap-1 border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800 font-bold h-8.5 text-xs rounded-lg cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Block Day
+                  </Button>
+                </div>
               </div>
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2.5 shrink-0 self-end md:self-center">
                 <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Filter:</span>
                 <Select value={filter} onValueChange={setFilter}>
                   <SelectTrigger className="w-36 h-9 text-xs rounded-lg border-slate-200 bg-white">
@@ -749,121 +1120,191 @@ ${clinicName}`;
                     <SelectItem value="booked">Booked</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
                     <SelectItem value="cancelled">Cancelled</SelectItem>
+                    <SelectItem value="blocked">Blocked Slots</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </CardHeader>
 
             <CardContent className="p-6 flex-1 overflow-y-auto">
+              {blockedDayForSelectedDate && (
+                <div className="p-4 bg-rose-50 border border-rose-100 rounded-xl flex items-center justify-between text-rose-800 mb-4 animate-in slide-in-from-top duration-300">
+                  <div className="flex items-start gap-2.5">
+                    <AlertCircle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="text-xs font-bold block uppercase tracking-wider">Entire Day Blocked</span>
+                      <span className="text-xs text-rose-600 mt-0.5 block">{blockedDayForSelectedDate.reason || "No reason specified"}</span>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs font-bold border-rose-200 hover:bg-rose-100/50 hover:text-rose-900 text-rose-800 rounded-lg cursor-pointer"
+                    onClick={() => handleUnblockDay(blockedDayForSelectedDate.id)}
+                  >
+                    Unblock Day
+                  </Button>
+                </div>
+              )}
               {isLoading ? (
                 <div className="space-y-4">
                   {[1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}
                 </div>
-              ) : filteredAppointmentsForSelectedDate.length === 0 ? (
+              ) : sortedUnifiedList.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-12 text-center h-full min-h-[300px]">
                   <div className="w-16 h-16 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center mb-4">
                     <CalendarX2 className="w-8 h-8 text-slate-300" />
                   </div>
-                  <h3 className="text-sm font-bold text-slate-800 font-display mb-1">No appointments</h3>
+                  <h3 className="text-sm font-bold text-slate-800 font-display mb-1">No schedule found</h3>
                   <p className="text-xs text-slate-400 max-w-[250px] leading-relaxed">
-                    {appointmentsForSelectedDate.length === 0
-                      ? "There are no appointments scheduled for this date."
-                      : "No appointments match your status filter."}
+                    {appointmentsForSelectedDate.length === 0 && blockedSlotsForSelectedDate.length === 0
+                      ? "There are no appointments or blocked slots scheduled for this date."
+                      : "No items match your status filter."}
                   </p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {filteredAppointmentsForSelectedDate.map((apt) => (
-                    <div
-                      key={apt.id}
-                      className="p-4 border border-slate-100 hover:border-primary/20 hover:shadow-md cursor-pointer transition-all bg-white rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
-                      onClick={() => handleRowClick(apt)}
-                      data-testid={`row-appointment-${apt.id}`}
-                    >
-                      <div className="space-y-1.5">
-                        <h4 className="font-semibold text-slate-800 flex items-center gap-2 group-hover:text-primary transition-colors font-display">
-                          <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
-                          {apt.patientName}
-                        </h4>
-                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-                          <span className="flex items-center gap-1.5">
-                            <Clock className="w-3.5 h-3.5 text-slate-450" />
-                            {apt.selectedTimeSlot || "No slot assigned"}
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <Phone className="w-3.5 h-3.5 text-slate-450" />
-                            {apt.patientPhone}
-                          </span>
-                        </div>
-                        {apt.patientProblem && (
-                          <p className="text-xs text-slate-500 mt-1 italic line-clamp-1 max-w-sm">
-                            "{apt.patientProblem}"
-                          </p>
-                        )}
-                        
-                        {/* Prescription Status Badge */}
-                        <div className="flex flex-wrap gap-2 pt-1">
-                          {apt.prescriptionGenerated ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-200">
-                              <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                              Prescription Generated
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-                              Prescription Missing
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2.5 justify-between sm:justify-end shrink-0">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${STATUS_COLORS[apt.status] ?? STATUS_COLORS.pending}`}>
-                          {STATUS_LABELS[apt.status] ?? apt.status}
-                        </span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 text-xs font-medium px-3 rounded-lg"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRowClick(apt);
-                          }}
-                          data-testid={`button-reschedule-${apt.id}`}
+                  {sortedUnifiedList.map((item) => {
+                    const statusDotColor = getDotColor(item);
+                    const statusBadgeColor = getItemStatusColor(item);
+                    const statusBadgeLabel = getItemStatusLabel(item);
+
+                    if (item.type === "blocked_slot") {
+                      return (
+                        <div
+                          key={`blocked-${item.id}`}
+                          className="p-4 border border-rose-100 bg-rose-50/10 hover:bg-rose-50/20 transition-all rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
                         >
-                          Reschedule
-                        </Button>
-                        {apt.status !== "cancelled" && (
+                          <div className="space-y-1.5">
+                            <h4 className="font-semibold text-rose-950 flex items-center gap-2 font-display">
+                              <span className={`w-2 h-2 rounded-full ${statusDotColor} shrink-0`} />
+                              Blocked Slot
+                            </h4>
+                            <div className="flex flex-col gap-1 text-xs text-rose-700">
+                              <span className="flex items-center gap-1.5 font-medium">
+                                <Clock className="w-3.5 h-3.5 text-rose-400" />
+                                {formatTime24to12(item.raw.startTime)} – {formatTime24to12(item.raw.endTime)}
+                              </span>
+                              {item.raw.reason && (
+                                <span className="text-[11px] text-rose-600 font-medium italic mt-0.5">
+                                  Reason: {item.raw.reason}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2.5 justify-between sm:justify-end shrink-0">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${statusBadgeColor}`}>
+                              {statusBadgeLabel}
+                            </span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 text-xs font-bold border-rose-205 hover:bg-rose-100/50 hover:text-rose-900 text-rose-800 rounded-lg cursor-pointer"
+                              onClick={() => handleUnblockSlot(item.id)}
+                            >
+                              Unblock Slot
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    const apt = item.raw;
+                    return (
+                      <div
+                        key={`appt-${apt.id}`}
+                        className="p-4 border border-slate-100 hover:border-primary/20 hover:shadow-md cursor-pointer transition-all bg-white rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
+                        onClick={() => handleRowClick(apt)}
+                        data-testid={`row-appointment-${apt.id}`}
+                      >
+                        <div className="space-y-1.5">
+                          <h4 className="font-semibold text-slate-800 flex items-center gap-2 group-hover:text-primary transition-colors font-display">
+                            <span className={`w-2 h-2 rounded-full ${statusDotColor} shrink-0`} />
+                            {apt.patientName}
+                          </h4>
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                            <span className="flex items-center gap-1.5">
+                              <Clock className="w-3.5 h-3.5 text-slate-450" />
+                              {apt.selectedTimeSlot || "No slot assigned"}
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                              <Phone className="w-3.5 h-3.5 text-slate-450" />
+                              {apt.patientPhone}
+                            </span>
+                            <span className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
+                              {apt.appointmentSource || "Online"}
+                            </span>
+                          </div>
+                          {apt.patientProblem && (
+                            <p className="text-xs text-slate-500 mt-1 italic line-clamp-1 max-w-sm">
+                              "{apt.patientProblem}"
+                            </p>
+                          )}
+                          
+                          {/* Prescription Status Badge */}
+                          <div className="flex flex-wrap gap-2 pt-1">
+                            {apt.prescriptionGenerated ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-200">
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                                Prescription Generated
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                                Prescription Missing
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2.5 justify-between sm:justify-end shrink-0">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${statusBadgeColor}`}>
+                            {statusBadgeLabel}
+                          </span>
                           <Button
-                            variant={apt.prescriptionGenerated ? "outline" : "default"}
+                            variant="outline"
                             size="sm"
-                            className={`h-8 text-xs font-semibold px-3 rounded-lg gap-1 ${
-                              apt.prescriptionGenerated ? "border-green-300 text-green-700 hover:bg-green-50/50 hover:text-green-800" : ""
-                            }`}
+                            className="h-8 text-xs font-medium px-3 rounded-lg"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleRowClick(apt, "prescription");
+                              handleRowClick(apt);
                             }}
+                            data-testid={`button-reschedule-${apt.id}`}
                           >
-                            <FileText className="w-3.5 h-3.5" />
-                            {apt.prescriptionGenerated ? "View Prescription" : "Add Prescription"}
+                            Reschedule
                           </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-gray-400 hover:text-red-600 hover:bg-red-50 h-8 w-8 rounded-lg"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(apt.id);
-                          }}
-                          disabled={deleteAppointment.isPending}
-                          data-testid={`button-delete-${apt.id}`}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                          {apt.status !== "cancelled" && (
+                            <Button
+                              variant={apt.prescriptionGenerated ? "outline" : "default"}
+                              size="sm"
+                              className={`h-8 text-xs font-semibold px-3 rounded-lg gap-1 ${
+                                apt.prescriptionGenerated ? "border-green-300 text-green-700 hover:bg-green-50/50 hover:text-green-800" : ""
+                              }`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRowClick(apt, "prescription");
+                              }}
+                            >
+                              <FileText className="w-3.5 h-3.5" />
+                              {apt.prescriptionGenerated ? "View Prescription" : "Add Prescription"}
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-gray-400 hover:text-red-600 hover:bg-red-50 h-8 w-8 rounded-lg"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(apt.id);
+                            }}
+                            disabled={deleteAppointment.isPending}
+                            data-testid={`button-delete-${apt.id}`}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </CardContent>
@@ -928,6 +1369,28 @@ ${clinicName}`;
                     <span className="text-slate-450 font-medium">Patient</span>
                     <span className="font-bold text-slate-800">{selectedAppointment.patientName}</span>
                   </div>
+                  {selectedAppointment.patientAge && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-450 font-medium">Age</span>
+                      <span className="font-semibold text-slate-700">{selectedAppointment.patientAge} years</span>
+                    </div>
+                  )}
+                  {selectedAppointment.patientGender && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-450 font-medium">Gender</span>
+                      <span className="font-semibold text-slate-700 capitalize">{selectedAppointment.patientGender}</span>
+                    </div>
+                  )}
+                  {selectedAppointment.visitType && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-450 font-medium">Visit Type</span>
+                      <span className="font-semibold text-slate-700">{selectedAppointment.visitType}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-450 font-medium">Source</span>
+                    <span className="font-bold text-slate-700 bg-slate-200 px-2 py-0.5 rounded-full text-[9px] uppercase tracking-wider">{selectedAppointment.appointmentSource || "Online"}</span>
+                  </div>
                   <div className="flex justify-between items-center">
                     <span className="text-slate-450 font-medium">Phone</span>
                     <span className="font-semibold text-slate-700">{selectedAppointment.patientPhone}</span>
@@ -938,7 +1401,13 @@ ${clinicName}`;
                       {selectedAppointment.patientProblem || "General consultation"}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center pt-2.5 border-t border-slate-200/50">
+                  {selectedAppointment.notes && (
+                    <div className="flex flex-col gap-1 pt-1.5 border-t border-slate-200/50">
+                      <span className="text-slate-450 font-medium">Notes</span>
+                      <span className="font-medium text-slate-600 italic block">{selectedAppointment.notes}</span>
+                    </div>
+                  )}
+                  <div className={`flex justify-between items-center ${selectedAppointment.notes ? "pt-1.5" : "pt-2.5 border-t border-slate-200/50"}`}>
                     <span className="text-slate-450 font-medium">Prescription Status</span>
                     {prescription ? (
                       <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-green-50 text-green-700 border border-green-200 uppercase tracking-wider">
@@ -1558,6 +2027,319 @@ ${clinicName}`;
                 })()}
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Add Appointment Dialog */}
+      {isAddOpen && (
+        <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+          <DialogContent className="max-w-md bg-white rounded-2xl p-6 shadow-xl border border-slate-100/80 max-h-[90vh] overflow-y-auto">
+            <DialogHeader className="pb-3 border-b border-slate-100/60">
+              <DialogTitle className="text-base font-bold text-slate-800 font-display">Add Appointment</DialogTitle>
+            </DialogHeader>
+
+            <form onSubmit={handleAddSubmit} className="space-y-4 pt-4 text-xs">
+              <div className="space-y-1.5">
+                <Label htmlFor="addName" className="font-semibold text-slate-500 uppercase tracking-wider block">Patient Name *</Label>
+                <Input
+                  id="addName"
+                  value={addForm.patientName}
+                  onChange={(e) => setAddForm({ ...addForm, patientName: e.target.value })}
+                  placeholder="Patient Full Name"
+                  className="h-10 border-slate-200 text-xs bg-white focus-visible:bg-white"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="addPhone" className="font-semibold text-slate-500 uppercase tracking-wider block">Mobile Number *</Label>
+                <Input
+                  id="addPhone"
+                  value={addForm.patientPhone}
+                  onChange={(e) => setAddForm({ ...addForm, patientPhone: e.target.value })}
+                  placeholder="e.g. +919876543210"
+                  className="h-10 border-slate-200 text-xs bg-white"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="addAge" className="font-semibold text-slate-500 uppercase tracking-wider block">Age</Label>
+                  <Input
+                    id="addAge"
+                    type="number"
+                    value={addForm.patientAge}
+                    onChange={(e) => setAddForm({ ...addForm, patientAge: e.target.value })}
+                    placeholder="Years"
+                    className="h-10 border-slate-200 text-xs bg-white"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="addGender" className="font-semibold text-slate-500 uppercase tracking-wider block">Gender</Label>
+                  <Select value={addForm.patientGender} onValueChange={(val) => setAddForm({ ...addForm, patientGender: val })}>
+                    <SelectTrigger id="addGender" className="w-full text-xs h-10 border-slate-200 bg-white">
+                      <SelectValue placeholder="Gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="female">Female</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="addVisitType" className="font-semibold text-slate-500 uppercase tracking-wider block">Visit Type</Label>
+                  <Select value={addForm.visitType} onValueChange={(val) => setAddForm({ ...addForm, visitType: val })}>
+                    <SelectTrigger id="addVisitType" className="w-full text-xs h-10 border-slate-200 bg-white">
+                      <SelectValue placeholder="Visit Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="New Consultation">New Consultation</SelectItem>
+                      <SelectItem value="Follow-up">Follow-up</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="addSource" className="font-semibold text-slate-500 uppercase tracking-wider block">Source</Label>
+                  <Select value={addForm.appointmentSource} onValueChange={(val) => setAddForm({ ...addForm, appointmentSource: val })}>
+                    <SelectTrigger id="addSource" className="w-full text-xs h-10 border-slate-200 bg-white">
+                      <SelectValue placeholder="Source" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Manual">Manual</SelectItem>
+                      <SelectItem value="Phone">Phone</SelectItem>
+                      <SelectItem value="Walk-in">Walk-in</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="addProblem" className="font-semibold text-slate-500 uppercase tracking-wider block">Reason / Problem</Label>
+                <Input
+                  id="addProblem"
+                  value={addForm.patientProblem}
+                  onChange={(e) => setAddForm({ ...addForm, patientProblem: e.target.value })}
+                  placeholder="e.g. Fever, Cough"
+                  className="h-10 border-slate-200 text-xs bg-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="addDate" className="font-semibold text-slate-500 uppercase tracking-wider block">Appointment Date *</Label>
+                  <Input
+                    id="addDate"
+                    type="date"
+                    value={addForm.appointmentDate}
+                    onChange={(e) => setAddForm({ ...addForm, appointmentDate: e.target.value, selectedTimeSlot: "" })}
+                    className="h-10 border-slate-200 text-xs bg-white"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="addSlot" className="font-semibold text-slate-500 uppercase tracking-wider block">Select Time Slot *</Label>
+                  <Select
+                    value={addForm.selectedTimeSlot}
+                    onValueChange={(val) => setAddForm({ ...addForm, selectedTimeSlot: val })}
+                    disabled={loadingManualSlots || !addForm.appointmentDate}
+                  >
+                    <SelectTrigger id="addSlot" className="w-full text-xs h-10 border-slate-200 bg-white">
+                      <SelectValue placeholder={loadingManualSlots ? "Loading..." : "Select Slot"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {manualSlots.length === 0 ? (
+                        <SelectItem value="_" disabled>
+                          {addForm.appointmentDate ? "No free slots available" : "Select date first"}
+                        </SelectItem>
+                      ) : (
+                        manualSlots.map((slot) => (
+                          <SelectItem key={slot} value={slot}>
+                            {slot}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="addNotes" className="font-semibold text-slate-500 uppercase tracking-wider block">Notes (Optional)</Label>
+                <textarea
+                  id="addNotes"
+                  value={addForm.notes}
+                  onChange={(e) => setAddForm({ ...addForm, notes: e.target.value })}
+                  className="flex min-h-[60px] w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+                  placeholder="Additional patient notes..."
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsAddOpen(false)}
+                  className="flex-1 h-11 text-xs font-semibold rounded-xl border-slate-200 cursor-pointer"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={createAppointmentMutation.isPending}
+                  className="flex-1 h-11 text-xs font-bold rounded-xl shadow-md cursor-pointer"
+                >
+                  {createAppointmentMutation.isPending && <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />}
+                  Create Appointment
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Block Slot Dialog */}
+      {isBlockSlotOpen && (
+        <Dialog open={isBlockSlotOpen} onOpenChange={setIsBlockSlotOpen}>
+          <DialogContent className="max-w-md bg-white rounded-2xl p-6 shadow-xl border border-slate-100/80">
+            <DialogHeader className="pb-3 border-b border-slate-100/60">
+              <DialogTitle className="text-base font-bold text-slate-800 font-display">Block Appointment Slot</DialogTitle>
+            </DialogHeader>
+
+            <form onSubmit={handleBlockSlotSubmit} className="space-y-4 pt-4 text-xs">
+              <div className="space-y-1.5">
+                <Label htmlFor="blockSlotDate" className="font-semibold text-slate-500 uppercase tracking-wider block">Date *</Label>
+                <Input
+                  id="blockSlotDate"
+                  type="date"
+                  value={blockSlotForm.date}
+                  onChange={(e) => setBlockSlotForm({ ...blockSlotForm, date: e.target.value })}
+                  className="h-10 border-slate-200 text-xs bg-white"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="blockSlotStart" className="font-semibold text-slate-500 uppercase tracking-wider block">Start Time (24h format) *</Label>
+                  <Input
+                    id="blockSlotStart"
+                    type="text"
+                    value={blockSlotForm.startTime}
+                    onChange={(e) => setBlockSlotForm({ ...blockSlotForm, startTime: e.target.value })}
+                    placeholder="e.g. 13:00"
+                    className="h-10 border-slate-200 text-xs bg-white"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="blockSlotEnd" className="font-semibold text-slate-500 uppercase tracking-wider block">End Time (24h format) *</Label>
+                  <Input
+                    id="blockSlotEnd"
+                    type="text"
+                    value={blockSlotForm.endTime}
+                    onChange={(e) => setBlockSlotForm({ ...blockSlotForm, endTime: e.target.value })}
+                    placeholder="e.g. 14:00"
+                    className="h-10 border-slate-200 text-xs bg-white"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="blockSlotReason" className="font-semibold text-slate-500 uppercase tracking-wider block">Reason (Optional)</Label>
+                <Input
+                  id="blockSlotReason"
+                  value={blockSlotForm.reason}
+                  onChange={(e) => setBlockSlotForm({ ...blockSlotForm, reason: e.target.value })}
+                  placeholder="e.g. Lunch Break, Personal Time"
+                  className="h-10 border-slate-200 text-xs bg-white"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsBlockSlotOpen(false)}
+                  className="flex-1 h-11 text-xs font-semibold rounded-xl border-slate-200 cursor-pointer"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={createBlockedSlotMutation.isPending}
+                  className="flex-1 h-11 text-xs font-bold rounded-xl shadow-md bg-rose-600 hover:bg-rose-700 text-white cursor-pointer"
+                >
+                  {createBlockedSlotMutation.isPending && <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />}
+                  Block Slot
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Block Day Dialog */}
+      {isBlockDayOpen && (
+        <Dialog open={isBlockDayOpen} onOpenChange={setIsBlockDayOpen}>
+          <DialogContent className="max-w-md bg-white rounded-2xl p-6 shadow-xl border border-slate-100/80">
+            <DialogHeader className="pb-3 border-b border-slate-100/60">
+              <DialogTitle className="text-base font-bold text-slate-800 font-display">Block Entire Day</DialogTitle>
+            </DialogHeader>
+
+            <form onSubmit={handleBlockDaySubmit} className="space-y-4 pt-4 text-xs">
+              <div className="space-y-1.5">
+                <Label htmlFor="blockDayDate" className="font-semibold text-slate-500 uppercase tracking-wider block">Select Date *</Label>
+                <Input
+                  id="blockDayDate"
+                  type="date"
+                  value={blockDayForm.date}
+                  onChange={(e) => setBlockDayForm({ ...blockDayForm, date: e.target.value })}
+                  className="h-10 border-slate-200 text-xs bg-white"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="blockDayReason" className="font-semibold text-slate-500 uppercase tracking-wider block">Reason (Optional)</Label>
+                <Input
+                  id="blockDayReason"
+                  value={blockDayForm.reason}
+                  onChange={(e) => setBlockDayForm({ ...blockDayForm, reason: e.target.value })}
+                  placeholder="e.g. Public Holiday, Medical Leave"
+                  className="h-10 border-slate-200 text-xs bg-white"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsBlockDayOpen(false)}
+                  className="flex-1 h-11 text-xs font-semibold rounded-xl border-slate-200 cursor-pointer"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={createBlockedDayMutation.isPending}
+                  className="flex-1 h-11 text-xs font-bold rounded-xl shadow-md bg-rose-600 hover:bg-rose-700 text-white cursor-pointer"
+                >
+                  {createBlockedDayMutation.isPending && <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />}
+                  Block Entire Day
+                </Button>
+              </div>
+            </form>
           </DialogContent>
         </Dialog>
       )}

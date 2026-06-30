@@ -21,6 +21,8 @@ import {
   deleteCalendarEvent,
 } from "../lib/google-calendar";
 
+import { calculateAvailableSlots } from "../lib/scheduler";
+
 const router: IRouter = Router();
 
 function serializeAppt(a: Record<string, unknown>) {
@@ -80,10 +82,69 @@ router.post("/clinics/:clinicId/appointments", requireAuth, requireClinicOwnersh
     return;
   }
 
-  const [appointment] = await db
+  const valuesToInsert: any = {
+    ...parsed.data,
+    clinicId: params.data.clinicId,
+  };
+
+  // If a time slot is selected (manual appointments), auto-confirm it and validate availability
+  if (parsed.data.selectedTimeSlot && parsed.data.appointmentDate) {
+    const availableSlots = await calculateAvailableSlots(params.data.clinicId, parsed.data.appointmentDate);
+    if (!availableSlots.includes(parsed.data.selectedTimeSlot)) {
+      res.status(400).json({ error: "Selected time slot is not available" });
+      return;
+    }
+    valuesToInsert.status = "confirmed";
+  }
+
+  let [appointment] = await db
     .insert(appointmentsTable)
-    .values({ ...parsed.data, clinicId: params.data.clinicId })
+    .values(valuesToInsert)
     .returning();
+
+  // Google Calendar Integration for Manual Bookings
+  if (appointment.selectedTimeSlot && appointment.appointmentDate && appointment.status === "confirmed") {
+    const [clinic] = await db.select().from(clinicsTable).where(eq(clinicsTable.id, params.data.clinicId));
+    if (clinic && clinic.googleConnected && clinic.googleCalendarId) {
+      try {
+        const startLocal = `${appointment.appointmentDate}T${convertTo24Hour(appointment.selectedTimeSlot)}`;
+        const startDate = new Date(startLocal);
+        const endDate = new Date(startDate.getTime() + (clinic.slotDuration || 30) * 60 * 1000);
+
+        const sourceLabel = appointment.appointmentSource === "Online" ? "AI" : "Admin";
+        const descriptionLines = [
+          `Appointment booked via ClinicFlow ${sourceLabel}.`,
+          `Patient: ${appointment.patientName}`,
+          `Phone: ${appointment.patientPhone}`,
+          appointment.patientAge ? `Age: ${appointment.patientAge}` : null,
+          appointment.patientGender ? `Gender: ${appointment.patientGender}` : null,
+          appointment.visitType ? `Visit Type: ${appointment.visitType}` : null,
+          appointment.patientProblem ? `Concern: ${appointment.patientProblem}` : null,
+          appointment.notes ? `Notes: ${appointment.notes}` : null,
+        ].filter(Boolean);
+
+        const eventDetails = {
+          summary: `Appointment: ${appointment.patientName}`,
+          description: descriptionLines.join("\n"),
+          start: startDate.toISOString(),
+          end: endDate.toISOString(),
+        };
+
+        const token = await getValidAccessToken(clinic);
+        const eventId = await createCalendarEvent(token, clinic.googleCalendarId, eventDetails);
+        
+        const [updated] = await db
+          .update(appointmentsTable)
+          .set({ calendarEventId: eventId })
+          .where(eq(appointmentsTable.id, appointment.id))
+          .returning();
+        
+        appointment = updated;
+      } catch (err) {
+        console.error("Failed to sync manual appointment with Google Calendar:", err);
+      }
+    }
+  }
 
   res.status(201).json(GetAppointmentResponse.parse(serializeAppt(appointment)));
 });
@@ -126,12 +187,62 @@ router.patch("/clinics/:clinicId/appointments/:appointmentId", requireAuth, requ
     return;
   }
 
+  const [existingAppt] = await db
+    .select()
+    .from(appointmentsTable)
+    .where(
+      and(
+        eq(appointmentsTable.id, params.data.appointmentId),
+        eq(appointmentsTable.clinicId, params.data.clinicId)
+      )
+    )
+    .limit(1);
+
+  if (!existingAppt) {
+    res.status(404).json({ error: "Appointment not found" });
+    return;
+  }
+
+  const newDate = parsed.data.appointmentDate !== undefined ? parsed.data.appointmentDate : existingAppt.appointmentDate;
+  const newSlot = parsed.data.selectedTimeSlot !== undefined ? parsed.data.selectedTimeSlot : existingAppt.selectedTimeSlot;
+
+  if (
+    newSlot && newDate &&
+    (parsed.data.appointmentDate !== undefined || parsed.data.selectedTimeSlot !== undefined)
+  ) {
+    if (newDate !== existingAppt.appointmentDate || newSlot !== existingAppt.selectedTimeSlot) {
+      const availableSlots = await calculateAvailableSlots(params.data.clinicId, newDate);
+      if (!availableSlots.includes(newSlot)) {
+        res.status(400).json({ error: "Selected time slot is not available" });
+        return;
+      }
+    }
+  }
+
   const updateFields: any = { status: parsed.data.status };
   if (parsed.data.appointmentDate !== undefined) {
     updateFields.appointmentDate = parsed.data.appointmentDate;
   }
   if (parsed.data.selectedTimeSlot !== undefined) {
     updateFields.selectedTimeSlot = parsed.data.selectedTimeSlot;
+  }
+  if (parsed.data.appointmentSource !== undefined) {
+    updateFields.appointmentSource = parsed.data.appointmentSource;
+  }
+  if (parsed.data.patientAge !== undefined) {
+    updateFields.patientAge = parsed.data.patientAge;
+  }
+  if (parsed.data.patientGender !== undefined) {
+    updateFields.patientGender = parsed.data.patientGender;
+  }
+  if (parsed.data.visitType !== undefined) {
+    updateFields.visitType = parsed.data.visitType;
+  }
+  if (parsed.data.notes !== undefined) {
+    updateFields.notes = parsed.data.notes;
+  }
+  if (parsed.data.doctorId !== undefined) {
+    updateFields.doctorId = parsed.data.doctorId;
   }
 
   const [appointment] = await db
@@ -159,9 +270,21 @@ router.patch("/clinics/:clinicId/appointments/:appointmentId", requireAuth, requ
         const startDate = new Date(startLocal);
         const endDate = new Date(startDate.getTime() + (clinic.slotDuration || 30) * 60 * 1000);
 
+        const sourceLabel = appointment.appointmentSource === "Online" ? "AI" : "Admin";
+        const descriptionLines = [
+          `Appointment booked via ClinicFlow ${sourceLabel}.`,
+          `Patient: ${appointment.patientName}`,
+          `Phone: ${appointment.patientPhone}`,
+          appointment.patientAge ? `Age: ${appointment.patientAge}` : null,
+          appointment.patientGender ? `Gender: ${appointment.patientGender}` : null,
+          appointment.visitType ? `Visit Type: ${appointment.visitType}` : null,
+          appointment.patientProblem ? `Concern: ${appointment.patientProblem}` : null,
+          appointment.notes ? `Notes: ${appointment.notes}` : null,
+        ].filter(Boolean);
+
         const eventDetails = {
           summary: `Appointment: ${appointment.patientName}`,
-          description: `Appointment booked via ClinicFlow AI.\nPatient: ${appointment.patientName}\nPhone: ${appointment.patientPhone}\nProblem: ${appointment.patientProblem}`,
+          description: descriptionLines.join("\n"),
           start: startDate.toISOString(),
           end: endDate.toISOString(),
         };

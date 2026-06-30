@@ -253,6 +253,11 @@ export const GetDashboardResponse = zod.object({
   "pendingCount": zod.number(),
   "confirmedCount": zod.number(),
   "completedCount": zod.number(),
+  "todayOnlineAppointments": zod.number(),
+  "todayManualAppointments": zod.number(),
+  "todayBlockedSlots": zod.number(),
+  "todayCompletedAppointments": zod.number(),
+  "todayCancelledAppointments": zod.number(),
   "recentAppointments": zod.array(zod.object({
   "id": zod.number(),
   "clinicId": zod.number(),
@@ -264,6 +269,12 @@ export const GetDashboardResponse = zod.object({
   "selectedTimeSlot": zod.string().nullish(),
   "calendarEventId": zod.string().nullish(),
   "status": zod.enum(['pending', 'pending_slot_selection', 'confirmed', 'booked', 'completed', 'cancelled']),
+  "appointmentSource": zod.enum(['Online', 'Phone', 'Walk-in', 'Manual']).optional(),
+  "patientAge": zod.number().nullish(),
+  "patientGender": zod.string().nullish(),
+  "visitType": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "doctorId": zod.number().nullish(),
   "createdAt": zod.string()
 }))
 })
@@ -287,6 +298,12 @@ export const ListAppointmentsResponseItem = zod.object({
   "selectedTimeSlot": zod.string().nullish(),
   "calendarEventId": zod.string().nullish(),
   "status": zod.enum(['pending', 'pending_slot_selection', 'confirmed', 'booked', 'completed', 'cancelled']),
+  "appointmentSource": zod.enum(['Online', 'Phone', 'Walk-in', 'Manual']).optional(),
+  "patientAge": zod.number().nullish(),
+  "patientGender": zod.string().nullish(),
+  "visitType": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "doctorId": zod.number().nullish(),
   "createdAt": zod.string()
 })
 export const ListAppointmentsResponse = zod.array(ListAppointmentsResponseItem)
@@ -309,7 +326,108 @@ export const CreateAppointmentBody = zod.object({
   "patientName": zod.string().min(1),
   "patientPhone": zod.string().min(1),
   "patientProblem": zod.string().min(1),
-  "appointmentDate": zod.string().min(1)
+  "appointmentDate": zod.string().min(1),
+  "selectedTimeSlot": zod.string().nullish(),
+  "appointmentSource": zod.enum(['Online', 'Phone', 'Walk-in', 'Manual']).optional(),
+  "patientAge": zod.number().nullish(),
+  "patientGender": zod.string().nullish(),
+  "visitType": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "doctorId": zod.number().nullish()
+})
+
+
+/**
+ * @summary List blocked slots for a clinic
+ */
+export const ListBlockedSlotsParams = zod.object({
+  "clinicId": zod.coerce.number()
+})
+
+export const ListBlockedSlotsResponseItem = zod.object({
+  "id": zod.number(),
+  "clinicId": zod.number(),
+  "doctorId": zod.number().nullish(),
+  "date": zod.string(),
+  "startTime": zod.string(),
+  "endTime": zod.string(),
+  "reason": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const ListBlockedSlotsResponse = zod.array(ListBlockedSlotsResponseItem)
+
+
+/**
+ * @summary Block a specific slot
+ */
+export const CreateBlockedSlotParams = zod.object({
+  "clinicId": zod.coerce.number()
+})
+
+
+
+
+
+
+export const CreateBlockedSlotBody = zod.object({
+  "doctorId": zod.number().nullish(),
+  "date": zod.string().min(1),
+  "startTime": zod.string().min(1),
+  "endTime": zod.string().min(1),
+  "reason": zod.string().nullish()
+})
+
+
+/**
+ * @summary Unblock a slot
+ */
+export const DeleteBlockedSlotParams = zod.object({
+  "clinicId": zod.coerce.number(),
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary List blocked days for a clinic
+ */
+export const ListBlockedDaysParams = zod.object({
+  "clinicId": zod.coerce.number()
+})
+
+export const ListBlockedDaysResponseItem = zod.object({
+  "id": zod.number(),
+  "clinicId": zod.number(),
+  "doctorId": zod.number().nullish(),
+  "date": zod.string(),
+  "reason": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const ListBlockedDaysResponse = zod.array(ListBlockedDaysResponseItem)
+
+
+/**
+ * @summary Block a specific day
+ */
+export const CreateBlockedDayParams = zod.object({
+  "clinicId": zod.coerce.number()
+})
+
+
+
+
+export const CreateBlockedDayBody = zod.object({
+  "doctorId": zod.number().nullish(),
+  "date": zod.string().min(1),
+  "reason": zod.string().nullish()
+})
+
+
+/**
+ * @summary Unblock a day
+ */
+export const DeleteBlockedDayParams = zod.object({
+  "clinicId": zod.coerce.number(),
+  "id": zod.coerce.number()
 })
 
 
@@ -332,6 +450,12 @@ export const GetAppointmentResponse = zod.object({
   "selectedTimeSlot": zod.string().nullish(),
   "calendarEventId": zod.string().nullish(),
   "status": zod.enum(['pending', 'pending_slot_selection', 'confirmed', 'booked', 'completed', 'cancelled']),
+  "appointmentSource": zod.enum(['Online', 'Phone', 'Walk-in', 'Manual']).optional(),
+  "patientAge": zod.number().nullish(),
+  "patientGender": zod.string().nullish(),
+  "visitType": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "doctorId": zod.number().nullish(),
   "createdAt": zod.string()
 })
 
@@ -347,7 +471,13 @@ export const UpdateAppointmentStatusParams = zod.object({
 export const UpdateAppointmentStatusBody = zod.object({
   "status": zod.enum(['pending', 'pending_slot_selection', 'confirmed', 'booked', 'completed', 'cancelled']),
   "appointmentDate": zod.string().optional(),
-  "selectedTimeSlot": zod.string().optional()
+  "selectedTimeSlot": zod.string().optional(),
+  "appointmentSource": zod.enum(['Online', 'Phone', 'Walk-in', 'Manual']).optional(),
+  "patientAge": zod.number().nullish(),
+  "patientGender": zod.string().nullish(),
+  "visitType": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "doctorId": zod.number().nullish()
 })
 
 export const UpdateAppointmentStatusResponse = zod.object({
@@ -361,6 +491,12 @@ export const UpdateAppointmentStatusResponse = zod.object({
   "selectedTimeSlot": zod.string().nullish(),
   "calendarEventId": zod.string().nullish(),
   "status": zod.enum(['pending', 'pending_slot_selection', 'confirmed', 'booked', 'completed', 'cancelled']),
+  "appointmentSource": zod.enum(['Online', 'Phone', 'Walk-in', 'Manual']).optional(),
+  "patientAge": zod.number().nullish(),
+  "patientGender": zod.string().nullish(),
+  "visitType": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "doctorId": zod.number().nullish(),
   "createdAt": zod.string()
 })
 
@@ -444,6 +580,12 @@ export const StartChatResponse = zod.object({
   "selectedTimeSlot": zod.string().nullish(),
   "calendarEventId": zod.string().nullish(),
   "status": zod.enum(['pending', 'pending_slot_selection', 'confirmed', 'booked', 'completed', 'cancelled']),
+  "appointmentSource": zod.enum(['Online', 'Phone', 'Walk-in', 'Manual']).optional(),
+  "patientAge": zod.number().nullish(),
+  "patientGender": zod.string().nullish(),
+  "visitType": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "doctorId": zod.number().nullish(),
   "createdAt": zod.string()
 }).optional()
 })
@@ -488,6 +630,12 @@ export const SendChatMessageResponse = zod.object({
   "selectedTimeSlot": zod.string().nullish(),
   "calendarEventId": zod.string().nullish(),
   "status": zod.enum(['pending', 'pending_slot_selection', 'confirmed', 'booked', 'completed', 'cancelled']),
+  "appointmentSource": zod.enum(['Online', 'Phone', 'Walk-in', 'Manual']).optional(),
+  "patientAge": zod.number().nullish(),
+  "patientGender": zod.string().nullish(),
+  "visitType": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "doctorId": zod.number().nullish(),
   "createdAt": zod.string()
 }).optional()
 })

@@ -240,19 +240,6 @@ export default function Dashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <Card className="bg-white border-slate-100 hover:border-slate-200 transition-all duration-300 rounded-xl overflow-hidden shadow-xs hover:shadow-md relative pl-1.5 select-none">
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-slate-300" />
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-8.5 h-8.5 rounded-lg bg-slate-50 border border-slate-100 text-slate-500 flex items-center justify-center">
-                <Users className="w-4 h-4" />
-              </div>
-            </div>
-            <p className="text-xs font-semibold text-slate-400 mb-0.5">Total</p>
-            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.totalAppointments}</h3>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-white border-slate-100 hover:border-slate-200 transition-all duration-300 rounded-xl overflow-hidden shadow-xs hover:shadow-md relative pl-1.5 select-none">
           <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500" />
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-3">
@@ -260,47 +247,60 @@ export default function Dashboard() {
                 <Calendar className="w-4 h-4" />
               </div>
             </div>
-            <p className="text-xs font-semibold text-slate-400 mb-0.5">Today</p>
-            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.todayAppointments}</h3>
+            <p className="text-xs font-semibold text-slate-400 mb-0.5">Today's Online</p>
+            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.todayOnlineAppointments ?? 0}</h3>
           </CardContent>
         </Card>
-
+        
         <Card className="bg-white border-slate-100 hover:border-slate-200 transition-all duration-300 rounded-xl overflow-hidden shadow-xs hover:shadow-md relative pl-1.5 select-none">
           <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500" />
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-3">
               <div className="w-8.5 h-8.5 rounded-lg bg-amber-50 border border-amber-100 text-amber-500 flex items-center justify-center">
+                <Users className="w-4 h-4" />
+              </div>
+            </div>
+            <p className="text-xs font-semibold text-slate-400 mb-0.5">Today's Manual</p>
+            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.todayManualAppointments ?? 0}</h3>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border-slate-100 hover:border-slate-200 transition-all duration-300 rounded-xl overflow-hidden shadow-xs hover:shadow-md relative pl-1.5 select-none">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-500" />
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-8.5 h-8.5 rounded-lg bg-red-50 border border-red-100 text-red-500 flex items-center justify-center">
                 <Clock className="w-4 h-4" />
               </div>
             </div>
-            <p className="text-xs font-semibold text-slate-400 mb-0.5">Pending</p>
-            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.pendingCount}</h3>
+            <p className="text-xs font-semibold text-slate-400 mb-0.5">Today's Blocked</p>
+            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.todayBlockedSlots ?? 0}</h3>
           </CardContent>
         </Card>
 
         <Card className="bg-white border-slate-100 hover:border-slate-200 transition-all duration-300 rounded-xl overflow-hidden shadow-xs hover:shadow-md relative pl-1.5 select-none">
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-500" />
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-3">
-              <div className="w-8.5 h-8.5 rounded-lg bg-primary/5 border border-primary/10 text-primary flex items-center justify-center">
+              <div className="w-8.5 h-8.5 rounded-lg bg-purple-50 border border-purple-100 text-purple-500 flex items-center justify-center">
                 <CalendarCheck className="w-4 h-4" />
               </div>
             </div>
-            <p className="text-xs font-semibold text-slate-400 mb-0.5">Confirmed</p>
-            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.confirmedCount}</h3>
+            <p className="text-xs font-semibold text-slate-400 mb-0.5">Today's Completed</p>
+            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.todayCompletedAppointments ?? 0}</h3>
           </CardContent>
         </Card>
 
         <Card className="bg-white border-slate-100 hover:border-slate-200 transition-all duration-300 rounded-xl overflow-hidden shadow-xs hover:shadow-md relative pl-1.5 select-none">
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500" />
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-slate-700" />
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-3">
-              <div className="w-8.5 h-8.5 rounded-lg bg-green-50 border border-green-100 text-green-500 flex items-center justify-center">
+              <div className="w-8.5 h-8.5 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
             </div>
-            <p className="text-xs font-semibold text-slate-400 mb-0.5">Completed</p>
-            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.completedCount}</h3>
+            <p className="text-xs font-semibold text-slate-400 mb-0.5">Today's Cancelled</p>
+            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.todayCancelledAppointments ?? 0}</h3>
           </CardContent>
         </Card>
       </div>

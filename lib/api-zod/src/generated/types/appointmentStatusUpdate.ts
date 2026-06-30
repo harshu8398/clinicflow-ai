@@ -5,10 +5,22 @@
  * ClinicFlow AI API
  * OpenAPI spec version: 0.1.0
  */
+import type { AppointmentStatusUpdateAppointmentSource } from './appointmentStatusUpdateAppointmentSource';
 import type { AppointmentStatusUpdateStatus } from './appointmentStatusUpdateStatus';
 
 export interface AppointmentStatusUpdate {
   status: AppointmentStatusUpdateStatus;
   appointmentDate?: string;
   selectedTimeSlot?: string;
+  appointmentSource?: AppointmentStatusUpdateAppointmentSource;
+  /** @nullable */
+  patientAge?: number | null;
+  /** @nullable */
+  patientGender?: string | null;
+  /** @nullable */
+  visitType?: string | null;
+  /** @nullable */
+  notes?: string | null;
+  /** @nullable */
+  doctorId?: number | null;
 }

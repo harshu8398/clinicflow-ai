@@ -205,6 +205,110 @@ paths:
               schema:
                 $ref: "#/components/schemas/Appointment"
 
+  /clinics/{clinicId}/blocked-slots:
+    get:
+      operationId: listBlockedSlots
+      tags: [appointments]
+      summary: List blocked slots for a clinic
+      parameters:
+        - $ref: "#/components/parameters/ClinicIdParam"
+      responses:
+        "200":
+          description: List of blocked slots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BlockedSlot"
+    post:
+      operationId: createBlockedSlot
+      tags: [appointments]
+      summary: Block a specific slot
+      parameters:
+        - $ref: "#/components/parameters/ClinicIdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BlockedSlotInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlockedSlot"
+
+  /clinics/{clinicId}/blocked-slots/{id}:
+    delete:
+      operationId: deleteBlockedSlot
+      tags: [appointments]
+      summary: Unblock a slot
+      parameters:
+        - $ref: "#/components/parameters/ClinicIdParam"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /clinics/{clinicId}/blocked-days:
+    get:
+      operationId: listBlockedDays
+      tags: [appointments]
+      summary: List blocked days for a clinic
+      parameters:
+        - $ref: "#/components/parameters/ClinicIdParam"
+      responses:
+        "200":
+          description: List of blocked days
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BlockedDay"
+    post:
+      operationId: createBlockedDay
+      tags: [appointments]
+      summary: Block a specific day
+      parameters:
+        - $ref: "#/components/parameters/ClinicIdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BlockedDayInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlockedDay"
+
+  /clinics/{clinicId}/blocked-days/{id}:
+    delete:
+      operationId: deleteBlockedDay
+      tags: [appointments]
+      summary: Unblock a day
+      parameters:
+        - $ref: "#/components/parameters/ClinicIdParam"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
   /clinics/{clinicId}/appointments/{appointmentId}:
     get:
       operationId: getAppointment
@@ -586,6 +690,19 @@ components:
         status:
           type: string
           enum: [pending, pending_slot_selection, confirmed, booked, completed, cancelled]
+        appointmentSource:
+          type: string
+          enum: [Online, Phone, Walk-in, Manual]
+        patientAge:
+          type: ["integer", "null"]
+        patientGender:
+          type: ["string", "null"]
+        visitType:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        doctorId:
+          type: ["integer", "null"]
         createdAt:
           type: string
       required: [id, clinicId, patientName, patientPhone, patientProblem, appointmentDate, status, createdAt]
@@ -605,6 +722,21 @@ components:
         appointmentDate:
           type: string
           minLength: 1
+        selectedTimeSlot:
+          type: ["string", "null"]
+        appointmentSource:
+          type: string
+          enum: [Online, Phone, Walk-in, Manual]
+        patientAge:
+          type: ["integer", "null"]
+        patientGender:
+          type: ["string", "null"]
+        visitType:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        doctorId:
+          type: ["integer", "null"]
       required: [patientName, patientPhone, patientProblem, appointmentDate]
 
     AppointmentStatusUpdate:
@@ -617,6 +749,19 @@ components:
           type: string
         selectedTimeSlot:
           type: string
+        appointmentSource:
+          type: string
+          enum: [Online, Phone, Walk-in, Manual]
+        patientAge:
+          type: ["integer", "null"]
+        patientGender:
+          type: ["string", "null"]
+        visitType:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        doctorId:
+          type: ["integer", "null"]
       required: [status]
 
     Faq:
@@ -658,11 +803,21 @@ components:
           type: integer
         completedCount:
           type: integer
+        todayOnlineAppointments:
+          type: integer
+        todayManualAppointments:
+          type: integer
+        todayBlockedSlots:
+          type: integer
+        todayCompletedAppointments:
+          type: integer
+        todayCancelledAppointments:
+          type: integer
         recentAppointments:
           type: array
           items:
             $ref: "#/components/schemas/Appointment"
-      required: [totalAppointments, todayAppointments, pendingCount, confirmedCount, completedCount, recentAppointments]
+      required: [totalAppointments, todayAppointments, pendingCount, confirmedCount, completedCount, todayOnlineAppointments, todayManualAppointments, todayBlockedSlots, todayCompletedAppointments, todayCancelledAppointments, recentAppointments]
 
     ChatMessageInput:
       type: object
@@ -703,3 +858,71 @@ components:
         appointment:
           $ref: "#/components/schemas/Appointment"
       required: [sessionId, step, botMessage, isComplete]
+
+    BlockedSlot:
+      type: object
+      properties:
+        id:
+          type: integer
+        clinicId:
+          type: integer
+        doctorId:
+          type: ["integer", "null"]
+        date:
+          type: string
+        startTime:
+          type: string
+        endTime:
+          type: string
+        reason:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required: [id, clinicId, date, startTime, endTime, createdAt]
+
+    BlockedSlotInput:
+      type: object
+      properties:
+        doctorId:
+          type: ["integer", "null"]
+        date:
+          type: string
+          minLength: 1
+        startTime:
+          type: string
+          minLength: 1
+        endTime:
+          type: string
+          minLength: 1
+        reason:
+          type: ["string", "null"]
+      required: [date, startTime, endTime]
+
+    BlockedDay:
+      type: object
+      properties:
+        id:
+          type: integer
+        clinicId:
+          type: integer
+        doctorId:
+          type: ["integer", "null"]
+        date:
+          type: string
+        reason:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required: [id, clinicId, date, createdAt]
+
+    BlockedDayInput:
+      type: object
+      properties:
+        doctorId:
+          type: ["integer", "null"]
+        date:
+          type: string
+          minLength: 1
+        reason:
+          type: ["string", "null"]
+      required: [date]

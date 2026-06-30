@@ -3,8 +3,8 @@ import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
 async function main() {
-  const email = "jha753430@gmail.com";
-  const clinicId = 4; // Clove Dental Clinic
+  const email = "harsh.jha2024@vitstudent.ac.in";
+  const clinicId = 9; // clove dental clinic
   const password = "admin123";
 
   // Check if clinic exists

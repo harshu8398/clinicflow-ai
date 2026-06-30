@@ -7,10 +7,17 @@
  */
 
 export * from './appointment';
+export * from './appointmentAppointmentSource';
 export * from './appointmentInput';
+export * from './appointmentInputAppointmentSource';
 export * from './appointmentStatus';
 export * from './appointmentStatusUpdate';
+export * from './appointmentStatusUpdateAppointmentSource';
 export * from './appointmentStatusUpdateStatus';
+export * from './blockedDay';
+export * from './blockedDayInput';
+export * from './blockedSlot';
+export * from './blockedSlotInput';
 export * from './chatMessageInput';
 export * from './chatMessageInputContext';
 export * from './chatResponse';

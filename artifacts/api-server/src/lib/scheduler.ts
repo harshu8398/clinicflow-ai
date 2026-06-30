@@ -1,11 +1,56 @@
-import { db, appointmentsTable, clinicsTable } from "@workspace/db";
+import { db, appointmentsTable, clinicsTable, blockedSlotsTable, blockedDaysTable } from "@workspace/db";
 import { and, eq, ne } from "drizzle-orm";
 import { getValidAccessToken, getBusySlots } from "./google-calendar";
+
+function parseTimeToDate(dateStr: string, timeStr: string): Date {
+  let cleanTime = timeStr.trim();
+  let hours = "";
+  let minutes = "";
+
+  if (cleanTime.toUpperCase().includes("AM") || cleanTime.toUpperCase().includes("PM")) {
+    const [time, modifier] = cleanTime.split(" ");
+    const parts = time.split(":");
+    let h = parseInt(parts[0] || "0", 10);
+    const m = parts[1] || "00";
+    if (h === 12) {
+      h = 0;
+    }
+    if (modifier.toUpperCase() === "PM") {
+      h += 12;
+    }
+    hours = h.toString().padStart(2, "0");
+    minutes = m.padStart(2, "0");
+  } else {
+    const parts = cleanTime.split(":");
+    const h = parseInt(parts[0] || "0", 10);
+    const m = parts[1] || "00";
+    hours = h.toString().padStart(2, "0");
+    minutes = m.padStart(2, "0");
+  }
+
+  return new Date(`${dateStr}T${hours}:${minutes}:00`);
+}
 
 export async function calculateAvailableSlots(clinicId: number, dateStr: string): Promise<string[]> {
   if (!dateStr) return [];
   const dateOnly = dateStr.includes("T") ? dateStr.split("T")[0] : dateStr;
   if (isNaN(new Date(dateOnly).getTime())) {
+    return [];
+  }
+
+  // Check if the entire day is blocked
+  const [blockedDay] = await db
+    .select()
+    .from(blockedDaysTable)
+    .where(
+      and(
+        eq(blockedDaysTable.clinicId, clinicId),
+        eq(blockedDaysTable.date, dateOnly)
+      )
+    )
+    .limit(1);
+
+  if (blockedDay) {
     return [];
   }
 
@@ -103,6 +148,24 @@ export async function calculateAvailableSlots(clinicId: number, dateStr: string)
     }
   }
 
+  // Fetch blocked slots for this date
+  const blockedSlots = await db
+    .select()
+    .from(blockedSlotsTable)
+    .where(
+      and(
+        eq(blockedSlotsTable.clinicId, clinicId),
+        eq(blockedSlotsTable.date, dateOnly)
+      )
+    );
+
+  const parsedBlockedSlots = blockedSlots
+    .map(b => ({
+      start: parseTimeToDate(dateOnly, b.startTime),
+      end: parseTimeToDate(dateOnly, b.endTime)
+    }))
+    .filter(b => !isNaN(b.start.getTime()) && !isNaN(b.end.getTime()));
+
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, "0");
@@ -116,6 +179,14 @@ export async function calculateAvailableSlots(clinicId: number, dateStr: string)
     }
 
     if (bookedSlots.has(slot.label)) {
+      return false;
+    }
+
+    const hasBlockConflict = parsedBlockedSlots.some(block => {
+      return slot.start < block.end && slot.end > block.start;
+    });
+
+    if (hasBlockConflict) {
       return false;
     }
 

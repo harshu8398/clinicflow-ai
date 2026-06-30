@@ -141,6 +141,16 @@ export const AppointmentStatus = {
   cancelled: 'cancelled',
 } as const;
 
+export type AppointmentAppointmentSource = typeof AppointmentAppointmentSource[keyof typeof AppointmentAppointmentSource];
+
+
+export const AppointmentAppointmentSource = {
+  Online: 'Online',
+  Phone: 'Phone',
+  'Walk-in': 'Walk-in',
+  Manual: 'Manual',
+} as const;
+
 export interface Appointment {
   id: number;
   clinicId: number;
@@ -155,8 +165,29 @@ export interface Appointment {
   /** @nullable */
   calendarEventId?: string | null;
   status: AppointmentStatus;
+  appointmentSource?: AppointmentAppointmentSource;
+  /** @nullable */
+  patientAge?: number | null;
+  /** @nullable */
+  patientGender?: string | null;
+  /** @nullable */
+  visitType?: string | null;
+  /** @nullable */
+  notes?: string | null;
+  /** @nullable */
+  doctorId?: number | null;
   createdAt: string;
 }
+
+export type AppointmentInputAppointmentSource = typeof AppointmentInputAppointmentSource[keyof typeof AppointmentInputAppointmentSource];
+
+
+export const AppointmentInputAppointmentSource = {
+  Online: 'Online',
+  Phone: 'Phone',
+  'Walk-in': 'Walk-in',
+  Manual: 'Manual',
+} as const;
 
 export interface AppointmentInput {
   /** @minLength 1 */
@@ -167,6 +198,19 @@ export interface AppointmentInput {
   patientProblem: string;
   /** @minLength 1 */
   appointmentDate: string;
+  /** @nullable */
+  selectedTimeSlot?: string | null;
+  appointmentSource?: AppointmentInputAppointmentSource;
+  /** @nullable */
+  patientAge?: number | null;
+  /** @nullable */
+  patientGender?: string | null;
+  /** @nullable */
+  visitType?: string | null;
+  /** @nullable */
+  notes?: string | null;
+  /** @nullable */
+  doctorId?: number | null;
 }
 
 export type AppointmentStatusUpdateStatus = typeof AppointmentStatusUpdateStatus[keyof typeof AppointmentStatusUpdateStatus];
@@ -181,10 +225,31 @@ export const AppointmentStatusUpdateStatus = {
   cancelled: 'cancelled',
 } as const;
 
+export type AppointmentStatusUpdateAppointmentSource = typeof AppointmentStatusUpdateAppointmentSource[keyof typeof AppointmentStatusUpdateAppointmentSource];
+
+
+export const AppointmentStatusUpdateAppointmentSource = {
+  Online: 'Online',
+  Phone: 'Phone',
+  'Walk-in': 'Walk-in',
+  Manual: 'Manual',
+} as const;
+
 export interface AppointmentStatusUpdate {
   status: AppointmentStatusUpdateStatus;
   appointmentDate?: string;
   selectedTimeSlot?: string;
+  appointmentSource?: AppointmentStatusUpdateAppointmentSource;
+  /** @nullable */
+  patientAge?: number | null;
+  /** @nullable */
+  patientGender?: string | null;
+  /** @nullable */
+  visitType?: string | null;
+  /** @nullable */
+  notes?: string | null;
+  /** @nullable */
+  doctorId?: number | null;
 }
 
 export interface Faq {
@@ -208,6 +273,11 @@ export interface DashboardStats {
   pendingCount: number;
   confirmedCount: number;
   completedCount: number;
+  todayOnlineAppointments: number;
+  todayManualAppointments: number;
+  todayBlockedSlots: number;
+  todayCompletedAppointments: number;
+  todayCancelledAppointments: number;
   recentAppointments: Appointment[];
 }
 
@@ -238,6 +308,52 @@ export interface ChatResponse {
   botMessage: string;
   isComplete: boolean;
   appointment?: Appointment;
+}
+
+export interface BlockedSlot {
+  id: number;
+  clinicId: number;
+  /** @nullable */
+  doctorId?: number | null;
+  date: string;
+  startTime: string;
+  endTime: string;
+  /** @nullable */
+  reason?: string | null;
+  createdAt: string;
+}
+
+export interface BlockedSlotInput {
+  /** @nullable */
+  doctorId?: number | null;
+  /** @minLength 1 */
+  date: string;
+  /** @minLength 1 */
+  startTime: string;
+  /** @minLength 1 */
+  endTime: string;
+  /** @nullable */
+  reason?: string | null;
+}
+
+export interface BlockedDay {
+  id: number;
+  clinicId: number;
+  /** @nullable */
+  doctorId?: number | null;
+  date: string;
+  /** @nullable */
+  reason?: string | null;
+  createdAt: string;
+}
+
+export interface BlockedDayInput {
+  /** @nullable */
+  doctorId?: number | null;
+  /** @minLength 1 */
+  date: string;
+  /** @nullable */
+  reason?: string | null;
 }
 
 export type DisconnectGoogleAuth200 = {

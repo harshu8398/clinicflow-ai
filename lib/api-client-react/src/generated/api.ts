@@ -23,6 +23,10 @@ import type {
   Appointment,
   AppointmentInput,
   AppointmentStatusUpdate,
+  BlockedDay,
+  BlockedDayInput,
+  BlockedSlot,
+  BlockedSlotInput,
   ChatMessageInput,
   ChatResponse,
   Clinic,
@@ -883,6 +887,448 @@ export const useCreateAppointment = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getCreateAppointmentMutationOptions(options));
+    }
+
+export const getListBlockedSlotsUrl = (clinicId: number,) => {
+
+
+
+
+  return `/api/clinics/${clinicId}/blocked-slots`
+}
+
+/**
+ * @summary List blocked slots for a clinic
+ */
+export const listBlockedSlots = async (clinicId: number, options?: RequestInit): Promise<BlockedSlot[]> => {
+
+  return customFetch<BlockedSlot[]>(getListBlockedSlotsUrl(clinicId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListBlockedSlotsQueryKey = (clinicId: number,) => {
+    return [
+    `/api/clinics/${clinicId}/blocked-slots`
+    ] as const;
+    }
+
+
+export const getListBlockedSlotsQueryOptions = <TData = Awaited<ReturnType<typeof listBlockedSlots>>, TError = ErrorType<unknown>>(clinicId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listBlockedSlots>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListBlockedSlotsQueryKey(clinicId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listBlockedSlots>>> = ({ signal }) => listBlockedSlots(clinicId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(clinicId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listBlockedSlots>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListBlockedSlotsQueryResult = NonNullable<Awaited<ReturnType<typeof listBlockedSlots>>>
+export type ListBlockedSlotsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List blocked slots for a clinic
+ */
+
+export function useListBlockedSlots<TData = Awaited<ReturnType<typeof listBlockedSlots>>, TError = ErrorType<unknown>>(
+ clinicId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listBlockedSlots>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListBlockedSlotsQueryOptions(clinicId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateBlockedSlotUrl = (clinicId: number,) => {
+
+
+
+
+  return `/api/clinics/${clinicId}/blocked-slots`
+}
+
+/**
+ * @summary Block a specific slot
+ */
+export const createBlockedSlot = async (clinicId: number,
+    blockedSlotInput: BlockedSlotInput, options?: RequestInit): Promise<BlockedSlot> => {
+
+  return customFetch<BlockedSlot>(getCreateBlockedSlotUrl(clinicId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      blockedSlotInput,)
+  }
+);}
+
+
+
+
+export const getCreateBlockedSlotMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createBlockedSlot>>, TError,{clinicId: number;data: BodyType<BlockedSlotInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createBlockedSlot>>, TError,{clinicId: number;data: BodyType<BlockedSlotInput>}, TContext> => {
+
+const mutationKey = ['createBlockedSlot'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createBlockedSlot>>, {clinicId: number;data: BodyType<BlockedSlotInput>}> = (props) => {
+          const {clinicId,data} = props ?? {};
+
+          return  createBlockedSlot(clinicId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateBlockedSlotMutationResult = NonNullable<Awaited<ReturnType<typeof createBlockedSlot>>>
+    export type CreateBlockedSlotMutationBody = BodyType<BlockedSlotInput>
+    export type CreateBlockedSlotMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Block a specific slot
+ */
+export const useCreateBlockedSlot = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createBlockedSlot>>, TError,{clinicId: number;data: BodyType<BlockedSlotInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createBlockedSlot>>,
+        TError,
+        {clinicId: number;data: BodyType<BlockedSlotInput>},
+        TContext
+      > => {
+      return useMutation(getCreateBlockedSlotMutationOptions(options));
+    }
+
+export const getDeleteBlockedSlotUrl = (clinicId: number,
+    id: number,) => {
+
+
+
+
+  return `/api/clinics/${clinicId}/blocked-slots/${id}`
+}
+
+/**
+ * @summary Unblock a slot
+ */
+export const deleteBlockedSlot = async (clinicId: number,
+    id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteBlockedSlotUrl(clinicId,id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteBlockedSlotMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteBlockedSlot>>, TError,{clinicId: number;id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteBlockedSlot>>, TError,{clinicId: number;id: number}, TContext> => {
+
+const mutationKey = ['deleteBlockedSlot'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteBlockedSlot>>, {clinicId: number;id: number}> = (props) => {
+          const {clinicId,id} = props ?? {};
+
+          return  deleteBlockedSlot(clinicId,id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteBlockedSlotMutationResult = NonNullable<Awaited<ReturnType<typeof deleteBlockedSlot>>>
+
+    export type DeleteBlockedSlotMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Unblock a slot
+ */
+export const useDeleteBlockedSlot = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteBlockedSlot>>, TError,{clinicId: number;id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteBlockedSlot>>,
+        TError,
+        {clinicId: number;id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteBlockedSlotMutationOptions(options));
+    }
+
+export const getListBlockedDaysUrl = (clinicId: number,) => {
+
+
+
+
+  return `/api/clinics/${clinicId}/blocked-days`
+}
+
+/**
+ * @summary List blocked days for a clinic
+ */
+export const listBlockedDays = async (clinicId: number, options?: RequestInit): Promise<BlockedDay[]> => {
+
+  return customFetch<BlockedDay[]>(getListBlockedDaysUrl(clinicId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListBlockedDaysQueryKey = (clinicId: number,) => {
+    return [
+    `/api/clinics/${clinicId}/blocked-days`
+    ] as const;
+    }
+
+
+export const getListBlockedDaysQueryOptions = <TData = Awaited<ReturnType<typeof listBlockedDays>>, TError = ErrorType<unknown>>(clinicId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listBlockedDays>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListBlockedDaysQueryKey(clinicId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listBlockedDays>>> = ({ signal }) => listBlockedDays(clinicId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(clinicId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listBlockedDays>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListBlockedDaysQueryResult = NonNullable<Awaited<ReturnType<typeof listBlockedDays>>>
+export type ListBlockedDaysQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List blocked days for a clinic
+ */
+
+export function useListBlockedDays<TData = Awaited<ReturnType<typeof listBlockedDays>>, TError = ErrorType<unknown>>(
+ clinicId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listBlockedDays>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListBlockedDaysQueryOptions(clinicId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateBlockedDayUrl = (clinicId: number,) => {
+
+
+
+
+  return `/api/clinics/${clinicId}/blocked-days`
+}
+
+/**
+ * @summary Block a specific day
+ */
+export const createBlockedDay = async (clinicId: number,
+    blockedDayInput: BlockedDayInput, options?: RequestInit): Promise<BlockedDay> => {
+
+  return customFetch<BlockedDay>(getCreateBlockedDayUrl(clinicId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      blockedDayInput,)
+  }
+);}
+
+
+
+
+export const getCreateBlockedDayMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createBlockedDay>>, TError,{clinicId: number;data: BodyType<BlockedDayInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createBlockedDay>>, TError,{clinicId: number;data: BodyType<BlockedDayInput>}, TContext> => {
+
+const mutationKey = ['createBlockedDay'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createBlockedDay>>, {clinicId: number;data: BodyType<BlockedDayInput>}> = (props) => {
+          const {clinicId,data} = props ?? {};
+
+          return  createBlockedDay(clinicId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateBlockedDayMutationResult = NonNullable<Awaited<ReturnType<typeof createBlockedDay>>>
+    export type CreateBlockedDayMutationBody = BodyType<BlockedDayInput>
+    export type CreateBlockedDayMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Block a specific day
+ */
+export const useCreateBlockedDay = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createBlockedDay>>, TError,{clinicId: number;data: BodyType<BlockedDayInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createBlockedDay>>,
+        TError,
+        {clinicId: number;data: BodyType<BlockedDayInput>},
+        TContext
+      > => {
+      return useMutation(getCreateBlockedDayMutationOptions(options));
+    }
+
+export const getDeleteBlockedDayUrl = (clinicId: number,
+    id: number,) => {
+
+
+
+
+  return `/api/clinics/${clinicId}/blocked-days/${id}`
+}
+
+/**
+ * @summary Unblock a day
+ */
+export const deleteBlockedDay = async (clinicId: number,
+    id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteBlockedDayUrl(clinicId,id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteBlockedDayMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteBlockedDay>>, TError,{clinicId: number;id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteBlockedDay>>, TError,{clinicId: number;id: number}, TContext> => {
+
+const mutationKey = ['deleteBlockedDay'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteBlockedDay>>, {clinicId: number;id: number}> = (props) => {
+          const {clinicId,id} = props ?? {};
+
+          return  deleteBlockedDay(clinicId,id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteBlockedDayMutationResult = NonNullable<Awaited<ReturnType<typeof deleteBlockedDay>>>
+
+    export type DeleteBlockedDayMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Unblock a day
+ */
+export const useDeleteBlockedDay = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteBlockedDay>>, TError,{clinicId: number;id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteBlockedDay>>,
+        TError,
+        {clinicId: number;id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteBlockedDayMutationOptions(options));
     }
 
 export const getGetAppointmentUrl = (clinicId: number,

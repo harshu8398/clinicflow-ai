@@ -14,6 +14,12 @@ export const appointmentsTable = pgTable("appointments", {
   selectedTimeSlot: text("booking_time"),
   calendarEventId: text("google_event_id"),
   status: text("status").notNull().default("pending_slot_selection"),
+  appointmentSource: text("appointment_source").notNull().default("Online"),
+  patientAge: integer("patient_age"),
+  patientGender: text("patient_gender"),
+  visitType: text("visit_type"),
+  notes: text("notes"),
+  doctorId: integer("doctor_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

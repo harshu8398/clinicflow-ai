@@ -13,5 +13,10 @@ export interface DashboardStats {
   pendingCount: number;
   confirmedCount: number;
   completedCount: number;
+  todayOnlineAppointments: number;
+  todayManualAppointments: number;
+  todayBlockedSlots: number;
+  todayCompletedAppointments: number;
+  todayCancelledAppointments: number;
   recentAppointments: Appointment[];
 }

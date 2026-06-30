@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { eq } from "drizzle-orm";
-import { db, appointmentsTable } from "@workspace/db";
+import { eq, and } from "drizzle-orm";
+import { db, appointmentsTable, blockedSlotsTable, blockedDaysTable } from "@workspace/db";
 import { GetDashboardParams, GetDashboardResponse } from "@workspace/api-zod";
 import { requireAuth, requireClinicOwnership } from "../middleware/auth";
 
@@ -38,6 +38,44 @@ router.get("/clinics/:clinicId/dashboard", requireAuth, requireClinicOwnership, 
     .sort((a, b) => new Date(String(b.createdAt)).getTime() - new Date(String(a.createdAt)).getTime())
     .slice(0, 5);
 
+  const blockedSlotsCount = await db
+    .select()
+    .from(blockedSlotsTable)
+    .where(
+      and(
+        eq(blockedSlotsTable.clinicId, clinicId),
+        eq(blockedSlotsTable.date, todayStr)
+      )
+    );
+
+  const blockedDaysCount = await db
+    .select()
+    .from(blockedDaysTable)
+    .where(
+      and(
+        eq(blockedDaysTable.clinicId, clinicId),
+        eq(blockedDaysTable.date, todayStr)
+      )
+    );
+
+  const todayOnlineAppointments = serialized.filter((a) =>
+    String(a.appointmentDate).startsWith(todayStr) && a.appointmentSource === "Online"
+  ).length;
+
+  const todayManualAppointments = serialized.filter((a) =>
+    String(a.appointmentDate).startsWith(todayStr) && a.appointmentSource !== "Online"
+  ).length;
+
+  const todayBlockedSlots = blockedSlotsCount.length + (blockedDaysCount.length ? 1 : 0);
+
+  const todayCompletedAppointments = serialized.filter((a) =>
+    String(a.appointmentDate).startsWith(todayStr) && a.status === "completed"
+  ).length;
+
+  const todayCancelledAppointments = serialized.filter((a) =>
+    String(a.appointmentDate).startsWith(todayStr) && a.status === "cancelled"
+  ).length;
+
   res.json(
     GetDashboardResponse.parse({
       totalAppointments,
@@ -45,6 +83,11 @@ router.get("/clinics/:clinicId/dashboard", requireAuth, requireClinicOwnership, 
       pendingCount,
       confirmedCount,
       completedCount,
+      todayOnlineAppointments,
+      todayManualAppointments,
+      todayBlockedSlots,
+      todayCompletedAppointments,
+      todayCancelledAppointments,
       recentAppointments,
     })
   );

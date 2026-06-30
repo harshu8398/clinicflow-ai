@@ -11,6 +11,8 @@ import prescriptionsRouter from "./prescriptions";
 import subscriptionsRouter from "./subscriptions";
 import demoRequestsRouter from "./demo-requests";
 import contactMessagesRouter from "./contact-messages";
+import blockedSlotsRouter from "./blocked-slots";
+import blockedDaysRouter from "./blocked-days";
 
 const router: IRouter = Router();
 
@@ -23,6 +25,8 @@ router.use(chatRouter);
 router.use(subscriptionsRouter);
 router.use(demoRequestsRouter);
 router.use(contactMessagesRouter);
+router.use(blockedSlotsRouter);
+router.use(blockedDaysRouter);
 
 // Protected clinic admin routes (middleware applied per-route inside each file)
 router.use(appointmentsRouter);

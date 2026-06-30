@@ -5,6 +5,7 @@
  * ClinicFlow AI API
  * OpenAPI spec version: 0.1.0
  */
+import type { AppointmentInputAppointmentSource } from './appointmentInputAppointmentSource';
 
 export interface AppointmentInput {
   /** @minLength 1 */
@@ -15,4 +16,17 @@ export interface AppointmentInput {
   patientProblem: string;
   /** @minLength 1 */
   appointmentDate: string;
+  /** @nullable */
+  selectedTimeSlot?: string | null;
+  appointmentSource?: AppointmentInputAppointmentSource;
+  /** @nullable */
+  patientAge?: number | null;
+  /** @nullable */
+  patientGender?: string | null;
+  /** @nullable */
+  visitType?: string | null;
+  /** @nullable */
+  notes?: string | null;
+  /** @nullable */
+  doctorId?: number | null;
 }
