@@ -1,4 +1,4 @@
-import { db, clinicsTable, appointmentsTable } from '../../lib/db/src/index.ts';
+import { db, clinicsTable, appointmentsTable } from '@workspace/db';
 import { eq, and, ne } from 'drizzle-orm';
 
 async function main() {

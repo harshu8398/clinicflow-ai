@@ -1,4 +1,4 @@
-import { db, appointmentsTable, blockedSlotsTable, blockedDaysTable } from "../../lib/db/src/index.ts";
+import { db, appointmentsTable, blockedSlotsTable, blockedDaysTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
 async function main() {

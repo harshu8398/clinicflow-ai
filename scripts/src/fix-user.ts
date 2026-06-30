@@ -1,4 +1,4 @@
-import { db, usersTable, clinicsTable } from "../../lib/db/src/index.ts";
+import { db, usersTable, clinicsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 

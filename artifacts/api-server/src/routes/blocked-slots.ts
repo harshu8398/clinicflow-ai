@@ -2,7 +2,6 @@ import { Router, type IRouter } from "express";
 import { eq, and } from "drizzle-orm";
 import { db, blockedSlotsTable } from "@workspace/db";
 import { requireAuth, requireClinicOwnership } from "../middleware/auth";
-import { z } from "zod/v4";
 
 const router: IRouter = Router();
 
