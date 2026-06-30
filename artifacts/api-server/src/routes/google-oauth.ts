@@ -11,9 +11,7 @@ router.get("/clinics/:clinicId/auth/google", async (req, res) => {
     res.status(400).json({ error: "Invalid clinic ID" });
     return;
   }
-  console.log("GOOGLE_CLIENT_ID env:", process.env.GOOGLE_CLIENT_ID);
   const url = getAuthUrl(clinicId);
-  console.log("Redirecting to Google Auth URL:", url);
   res.redirect(url);
 });
 

@@ -130,7 +130,9 @@ router.post("/auth/forgot-password", async (req, res): Promise<void> => {
       });
     });
 
-    console.log(`\n========================================\n[PASSWORD RESET OTP] for ${user.email}:\nOTP: ${code}\n========================================\n`);
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`\n========================================\n[PASSWORD RESET OTP] for ${user.email}:\nOTP: ${code}\n========================================\n`);
+    }
 
     // Send the email using Gmail SMTP
     try {

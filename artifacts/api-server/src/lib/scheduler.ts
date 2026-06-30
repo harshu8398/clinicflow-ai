@@ -3,12 +3,17 @@ import { and, eq, ne } from "drizzle-orm";
 import { getValidAccessToken, getBusySlots } from "./google-calendar";
 
 export async function calculateAvailableSlots(clinicId: number, dateStr: string): Promise<string[]> {
+  if (!dateStr) return [];
+  const dateOnly = dateStr.includes("T") ? dateStr.split("T")[0] : dateStr;
+  if (isNaN(new Date(dateOnly).getTime())) {
+    return [];
+  }
+
   const [clinic] = await db.select().from(clinicsTable).where(eq(clinicsTable.id, clinicId));
   if (!clinic) {
     throw new Error("Clinic not found");
   }
 
-  const dateOnly = dateStr.includes("T") ? dateStr.split("T")[0] : dateStr;
   const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
   const dayOfWeek = days[new Date(dateOnly).getUTCDay()];
   const activeDays = clinic.workingDays

@@ -132,7 +132,13 @@ router.post("/subscriptions/requests", requireAuth, async (req: any, res): Promi
       return;
     }
 
-    const ext = matches[1];
+    const ext = matches[1].toLowerCase();
+    const allowedExtensions = ["png", "jpg", "jpeg", "webp"];
+    if (!allowedExtensions.includes(ext)) {
+      res.status(400).json({ error: "Supported payment proof file types are PNG, JPG, JPEG, or WEBP." });
+      return;
+    }
+
     const dataBuffer = Buffer.from(matches[2], "base64");
 
     // Check size <= 5 MB
@@ -299,16 +305,30 @@ router.put("/subscriptions/settings", requireAuth, requireSystemOwner, async (re
   if (upiQrCode && upiQrCode.startsWith("data:image")) {
     try {
       const matches = upiQrCode.match(/^data:image\/([a-zA-Z+]+);base64,(.+)$/);
-      if (matches && matches.length === 3) {
-        const ext = matches[1];
-        const dataBuffer = Buffer.from(matches[2], "base64");
-        const filename = `qrcode-${Date.now()}.${ext}`;
-        const filepath = path.join(UPLOADS_DIR, filename);
-        fs.writeFileSync(filepath, dataBuffer);
-        upiQrCodeUrl = `/uploads/${filename}`;
+      if (!matches || matches.length !== 3) {
+        res.status(400).json({ error: "Invalid QR code image format" });
+        return;
       }
+      const ext = matches[1].toLowerCase();
+      const allowedExtensions = ["png", "jpg", "jpeg", "webp"];
+      if (!allowedExtensions.includes(ext)) {
+        res.status(400).json({ error: "Supported QR code file types are PNG, JPG, JPEG, or WEBP." });
+        return;
+      }
+      const dataBuffer = Buffer.from(matches[2], "base64");
+      if (dataBuffer.length > 2 * 1024 * 1024) {
+        res.status(400).json({ error: "QR code image size must be smaller than 2MB." });
+        return;
+      }
+
+      const filename = `qrcode-${Date.now()}.${ext}`;
+      const filepath = path.join(UPLOADS_DIR, filename);
+      fs.writeFileSync(filepath, dataBuffer);
+      upiQrCodeUrl = `/uploads/${filename}`;
     } catch (err) {
       console.error("QR Code upload failed:", err);
+      res.status(500).json({ error: "Failed to process QR code upload" });
+      return;
     }
   }
 

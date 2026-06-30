@@ -115,7 +115,12 @@ export async function getBusySlots(
   calendarId: string,
   dateStr: string
 ): Promise<Array<{ start: string; end: string }>> {
+  if (!dateStr) return [];
   const dateOnly = dateStr.includes("T") ? dateStr.split("T")[0] : dateStr;
+  const parsedTime = new Date(`${dateOnly}T00:00:00Z`).getTime();
+  if (isNaN(parsedTime)) {
+    return [];
+  }
   const url = "https://www.googleapis.com/calendar/v3/freeBusy";
   const timeMin = new Date(`${dateOnly}T00:00:00Z`).toISOString();
   const timeMax = new Date(`${dateOnly}T23:59:59Z`).toISOString();

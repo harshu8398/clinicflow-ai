@@ -11,6 +11,18 @@ if (!rawPort) {
   );
 }
 
+if (!process.env["DATABASE_URL"]) {
+  throw new Error(
+    "DATABASE_URL environment variable is required but was not provided.",
+  );
+}
+
+if (process.env["NODE_ENV"] === "production" && !process.env["SESSION_SECRET"]) {
+  logger.warn(
+    "SESSION_SECRET environment variable is not defined in production. Falling back to default secret is insecure!",
+  );
+}
+
 const port = Number(rawPort);
 
 if (Number.isNaN(port) || port <= 0) {
