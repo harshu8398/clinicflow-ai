@@ -41,7 +41,7 @@ export async function seedAdminUsersIfEmpty(): Promise<void> {
     const clinics = await db.select().from(clinicsTable).orderBy(clinicsTable.id);
     if (clinics.length > 0) {
       const clinic = clinics[0];
-      const password = "1qaz1qaz!@#$Q";
+      const password = "admin1234";
       const passwordHash = await bcrypt.hash(password, 12);
 
       await db.insert(usersTable).values({
