@@ -45,6 +45,17 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     }
   }
 
+  await new Promise<void>((resolve, reject) => {
+    req.session.save((err) => {
+      if (err) {
+        console.error("Session save failed:", err);
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+
   res.json({
     userId: user.id,
     clinicId: user.clinicId,
