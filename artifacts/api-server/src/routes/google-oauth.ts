@@ -28,7 +28,7 @@ router.get("/clinics/:clinicId/auth/google/callback", async (req, res) => {
   const isLocalhost = host.includes("localhost") || host.includes("127.0.0.1");
   const baseRedirect = isLocalhost
     ? `http://localhost:3000/admin/${targetClinicId}/settings`
-    : `/admin/${targetClinicId}/settings`;
+    : `${process.env.CLIENT_URL || "https://clinicflow-wine.vercel.app"}/admin/${targetClinicId}/settings`;
 
   if (error || !code) {
     console.error("Google OAuth error or code missing:", error);

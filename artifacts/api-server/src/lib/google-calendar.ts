@@ -1,8 +1,12 @@
 import { db, clinicsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
-const getRedirectUri = (clinicId: number) =>
-  `http://localhost:5000/api/clinics/1/auth/google/callback`;
+const getRedirectUri = (clinicId: number) => {
+  const baseUrl = process.env.NODE_ENV === "production"
+    ? (process.env.SERVER_URL || "https://clinicflow-api-4izl.onrender.com")
+    : "http://localhost:5000";
+  return `${baseUrl}/api/clinics/${clinicId}/auth/google/callback`;
+};
 
 export function getAuthUrl(clinicId: number): string {
   const rootUrl = "https://accounts.google.com/o/oauth2/v2/auth";
