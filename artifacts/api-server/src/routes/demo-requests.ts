@@ -17,10 +17,13 @@ function requireSystemOwner(req: any, res: any, next: any) {
 
 // POST /api/demo-requests (Public)
 router.post("/demo-requests", async (req, res): Promise<void> => {
-  const { fullName, clinicName, mobileNumber, email, city, notes } = req.body ?? {};
+  const { name, fullName, clinicName, phone, mobileNumber, email, city, notes } = req.body ?? {};
 
-  if (!fullName || !clinicName || !mobileNumber || !email || !city) {
-    res.status(400).json({ error: "Full Name, Clinic Name, Mobile Number, Email, and City are required." });
+  const finalName = name || fullName;
+  const finalPhone = phone || mobileNumber;
+
+  if (!finalName || !clinicName || !finalPhone || !email || !city) {
+    res.status(400).json({ error: "Name, Clinic Name, Phone, Email, and City are required." });
     return;
   }
 
@@ -28,9 +31,9 @@ router.post("/demo-requests", async (req, res): Promise<void> => {
     const [inserted] = await db
       .insert(demoRequestsTable)
       .values({
-        fullName,
+        fullName: finalName,
         clinicName,
-        mobileNumber,
+        mobileNumber: finalPhone,
         email,
         city,
         notes: notes || null,
@@ -38,13 +41,15 @@ router.post("/demo-requests", async (req, res): Promise<void> => {
       })
       .returning();
 
-    // Send email notification to System Owner
-    await sendDemoRequestEmail({
-      fullName,
+    // Send email notification to System Owner (non-blocking in background)
+    sendDemoRequestEmail({
+      fullName: finalName,
       clinicName,
-      mobileNumber,
+      mobileNumber: finalPhone,
       email,
       city,
+    }).catch((err) => {
+      console.error("Failed to send demo request email in background:", err);
     });
 
     res.status(201).json({
