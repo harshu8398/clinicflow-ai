@@ -2,33 +2,69 @@ import { db, appointmentsTable, clinicsTable, blockedSlotsTable, blockedDaysTabl
 import { and, eq, ne } from "drizzle-orm";
 import { getValidAccessToken, getBusySlots } from "./google-calendar";
 
-function parseTimeToDate(dateStr: string, timeStr: string): Date {
+function parseTimeToDate(dateStr: string, timeStr: string, timeZone: string = "Asia/Kolkata"): Date {
   let cleanTime = timeStr.trim();
-  let hours = "";
-  let minutes = "";
+  let hours = 0;
+  let minutes = 0;
 
   if (cleanTime.toUpperCase().includes("AM") || cleanTime.toUpperCase().includes("PM")) {
     const [time, modifier] = cleanTime.split(" ");
     const parts = time.split(":");
     let h = parseInt(parts[0] || "0", 10);
-    const m = parts[1] || "00";
+    const m = parseInt(parts[1] || "00", 10);
     if (h === 12) {
       h = 0;
     }
     if (modifier.toUpperCase() === "PM") {
       h += 12;
     }
-    hours = h.toString().padStart(2, "0");
-    minutes = m.padStart(2, "0");
+    hours = h;
+    minutes = m;
   } else {
     const parts = cleanTime.split(":");
     const h = parseInt(parts[0] || "0", 10);
-    const m = parts[1] || "00";
-    hours = h.toString().padStart(2, "0");
-    minutes = m.padStart(2, "0");
+    const m = parseInt(parts[1] || "00", 10);
+    hours = h;
+    minutes = m;
   }
 
-  return new Date(`${dateStr}T${hours}:${minutes}:00`);
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const utcGuess = new Date(Date.UTC(year, month - 1, day, hours, minutes, 0));
+
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+    hour12: false,
+  });
+
+  const parts = formatter.formatToParts(utcGuess);
+  const partMap: Record<string, string> = {};
+  for (const part of parts) {
+    partMap[part.type] = part.value;
+  }
+
+  const formattedYear = parseInt(partMap.year || "1970", 10);
+  const formattedMonth = parseInt(partMap.month || "1", 10);
+  const formattedDay = parseInt(partMap.day || "1", 10);
+  const formattedHour = parseInt(partMap.hour || "0", 10);
+  const formattedMin = parseInt(partMap.minute || "0", 10);
+
+  const formattedLocalUTC = new Date(Date.UTC(
+    formattedYear,
+    formattedMonth - 1,
+    formattedDay,
+    formattedHour,
+    formattedMin,
+    0
+  ));
+
+  const offsetMs = formattedLocalUTC.getTime() - utcGuess.getTime();
+  return new Date(utcGuess.getTime() - offsetMs);
 }
 
 export async function calculateAvailableSlots(clinicId: number, dateStr: string): Promise<string[]> {
@@ -110,7 +146,7 @@ export async function calculateAvailableSlots(clinicId: number, dateStr: string)
 
       const hourStr = slotHour.toString().padStart(2, "0");
       const minStr = slotMin.toString().padStart(2, "0");
-      const slotStart = new Date(`${dateOnly}T${hourStr}:${minStr}:00`);
+      const slotStart = parseTimeToDate(dateOnly, `${hourStr}:${minStr}`, "Asia/Kolkata");
       const slotEnd = new Date(slotStart.getTime() + duration * 60 * 1000);
 
       potentialSlots.push({ label, start: slotStart, end: slotEnd });
@@ -167,10 +203,18 @@ export async function calculateAvailableSlots(clinicId: number, dateStr: string)
     .filter(b => !isNaN(b.start.getTime()) && !isNaN(b.end.getTime()));
 
   const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  const todayStr = `${year}-${month}-${day}`;
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const parts = formatter.formatToParts(now);
+  const partMap: Record<string, string> = {};
+  for (const part of parts) {
+    partMap[part.type] = part.value;
+  }
+  const todayStr = `${partMap.year}-${partMap.month}-${partMap.day}`;
   const isToday = dateOnly === todayStr;
 
   const available = potentialSlots.filter(slot => {
