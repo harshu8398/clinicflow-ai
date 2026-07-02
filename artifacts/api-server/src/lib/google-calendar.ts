@@ -169,8 +169,8 @@ export async function createCalendarEvent(
     body: JSON.stringify({
       summary: eventDetails.summary,
       description: eventDetails.description,
-      start: { dateTime: eventDetails.start },
-      end: { dateTime: eventDetails.end }
+      start: { dateTime: eventDetails.start, timeZone: "Asia/Kolkata" },
+      end: { dateTime: eventDetails.end, timeZone: "Asia/Kolkata" }
     })
   });
 
@@ -199,8 +199,8 @@ export async function updateCalendarEvent(
     body: JSON.stringify({
       summary: eventDetails.summary,
       description: eventDetails.description,
-      start: { dateTime: eventDetails.start },
-      end: { dateTime: eventDetails.end }
+      start: { dateTime: eventDetails.start, timeZone: "Asia/Kolkata" },
+      end: { dateTime: eventDetails.end, timeZone: "Asia/Kolkata" }
     })
   });
 

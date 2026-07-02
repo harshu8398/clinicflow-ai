@@ -10,7 +10,7 @@ import {
 } from "@workspace/api-zod";
 import { randomUUID } from "crypto";
 
-import { calculateAvailableSlots } from "../lib/scheduler";
+import { calculateAvailableSlots, parseTimeToDate, formatToLocalISO } from "../lib/scheduler";
 import { getValidAccessToken, createCalendarEvent } from "../lib/google-calendar";
 
 const router: IRouter = Router();
@@ -346,15 +346,14 @@ router.post("/clinics/:clinicId/chat/message", async (req, res): Promise<void> =
       let googleEventId: string | null = null;
       if (clinic && clinic.googleConnected && clinic.googleCalendarId) {
         try {
-          const startLocal = `${appointmentDate}T${convertTo24Hour(selectedTimeSlot)}`;
-          const startDate = new Date(startLocal);
+          const startDate = parseTimeToDate(appointmentDate, selectedTimeSlot, "Asia/Kolkata");
           const endDate = new Date(startDate.getTime() + (clinic.slotDuration || 30) * 60 * 1000);
 
           const eventDetails = {
             summary: `Appointment: ${patientName}`,
             description: `Appointment booked via ClinicFlow AI.\nPatient: ${patientName}\nPhone: ${patientPhone}\nProblem: ${patientProblem}`,
-            start: startDate.toISOString(),
-            end: endDate.toISOString(),
+            start: formatToLocalISO(startDate, "Asia/Kolkata"),
+            end: formatToLocalISO(endDate, "Asia/Kolkata"),
           };
 
           const token = await getValidAccessToken(clinic);

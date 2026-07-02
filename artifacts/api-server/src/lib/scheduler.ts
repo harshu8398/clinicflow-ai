@@ -2,7 +2,7 @@ import { db, appointmentsTable, clinicsTable, blockedSlotsTable, blockedDaysTabl
 import { and, eq, ne } from "drizzle-orm";
 import { getValidAccessToken, getBusySlots } from "./google-calendar";
 
-function parseTimeToDate(dateStr: string, timeStr: string, timeZone: string = "Asia/Kolkata"): Date {
+export function parseTimeToDate(dateStr: string, timeStr: string, timeZone: string = "Asia/Kolkata"): Date {
   let cleanTime = timeStr.trim();
   let hours = 0;
   let minutes = 0;
@@ -254,4 +254,23 @@ function format12Hour(hours: number, minutes: number): string {
   const displayMinutes = minutes.toString().padStart(2, "0");
   const displayHoursStr = displayHours.toString().padStart(2, "0");
   return `${displayHoursStr}:${displayMinutes} ${ampm}`;
+}
+
+export function formatToLocalISO(date: Date, timeZone: string = "Asia/Kolkata"): string {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  });
+  const parts = formatter.formatToParts(date);
+  const partMap: Record<string, string> = {};
+  for (const part of parts) {
+    partMap[part.type] = part.value;
+  }
+  return `${partMap.year}-${partMap.month}-${partMap.day}T${partMap.hour}:${partMap.minute}:${partMap.second}`;
 }

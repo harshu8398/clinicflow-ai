@@ -21,7 +21,7 @@ import {
   deleteCalendarEvent,
 } from "../lib/google-calendar";
 
-import { calculateAvailableSlots } from "../lib/scheduler";
+import { calculateAvailableSlots, parseTimeToDate, formatToLocalISO } from "../lib/scheduler";
 
 const router: IRouter = Router();
 
@@ -107,8 +107,7 @@ router.post("/clinics/:clinicId/appointments", requireAuth, requireClinicOwnersh
     const [clinic] = await db.select().from(clinicsTable).where(eq(clinicsTable.id, params.data.clinicId));
     if (clinic && clinic.googleConnected && clinic.googleCalendarId) {
       try {
-        const startLocal = `${appointment.appointmentDate}T${convertTo24Hour(appointment.selectedTimeSlot)}`;
-        const startDate = new Date(startLocal);
+        const startDate = parseTimeToDate(appointment.appointmentDate, appointment.selectedTimeSlot, "Asia/Kolkata");
         const endDate = new Date(startDate.getTime() + (clinic.slotDuration || 30) * 60 * 1000);
 
         const sourceLabel = appointment.appointmentSource === "Online" ? "AI" : "Admin";
@@ -126,8 +125,8 @@ router.post("/clinics/:clinicId/appointments", requireAuth, requireClinicOwnersh
         const eventDetails = {
           summary: `Appointment: ${appointment.patientName}`,
           description: descriptionLines.join("\n"),
-          start: startDate.toISOString(),
-          end: endDate.toISOString(),
+          start: formatToLocalISO(startDate, "Asia/Kolkata"),
+          end: formatToLocalISO(endDate, "Asia/Kolkata"),
         };
 
         const token = await getValidAccessToken(clinic);
@@ -266,8 +265,7 @@ router.patch("/clinics/:clinicId/appointments/:appointmentId", requireAuth, requ
   if (clinic && clinic.googleConnected && clinic.googleCalendarId) {
     try {
       if (appointment.selectedTimeSlot && appointment.appointmentDate) {
-        const startLocal = `${appointment.appointmentDate}T${convertTo24Hour(appointment.selectedTimeSlot)}`;
-        const startDate = new Date(startLocal);
+        const startDate = parseTimeToDate(appointment.appointmentDate, appointment.selectedTimeSlot, "Asia/Kolkata");
         const endDate = new Date(startDate.getTime() + (clinic.slotDuration || 30) * 60 * 1000);
 
         const sourceLabel = appointment.appointmentSource === "Online" ? "AI" : "Admin";
@@ -285,8 +283,8 @@ router.patch("/clinics/:clinicId/appointments/:appointmentId", requireAuth, requ
         const eventDetails = {
           summary: `Appointment: ${appointment.patientName}`,
           description: descriptionLines.join("\n"),
-          start: startDate.toISOString(),
-          end: endDate.toISOString(),
+          start: formatToLocalISO(startDate, "Asia/Kolkata"),
+          end: formatToLocalISO(endDate, "Asia/Kolkata"),
         };
 
         const token = await getValidAccessToken(clinic);
