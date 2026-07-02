@@ -986,6 +986,22 @@ ${clinicName}`;
     return `${displayHoursStr}:${displayMinutes} ${ampm}`;
   };
 
+  const formatTimeSlot = (slotStr: string | null | undefined): string => {
+    if (!slotStr) return "No slot assigned";
+    if (slotStr.toUpperCase().includes("AM") || slotStr.toUpperCase().includes("PM")) {
+      return slotStr;
+    }
+    const parts = slotStr.trim().split(":");
+    const h = parseInt(parts[0], 10);
+    if (isNaN(h)) return slotStr;
+    const m = parts[1] ? parseInt(parts[1], 10) : 0;
+    const ampm = h >= 12 ? "PM" : "AM";
+    const displayHours = h % 12 === 0 ? 12 : h % 12;
+    const displayMinutes = m.toString().padStart(2, "0");
+    const displayHoursStr = displayHours.toString().padStart(2, "0");
+    return `${displayHoursStr}:${displayMinutes} ${ampm}`;
+  };
+
   const getDotColor = (item: any) => {
     if (item.type === "blocked_slot") return "bg-rose-500";
     if (item.status === "completed") return "bg-purple-500";
@@ -1225,7 +1241,7 @@ ${clinicName}`;
                           <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
                             <span className="flex items-center gap-1.5">
                               <Clock className="w-3.5 h-3.5 text-slate-450" />
-                              {apt.selectedTimeSlot || "No slot assigned"}
+                              {formatTimeSlot(apt.selectedTimeSlot)}
                             </span>
                             <span className="flex items-center gap-1.5">
                               <Phone className="w-3.5 h-3.5 text-slate-450" />

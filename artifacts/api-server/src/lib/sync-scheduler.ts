@@ -44,14 +44,33 @@ export async function syncAllClinicsGoogleCalendar() {
 
             const eventDate = new Date(event.start.dateTime);
             
-            // Format to YYYY-MM-DD
-            const year = eventDate.getFullYear();
-            const month = (eventDate.getMonth() + 1).toString().padStart(2, "0");
-            const day = eventDate.getDate().toString().padStart(2, "0");
-            const googleDate = `${year}-${month}-${day}`;
+            // Format to YYYY-MM-DD in Asia/Kolkata
+            const formatterDate = new Intl.DateTimeFormat("en-US", {
+              timeZone: "Asia/Kolkata",
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            });
+            const partsDate = formatterDate.formatToParts(eventDate);
+            const partMapDate: Record<string, string> = {};
+            for (const part of partsDate) {
+              partMapDate[part.type] = part.value;
+            }
+            const googleDate = `${partMapDate.year}-${partMapDate.month}-${partMapDate.day}`;
 
-            // Format to hh:mm AM/PM
-            const googleTime = convertTo12Hour(eventDate.getHours(), eventDate.getMinutes());
+            // Format to hh:mm AM/PM in Asia/Kolkata
+            const formatterTime = new Intl.DateTimeFormat("en-US", {
+              timeZone: "Asia/Kolkata",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            });
+            const partsTime = formatterTime.formatToParts(eventDate);
+            const partMapTime: Record<string, string> = {};
+            for (const part of partsTime) {
+              partMapTime[part.type] = part.value;
+            }
+            const googleTime = `${partMapTime.hour}:${partMapTime.minute} ${partMapTime.dayPeriod}`;
 
             if (appt.appointmentDate !== googleDate || appt.selectedTimeSlot !== googleTime) {
               logger.info(
