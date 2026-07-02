@@ -35,12 +35,14 @@ router.post("/contact-messages", async (req, res): Promise<void> => {
       })
       .returning();
 
-    // Send email notification to System Owner
-    await sendContactMessageEmail({
+    // Send email notification to System Owner (non-blocking in background)
+    sendContactMessageEmail({
       name,
       email,
       message,
       createdAt: inserted.createdAt,
+    }).catch((err) => {
+      console.error("Failed to send contact message email in background:", err);
     });
 
     res.status(201).json({

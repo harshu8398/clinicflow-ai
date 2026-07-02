@@ -58,6 +58,7 @@ export async function checkActiveSubscription(req: any, res: any, next: NextFunc
     "/auth/forgot-password",
     "/auth/reset-password",
     "/demo-requests",
+    "/contact-messages",
   ];
   if (bypassRoutes.some(route => req.originalUrl.includes(route))) {
     next();
