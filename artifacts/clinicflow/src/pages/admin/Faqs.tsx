@@ -13,7 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, HelpCircle, Loader2 } from "lucide-react";
 
 export default function Faqs() {
-  const { clinicId } = useParams();
+  const match = window.location.pathname.match(/\/admin\/(\d+)/);
+  const clinicId = match ? match[1] : undefined;
   const id = Number(clinicId);
   const { data: faqs, isLoading } = useListFaqs(id);
   const createFaq = useCreateFaq();

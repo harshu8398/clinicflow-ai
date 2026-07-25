@@ -29,7 +29,8 @@ interface Session {
 }
 
 export default function Settings() {
-  const { clinicId } = useParams();
+  const match = window.location.pathname.match(/\/admin\/(\d+)/);
+  const clinicId = match ? match[1] : undefined;
   const search = useSearch();
   const id = Number(clinicId);
   const { data: clinic, isLoading } = useGetClinic(id);

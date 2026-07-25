@@ -49,7 +49,8 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function Appointments() {
-  const { clinicId } = useParams();
+  const match = window.location.pathname.match(/\/admin\/(\d+)/);
+  const clinicId = match ? match[1] : undefined;
   const id = Number(clinicId);
   const [page, setPage] = useState(1);
   const limit = 20;

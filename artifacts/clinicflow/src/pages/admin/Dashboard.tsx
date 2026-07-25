@@ -16,7 +16,8 @@ import { Input } from "@/components/ui/input";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 export default function Dashboard() {
-  const { clinicId } = useParams();
+  const match = window.location.pathname.match(/\/admin\/(\d+)/);
+  const clinicId = match ? match[1] : undefined;
   const id = Number(clinicId);
   const { data: stats, isLoading } = useGetDashboard(id, {
     query: {
