@@ -42,9 +42,11 @@ export function telemetryMiddleware(req: Request, res: Response, next: NextFunct
       const executionTimeMs = (diff[0] * 1e3 + diff[1] * 1e-6).toFixed(2);
       const queryCount = store.count;
 
-      res.setHeader("X-Query-Count", String(queryCount));
-      res.setHeader("X-Execution-Time", `${executionTimeMs}ms`);
-      res.setHeader("X-Response-Size", `${responseSize} bytes`);
+      if (!res.headersSent) {
+        res.setHeader("X-Query-Count", String(queryCount));
+        res.setHeader("X-Execution-Time", `${executionTimeMs}ms`);
+        res.setHeader("X-Response-Size", `${responseSize} bytes`);
+      }
 
       if (queryCount > 10) {
         logger.warn(

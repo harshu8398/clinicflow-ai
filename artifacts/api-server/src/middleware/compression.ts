@@ -33,16 +33,16 @@ export function compressionMiddleware(req: Request, res: Response, next: NextFun
       }
     }
 
-    zlib.gzip(buffer, (err, compressed) => {
-      if (err) {
-        return next(err);
+    try {
+      const compressed = zlib.gzipSync(buffer);
+      if (!res.headersSent) {
+        res.setHeader("Content-Encoding", "gzip");
+        res.setHeader("Content-Length", compressed.length);
       }
-      res.setHeader("Content-Encoding", "gzip");
-      res.setHeader("Content-Length", compressed.length);
-      originalEnd.call(this, compressed, cb);
-    });
-
-    return this;
+      return originalEnd.call(this, compressed, cb);
+    } catch (err) {
+      return next(err);
+    }
   } as any;
 
   next();
