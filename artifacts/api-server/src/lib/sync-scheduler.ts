@@ -128,9 +128,4 @@ export async function syncAllClinicsGoogleCalendar() {
   }
 }
 
-export function startGoogleSync() {
-  // Run immediately on startup
-  syncAllClinicsGoogleCalendar();
-  // Poll every 15 seconds
-  setInterval(syncAllClinicsGoogleCalendar, 15000);
-}
+

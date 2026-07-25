@@ -6,17 +6,17 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { Appointment } from './appointment';
+import type { DashboardStatsClinic } from './dashboardStatsClinic';
+import type { DashboardStatsSettings } from './dashboardStatsSettings';
+import type { DashboardStatsStats } from './dashboardStatsStats';
+import type { DashboardStatsSubscription } from './dashboardStatsSubscription';
 
 export interface DashboardStats {
-  totalAppointments: number;
-  todayAppointments: number;
-  pendingCount: number;
-  confirmedCount: number;
-  completedCount: number;
-  todayOnlineAppointments: number;
-  todayManualAppointments: number;
-  todayBlockedSlots: number;
-  todayCompletedAppointments: number;
-  todayCancelledAppointments: number;
+  clinic: DashboardStatsClinic;
+  /** @nullable */
+  subscription?: DashboardStatsSubscription;
+  stats: DashboardStatsStats;
   recentAppointments: Appointment[];
+  /** @nullable */
+  settings: DashboardStatsSettings;
 }

@@ -12,6 +12,7 @@ import { randomUUID } from "crypto";
 
 import { calculateAvailableSlots, parseTimeToDate, formatToLocalISO } from "../lib/scheduler";
 import { getValidAccessToken, createCalendarEvent } from "../lib/google-calendar";
+import { enqueueSyncJob } from "../lib/sync-queue";
 
 const router: IRouter = Router();
 
@@ -342,32 +343,52 @@ router.post("/clinics/:clinicId/chat/message", async (req, res): Promise<void> =
         .returning();
 
       // Sync to Google Calendar
-      const [clinic] = await db.select().from(clinicsTable).where(eq(clinicsTable.id, clinicId));
-      let googleEventId: string | null = null;
+      const [clinic] = await db
+        .select({
+          id: clinicsTable.id,
+          name: clinicsTable.name,
+          doctorName: clinicsTable.doctorName,
+          googleConnected: clinicsTable.googleConnected,
+          googleCalendarId: clinicsTable.googleCalendarId,
+          googleAccessToken: clinicsTable.googleAccessToken,
+          googleRefreshToken: clinicsTable.googleRefreshToken,
+          googleTokenExpiresAt: clinicsTable.googleTokenExpiresAt,
+          slotDuration: clinicsTable.slotDuration,
+        })
+        .from(clinicsTable)
+        .where(eq(clinicsTable.id, clinicId));
+
       if (clinic && clinic.googleConnected && clinic.googleCalendarId) {
-        try {
-          const startDate = parseTimeToDate(appointmentDate, selectedTimeSlot, "Asia/Kolkata");
-          const endDate = new Date(startDate.getTime() + (clinic.slotDuration || 30) * 60 * 1000);
+        const targetAppointmentId = newAppt.id;
+        const targetAppointmentDate = appointmentDate;
+        const targetSelectedTimeSlot = selectedTimeSlot;
+        const targetPatientName = patientName;
+        const targetPatientPhone = patientPhone;
+        const targetPatientProblem = patientProblem;
 
-          const eventDetails = {
-            summary: `Appointment: ${patientName}`,
-            description: `Appointment booked via ClinicFlow AI.\nPatient: ${patientName}\nPhone: ${patientPhone}\nProblem: ${patientProblem}`,
-            start: formatToLocalISO(startDate, "Asia/Kolkata"),
-            end: formatToLocalISO(endDate, "Asia/Kolkata"),
-          };
+        enqueueSyncJob(async () => {
+          try {
+            const startDate = parseTimeToDate(targetAppointmentDate, targetSelectedTimeSlot, "Asia/Kolkata");
+            const endDate = new Date(startDate.getTime() + (clinic.slotDuration || 30) * 60 * 1000);
 
-          const token = await getValidAccessToken(clinic);
-          googleEventId = await createCalendarEvent(token, clinic.googleCalendarId, eventDetails);
+            const eventDetails = {
+              summary: `Appointment: ${targetPatientName}`,
+              description: `Appointment booked via ClinicFlow AI.\nPatient: ${targetPatientName}\nPhone: ${targetPatientPhone}\nProblem: ${targetPatientProblem}`,
+              start: formatToLocalISO(startDate, "Asia/Kolkata"),
+              end: formatToLocalISO(endDate, "Asia/Kolkata"),
+            };
 
-          await db
-            .update(appointmentsTable)
-            .set({ calendarEventId: googleEventId })
-            .where(eq(appointmentsTable.id, newAppt.id));
+            const token = await getValidAccessToken(clinic as any);
+            const googleEventId = await createCalendarEvent(token, clinic.googleCalendarId!, eventDetails);
 
-          newAppt.calendarEventId = googleEventId;
-        } catch (err) {
-          console.error("Failed to create Google Calendar event in chat confirmation:", err);
-        }
+            await db
+              .update(appointmentsTable)
+              .set({ calendarEventId: googleEventId })
+              .where(eq(appointmentsTable.id, targetAppointmentId));
+          } catch (err) {
+            console.error("Failed to create Google Calendar event in chat confirmation:", err);
+          }
+        });
       }
       nextStep = STEPS.DONE;
       isComplete = true;

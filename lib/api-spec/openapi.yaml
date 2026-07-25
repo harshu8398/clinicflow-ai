@@ -176,6 +176,18 @@ paths:
       summary: List all appointments for a clinic
       parameters:
         - $ref: "#/components/parameters/ClinicIdParam"
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
       responses:
         "200":
           description: List of appointments
@@ -793,31 +805,87 @@ components:
     DashboardStats:
       type: object
       properties:
-        totalAppointments:
-          type: integer
-        todayAppointments:
-          type: integer
-        pendingCount:
-          type: integer
-        confirmedCount:
-          type: integer
-        completedCount:
-          type: integer
-        todayOnlineAppointments:
-          type: integer
-        todayManualAppointments:
-          type: integer
-        todayBlockedSlots:
-          type: integer
-        todayCompletedAppointments:
-          type: integer
-        todayCancelledAppointments:
-          type: integer
+        clinic:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            planType:
+              type: string
+            subscriptionStatus:
+              type: string
+            expiryDate:
+              type: ["string", "null"]
+          required: [id, name, planType, subscriptionStatus]
+        subscription:
+          type: ["object", "null"]
+          properties:
+            id:
+              type: integer
+            planType:
+              type: string
+            subscriptionStatus:
+              type: string
+            startDate:
+              type: ["string", "null"]
+            expiryDate:
+              type: ["string", "null"]
+            lastPaymentReference:
+              type: ["string", "null"]
+            subscriptionNotes:
+              type: ["string", "null"]
+          required: [id, planType, subscriptionStatus]
+        stats:
+          type: object
+          properties:
+            totalAppointments:
+              type: integer
+            todayAppointments:
+              type: integer
+            pendingCount:
+              type: integer
+            confirmedCount:
+              type: integer
+            completedCount:
+              type: integer
+            todayOnlineAppointments:
+              type: integer
+            todayManualAppointments:
+              type: integer
+            todayBlockedSlots:
+              type: integer
+            todayCompletedAppointments:
+              type: integer
+            todayCancelledAppointments:
+              type: integer
+          required: [totalAppointments, todayAppointments, pendingCount, confirmedCount, completedCount, todayOnlineAppointments, todayManualAppointments, todayBlockedSlots, todayCompletedAppointments, todayCancelledAppointments]
         recentAppointments:
           type: array
           items:
             $ref: "#/components/schemas/Appointment"
-      required: [totalAppointments, todayAppointments, pendingCount, confirmedCount, completedCount, todayOnlineAppointments, todayManualAppointments, todayBlockedSlots, todayCompletedAppointments, todayCancelledAppointments, recentAppointments]
+        settings:
+          type: ["object", "null"]
+          properties:
+            id:
+              type: integer
+            upiId:
+              type: string
+            upiQrCodeUrl:
+              type: ["string", "null"]
+            monthlyPrice:
+              type: string
+            quarterlyPrice:
+              type: string
+            yearlyPrice:
+              type: string
+            supportContact:
+              type: string
+            supportWhatsapp:
+              type: string
+          required: [id, upiId, monthlyPrice, quarterlyPrice, yearlyPrice, supportContact, supportWhatsapp]
+      required: [clinic, stats, recentAppointments, settings]
 
     ChatMessageInput:
       type: object

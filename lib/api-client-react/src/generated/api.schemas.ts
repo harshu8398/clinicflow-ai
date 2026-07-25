@@ -267,7 +267,33 @@ export interface FaqInput {
   answer: string;
 }
 
-export interface DashboardStats {
+export type DashboardStatsClinic = {
+  id: number;
+  name: string;
+  planType: string;
+  subscriptionStatus: string;
+  /** @nullable */
+  expiryDate?: string | null;
+};
+
+/**
+ * @nullable
+ */
+export type DashboardStatsSubscription = {
+  id: number;
+  planType: string;
+  subscriptionStatus: string;
+  /** @nullable */
+  startDate?: string | null;
+  /** @nullable */
+  expiryDate?: string | null;
+  /** @nullable */
+  lastPaymentReference?: string | null;
+  /** @nullable */
+  subscriptionNotes?: string | null;
+} | null;
+
+export type DashboardStatsStats = {
   totalAppointments: number;
   todayAppointments: number;
   pendingCount: number;
@@ -278,7 +304,31 @@ export interface DashboardStats {
   todayBlockedSlots: number;
   todayCompletedAppointments: number;
   todayCancelledAppointments: number;
+};
+
+/**
+ * @nullable
+ */
+export type DashboardStatsSettings = {
+  id: number;
+  upiId: string;
+  /** @nullable */
+  upiQrCodeUrl?: string | null;
+  monthlyPrice: string;
+  quarterlyPrice: string;
+  yearlyPrice: string;
+  supportContact: string;
+  supportWhatsapp: string;
+} | null;
+
+export interface DashboardStats {
+  clinic: DashboardStatsClinic;
+  /** @nullable */
+  subscription?: DashboardStatsSubscription;
+  stats: DashboardStatsStats;
   recentAppointments: Appointment[];
+  /** @nullable */
+  settings: DashboardStatsSettings;
 }
 
 export type ChatMessageInputContext = {
@@ -362,6 +412,11 @@ export type DisconnectGoogleAuth200 = {
 
 export type ListAvailableSlotsParams = {
 date: string;
+};
+
+export type ListAppointmentsParams = {
+page?: number;
+limit?: number;
 };
 
 export type StartChatBody = {

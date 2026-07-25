@@ -24,7 +24,13 @@ router.get("/clinics/:clinicId/faqs", requireAuth, requireClinicOwnership, async
   }
 
   const faqs = await db
-    .select()
+    .select({
+      id: faqsTable.id,
+      clinicId: faqsTable.clinicId,
+      question: faqsTable.question,
+      answer: faqsTable.answer,
+      createdAt: faqsTable.createdAt,
+    })
     .from(faqsTable)
     .where(eq(faqsTable.clinicId, params.data.clinicId))
     .orderBy(faqsTable.createdAt);

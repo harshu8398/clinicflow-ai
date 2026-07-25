@@ -248,6 +248,23 @@ export const GetDashboardParams = zod.object({
 })
 
 export const GetDashboardResponse = zod.object({
+  "clinic": zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "planType": zod.string(),
+  "subscriptionStatus": zod.string(),
+  "expiryDate": zod.string().nullish()
+}),
+  "subscription": zod.object({
+  "id": zod.number(),
+  "planType": zod.string(),
+  "subscriptionStatus": zod.string(),
+  "startDate": zod.string().nullish(),
+  "expiryDate": zod.string().nullish(),
+  "lastPaymentReference": zod.string().nullish(),
+  "subscriptionNotes": zod.string().nullish()
+}).nullish(),
+  "stats": zod.object({
   "totalAppointments": zod.number(),
   "todayAppointments": zod.number(),
   "pendingCount": zod.number(),
@@ -257,7 +274,8 @@ export const GetDashboardResponse = zod.object({
   "todayManualAppointments": zod.number(),
   "todayBlockedSlots": zod.number(),
   "todayCompletedAppointments": zod.number(),
-  "todayCancelledAppointments": zod.number(),
+  "todayCancelledAppointments": zod.number()
+}),
   "recentAppointments": zod.array(zod.object({
   "id": zod.number(),
   "clinicId": zod.number(),
@@ -276,7 +294,17 @@ export const GetDashboardResponse = zod.object({
   "notes": zod.string().nullish(),
   "doctorId": zod.number().nullish(),
   "createdAt": zod.string()
-}))
+})),
+  "settings": zod.object({
+  "id": zod.number(),
+  "upiId": zod.string(),
+  "upiQrCodeUrl": zod.string().nullish(),
+  "monthlyPrice": zod.string(),
+  "quarterlyPrice": zod.string(),
+  "yearlyPrice": zod.string(),
+  "supportContact": zod.string(),
+  "supportWhatsapp": zod.string()
+}).nullable()
 })
 
 
@@ -285,6 +313,14 @@ export const GetDashboardResponse = zod.object({
  */
 export const ListAppointmentsParams = zod.object({
   "clinicId": zod.coerce.number()
+})
+
+export const listAppointmentsQueryPageDefault = 1;
+export const listAppointmentsQueryLimitDefault = 20;
+
+export const ListAppointmentsQueryParams = zod.object({
+  "page": zod.coerce.number().default(listAppointmentsQueryPageDefault),
+  "limit": zod.coerce.number().default(listAppointmentsQueryLimitDefault)
 })
 
 export const ListAppointmentsResponseItem = zod.object({

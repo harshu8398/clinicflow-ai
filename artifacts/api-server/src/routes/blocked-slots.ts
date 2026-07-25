@@ -22,7 +22,16 @@ router.get("/clinics/:clinicId/blocked-slots", requireAuth, requireClinicOwnersh
 
   try {
     const slots = await db
-      .select()
+      .select({
+        id: blockedSlotsTable.id,
+        clinicId: blockedSlotsTable.clinicId,
+        doctorId: blockedSlotsTable.doctorId,
+        date: blockedSlotsTable.date,
+        startTime: blockedSlotsTable.startTime,
+        endTime: blockedSlotsTable.endTime,
+        reason: blockedSlotsTable.reason,
+        createdAt: blockedSlotsTable.createdAt
+      })
       .from(blockedSlotsTable)
       .where(eq(blockedSlotsTable.clinicId, clinicId))
       .orderBy(blockedSlotsTable.date);

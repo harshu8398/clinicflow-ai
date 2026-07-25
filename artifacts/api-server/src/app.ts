@@ -8,12 +8,17 @@ import { logger } from "./lib/logger";
 import path from "path";
 import fs from "fs";
 import { checkActiveSubscription } from "./middleware/auth";
+import { telemetryMiddleware } from "./middleware/telemetry";
+import { compressionMiddleware } from "./middleware/compression";
 
 const PgStore = connectPgSimple(session);
 
 const app: Express = express();
 
 app.set("trust proxy", 1);
+
+app.use(telemetryMiddleware);
+app.use(compressionMiddleware);
 
 app.use(
   pinoHttp({

@@ -22,7 +22,14 @@ router.get("/clinics/:clinicId/blocked-days", requireAuth, requireClinicOwnershi
 
   try {
     const days = await db
-      .select()
+      .select({
+        id: blockedDaysTable.id,
+        clinicId: blockedDaysTable.clinicId,
+        doctorId: blockedDaysTable.doctorId,
+        date: blockedDaysTable.date,
+        reason: blockedDaysTable.reason,
+        createdAt: blockedDaysTable.createdAt
+      })
       .from(blockedDaysTable)
       .where(eq(blockedDaysTable.clinicId, clinicId))
       .orderBy(blockedDaysTable.date);

@@ -2,10 +2,11 @@ import { Router } from "express";
 import { getAuthUrl, getTokensFromCode, getUserEmail } from "../lib/google-calendar";
 import { db, clinicsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { requireAuth, requireClinicOwnership } from "../middleware/auth";
 
 const router = Router();
 
-router.get("/clinics/:clinicId/auth/google", async (req, res) => {
+router.get("/clinics/:clinicId/auth/google", requireAuth, requireClinicOwnership, async (req, res) => {
   const clinicId = Number(req.params.clinicId);
   if (isNaN(clinicId)) {
     res.status(400).json({ error: "Invalid clinic ID" });
@@ -60,7 +61,7 @@ router.get("/clinics/:clinicId/auth/google/callback", async (req, res) => {
   }
 });
 
-router.post("/clinics/:clinicId/auth/google/disconnect", async (req, res) => {
+router.post("/clinics/:clinicId/auth/google/disconnect", requireAuth, requireClinicOwnership, async (req, res) => {
   const clinicId = Number(req.params.clinicId);
   if (isNaN(clinicId)) {
     res.status(400).json({ error: "Invalid clinic ID" });

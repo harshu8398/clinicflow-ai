@@ -51,7 +51,38 @@ function serializeClinic(c: Record<string, unknown>) {
 }
 
 router.get("/clinics", async (_req, res): Promise<void> => {
-  const clinics = await db.select().from(clinicsTable).orderBy(clinicsTable.createdAt);
+  const clinics = await db
+    .select({
+      id: clinicsTable.id,
+      name: clinicsTable.name,
+      email: clinicsTable.email,
+      address: clinicsTable.address,
+      fee: clinicsTable.fee,
+      timings: clinicsTable.timings,
+      logoUrl: clinicsTable.logoUrl,
+      doctorSignatureUrl: clinicsTable.doctorSignatureUrl,
+      doctorName: clinicsTable.doctorName,
+      doctorQualification: clinicsTable.doctorQualification,
+      doctorSpecialization: clinicsTable.doctorSpecialization,
+      phone: clinicsTable.phone,
+      calendarId: clinicsTable.calendarId,
+      createdAt: clinicsTable.createdAt,
+      workingDays: clinicsTable.workingDays,
+      openingTime: clinicsTable.openingTime,
+      closingTime: clinicsTable.closingTime,
+      slotDuration: clinicsTable.slotDuration,
+      googleConnected: clinicsTable.googleConnected,
+      googleConnectedEmail: clinicsTable.googleConnectedEmail,
+      googleCalendarId: clinicsTable.googleCalendarId,
+      googleTokenExpiresAt: clinicsTable.googleTokenExpiresAt,
+      googleLastSyncAt: clinicsTable.googleLastSyncAt,
+      planType: clinicsTable.planType,
+      subscriptionStatus: clinicsTable.subscriptionStatus,
+      startDate: clinicsTable.startDate,
+      expiryDate: clinicsTable.expiryDate,
+    })
+    .from(clinicsTable)
+    .orderBy(clinicsTable.createdAt);
   res.json(ListClinicsResponse.parse(clinics.map(serializeClinic)));
 });
 
@@ -145,13 +176,45 @@ router.get("/clinics/:clinicId", async (req, res): Promise<void> => {
     return;
   }
 
-  const [clinic] = await db.select().from(clinicsTable).where(eq(clinicsTable.id, params.data.clinicId));
+  const [clinic] = await db
+    .select({
+      id: clinicsTable.id,
+      name: clinicsTable.name,
+      email: clinicsTable.email,
+      address: clinicsTable.address,
+      fee: clinicsTable.fee,
+      timings: clinicsTable.timings,
+      logoUrl: clinicsTable.logoUrl,
+      doctorSignatureUrl: clinicsTable.doctorSignatureUrl,
+      doctorName: clinicsTable.doctorName,
+      doctorQualification: clinicsTable.doctorQualification,
+      doctorSpecialization: clinicsTable.doctorSpecialization,
+      phone: clinicsTable.phone,
+      calendarId: clinicsTable.calendarId,
+      createdAt: clinicsTable.createdAt,
+      workingDays: clinicsTable.workingDays,
+      openingTime: clinicsTable.openingTime,
+      closingTime: clinicsTable.closingTime,
+      slotDuration: clinicsTable.slotDuration,
+      googleConnected: clinicsTable.googleConnected,
+      googleConnectedEmail: clinicsTable.googleConnectedEmail,
+      googleCalendarId: clinicsTable.googleCalendarId,
+      googleTokenExpiresAt: clinicsTable.googleTokenExpiresAt,
+      googleLastSyncAt: clinicsTable.googleLastSyncAt,
+      planType: clinicsTable.planType,
+      subscriptionStatus: clinicsTable.subscriptionStatus,
+      startDate: clinicsTable.startDate,
+      expiryDate: clinicsTable.expiryDate,
+    })
+    .from(clinicsTable)
+    .where(eq(clinicsTable.id, params.data.clinicId));
+
   if (!clinic) {
     res.status(404).json({ error: "Clinic not found" });
     return;
   }
 
-  res.json(GetClinicResponse.parse(serializeClinic(clinic)));
+  res.json(GetClinicResponse.parse(serializeClinic(clinic as unknown as Record<string, unknown>)));
 });
 
 router.put("/clinics/:clinicId", requireAuth, requireClinicOwnership, async (req, res): Promise<void> => {
@@ -168,7 +231,10 @@ router.put("/clinics/:clinicId", requireAuth, requireClinicOwnership, async (req
   }
 
   const [existingClinic] = await db
-    .select()
+    .select({
+      id: clinicsTable.id,
+      doctorSignatureUrl: clinicsTable.doctorSignatureUrl,
+    })
     .from(clinicsTable)
     .where(eq(clinicsTable.id, params.data.clinicId));
 

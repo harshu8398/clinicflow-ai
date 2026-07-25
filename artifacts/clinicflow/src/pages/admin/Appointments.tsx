@@ -51,7 +51,14 @@ const STATUS_COLORS: Record<string, string> = {
 export default function Appointments() {
   const { clinicId } = useParams();
   const id = Number(clinicId);
-  const { data: appointments, isLoading } = useListAppointments(id);
+  const [page, setPage] = useState(1);
+  const limit = 20;
+  const { data: appointments, isLoading } = useListAppointments(id, { page, limit }, {
+    query: {
+      staleTime: 30 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+    }
+  } as any);
   const appointmentsTyped = appointments as (any & { prescriptionGenerated?: boolean })[] | undefined;
   const { data: clinic } = useGetClinic(id);
   const updateStatus = useUpdateAppointmentStatus();
@@ -1323,6 +1330,31 @@ ${clinicName}`;
                   })}
                 </div>
               )}
+
+              {/* Pagination Controls */}
+              <div className="flex items-center justify-between border-t border-slate-100 pt-4 mt-4 select-none">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page <= 1 || isLoading}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  className="text-xs font-semibold rounded-lg h-9"
+                >
+                  Previous
+                </Button>
+                <span className="text-xs text-slate-500 font-medium">
+                  Page {page}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={(appointmentsTyped?.length ?? 0) < limit || isLoading}
+                  onClick={() => setPage((p) => p + 1)}
+                  className="text-xs font-semibold rounded-lg h-9"
+                >
+                  Next
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>

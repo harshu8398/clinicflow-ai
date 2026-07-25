@@ -37,6 +37,7 @@ import type {
   Faq,
   FaqInput,
   HealthStatus,
+  ListAppointmentsParams,
   ListAvailableSlotsParams,
   StartChatBody
 } from './api.schemas';
@@ -740,20 +741,29 @@ export function useGetDashboard<TData = Awaited<ReturnType<typeof getDashboard>>
 
 
 
-export const getListAppointmentsUrl = (clinicId: number,) => {
+export const getListAppointmentsUrl = (clinicId: number,
+    params?: ListAppointmentsParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/clinics/${clinicId}/appointments`
+  return stringifiedParams.length > 0 ? `/api/clinics/${clinicId}/appointments?${stringifiedParams}` : `/api/clinics/${clinicId}/appointments`
 }
 
 /**
  * @summary List all appointments for a clinic
  */
-export const listAppointments = async (clinicId: number, options?: RequestInit): Promise<Appointment[]> => {
+export const listAppointments = async (clinicId: number,
+    params?: ListAppointmentsParams, options?: RequestInit): Promise<Appointment[]> => {
 
-  return customFetch<Appointment[]>(getListAppointmentsUrl(clinicId),
+  return customFetch<Appointment[]>(getListAppointmentsUrl(clinicId,params),
   {
     ...options,
     method: 'GET'
@@ -766,23 +776,25 @@ export const listAppointments = async (clinicId: number, options?: RequestInit):
 
 
 
-export const getListAppointmentsQueryKey = (clinicId: number,) => {
+export const getListAppointmentsQueryKey = (clinicId: number,
+    params?: ListAppointmentsParams,) => {
     return [
-    `/api/clinics/${clinicId}/appointments`
+    `/api/clinics/${clinicId}/appointments`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getListAppointmentsQueryOptions = <TData = Awaited<ReturnType<typeof listAppointments>>, TError = ErrorType<unknown>>(clinicId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAppointments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getListAppointmentsQueryOptions = <TData = Awaited<ReturnType<typeof listAppointments>>, TError = ErrorType<unknown>>(clinicId: number,
+    params?: ListAppointmentsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAppointments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListAppointmentsQueryKey(clinicId);
+  const queryKey =  queryOptions?.queryKey ?? getListAppointmentsQueryKey(clinicId,params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAppointments>>> = ({ signal }) => listAppointments(clinicId, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAppointments>>> = ({ signal }) => listAppointments(clinicId,params, { signal, ...requestOptions });
 
 
 
@@ -800,11 +812,12 @@ export type ListAppointmentsQueryError = ErrorType<unknown>
  */
 
 export function useListAppointments<TData = Awaited<ReturnType<typeof listAppointments>>, TError = ErrorType<unknown>>(
- clinicId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAppointments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ clinicId: number,
+    params?: ListAppointmentsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAppointments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getListAppointmentsQueryOptions(clinicId,options)
+  const queryOptions = getListAppointmentsQueryOptions(clinicId,params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

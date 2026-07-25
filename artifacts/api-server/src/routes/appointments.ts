@@ -20,6 +20,7 @@ import {
   updateCalendarEvent,
   deleteCalendarEvent,
 } from "../lib/google-calendar";
+import { enqueueSyncJob } from "../lib/sync-queue";
 
 import { calculateAvailableSlots, parseTimeToDate, formatToLocalISO } from "../lib/scheduler";
 
@@ -48,17 +49,39 @@ router.get("/clinics/:clinicId/appointments", requireAuth, requireClinicOwnershi
     return;
   }
 
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 20;
+  const offset = (page - 1) * limit;
+
   const appointmentsWithPresc = await db
     .select({
-      appointment: appointmentsTable,
+      id: appointmentsTable.id,
+      clinicId: appointmentsTable.clinicId,
+      sessionId: appointmentsTable.sessionId,
+      patientName: appointmentsTable.patientName,
+      patientPhone: appointmentsTable.patientPhone,
+      patientProblem: appointmentsTable.patientProblem,
+      appointmentDate: appointmentsTable.appointmentDate,
+      selectedTimeSlot: appointmentsTable.selectedTimeSlot,
+      calendarEventId: appointmentsTable.calendarEventId,
+      status: appointmentsTable.status,
+      appointmentSource: appointmentsTable.appointmentSource,
+      patientAge: appointmentsTable.patientAge,
+      patientGender: appointmentsTable.patientGender,
+      visitType: appointmentsTable.visitType,
+      notes: appointmentsTable.notes,
+      doctorId: appointmentsTable.doctorId,
+      createdAt: appointmentsTable.createdAt,
       prescriptionId: prescriptionsTable.id,
     })
     .from(appointmentsTable)
     .leftJoin(prescriptionsTable, eq(prescriptionsTable.appointmentId, appointmentsTable.id))
     .where(eq(appointmentsTable.clinicId, params.data.clinicId))
-    .orderBy(appointmentsTable.createdAt);
+    .orderBy(appointmentsTable.createdAt)
+    .limit(limit)
+    .offset(offset);
 
-  const serialized = appointmentsWithPresc.map(({ appointment }) => serializeAppt(appointment));
+  const serialized = appointmentsWithPresc.map((appt) => serializeAppt(appt as unknown as Record<string, unknown>));
   const parsed = ListAppointmentsResponse.parse(serialized);
 
   const result = parsed.map((appt, index) => ({
@@ -104,45 +127,70 @@ router.post("/clinics/:clinicId/appointments", requireAuth, requireClinicOwnersh
 
   // Google Calendar Integration for Manual Bookings
   if (appointment.selectedTimeSlot && appointment.appointmentDate && appointment.status === "confirmed") {
-    const [clinic] = await db.select().from(clinicsTable).where(eq(clinicsTable.id, params.data.clinicId));
-    if (clinic && clinic.googleConnected && clinic.googleCalendarId) {
-      try {
-        const startDate = parseTimeToDate(appointment.appointmentDate, appointment.selectedTimeSlot, "Asia/Kolkata");
-        const endDate = new Date(startDate.getTime() + (clinic.slotDuration || 30) * 60 * 1000);
+    const targetClinicId = params.data.clinicId;
+    const targetAppointmentId = appointment.id;
+    const targetTimeSlot = appointment.selectedTimeSlot;
+    const targetDate = appointment.appointmentDate;
+    const targetPatientName = appointment.patientName;
+    const targetSource = appointment.appointmentSource;
+    const targetPhone = appointment.patientPhone;
+    const targetAge = appointment.patientAge;
+    const targetGender = appointment.patientGender;
+    const targetVisitType = appointment.visitType;
+    const targetProblem = appointment.patientProblem;
+    const targetNotes = appointment.notes;
 
-        const sourceLabel = appointment.appointmentSource === "Online" ? "AI" : "Admin";
-        const descriptionLines = [
-          `Appointment booked via ClinicFlow ${sourceLabel}.`,
-          `Patient: ${appointment.patientName}`,
-          `Phone: ${appointment.patientPhone}`,
-          appointment.patientAge ? `Age: ${appointment.patientAge}` : null,
-          appointment.patientGender ? `Gender: ${appointment.patientGender}` : null,
-          appointment.visitType ? `Visit Type: ${appointment.visitType}` : null,
-          appointment.patientProblem ? `Concern: ${appointment.patientProblem}` : null,
-          appointment.notes ? `Notes: ${appointment.notes}` : null,
-        ].filter(Boolean);
+    enqueueSyncJob(async () => {
+      const [clinic] = await db
+        .select({
+          id: clinicsTable.id,
+          name: clinicsTable.name,
+          googleConnected: clinicsTable.googleConnected,
+          googleCalendarId: clinicsTable.googleCalendarId,
+          googleAccessToken: clinicsTable.googleAccessToken,
+          googleRefreshToken: clinicsTable.googleRefreshToken,
+          googleTokenExpiresAt: clinicsTable.googleTokenExpiresAt,
+          slotDuration: clinicsTable.slotDuration,
+        })
+        .from(clinicsTable)
+        .where(eq(clinicsTable.id, targetClinicId));
 
-        const eventDetails = {
-          summary: `Appointment: ${appointment.patientName}`,
-          description: descriptionLines.join("\n"),
-          start: formatToLocalISO(startDate, "Asia/Kolkata"),
-          end: formatToLocalISO(endDate, "Asia/Kolkata"),
-        };
+      if (clinic && clinic.googleConnected && clinic.googleCalendarId) {
+        try {
+          const startDate = parseTimeToDate(targetDate, targetTimeSlot, "Asia/Kolkata");
+          const endDate = new Date(startDate.getTime() + (clinic.slotDuration || 30) * 60 * 1000);
 
-        const token = await getValidAccessToken(clinic);
-        const eventId = await createCalendarEvent(token, clinic.googleCalendarId, eventDetails);
-        
-        const [updated] = await db
-          .update(appointmentsTable)
-          .set({ calendarEventId: eventId })
-          .where(eq(appointmentsTable.id, appointment.id))
-          .returning();
-        
-        appointment = updated;
-      } catch (err) {
-        console.error("Failed to sync manual appointment with Google Calendar:", err);
+          const sourceLabel = targetSource === "Online" ? "AI" : "Admin";
+          const descriptionLines = [
+            `Appointment booked via ClinicFlow ${sourceLabel}.`,
+            `Patient: ${targetPatientName}`,
+            `Phone: ${targetPhone}`,
+            targetAge ? `Age: ${targetAge}` : null,
+            targetGender ? `Gender: ${targetGender}` : null,
+            targetVisitType ? `Visit Type: ${targetVisitType}` : null,
+            targetProblem ? `Concern: ${targetProblem}` : null,
+            targetNotes ? `Notes: ${targetNotes}` : null,
+          ].filter(Boolean);
+
+          const eventDetails = {
+            summary: `Appointment: ${targetPatientName}`,
+            description: descriptionLines.join("\n"),
+            start: formatToLocalISO(startDate, "Asia/Kolkata"),
+            end: formatToLocalISO(endDate, "Asia/Kolkata"),
+          };
+
+          const token = await getValidAccessToken(clinic as any);
+          const eventId = await createCalendarEvent(token, clinic.googleCalendarId!, eventDetails);
+          
+          await db
+            .update(appointmentsTable)
+            .set({ calendarEventId: eventId })
+            .where(eq(appointmentsTable.id, targetAppointmentId));
+        } catch (err) {
+          console.error("Failed to sync manual appointment with Google Calendar:", err);
+        }
       }
-    }
+    });
   }
 
   res.status(201).json(GetAppointmentResponse.parse(serializeAppt(appointment)));
@@ -156,7 +204,25 @@ router.get("/clinics/:clinicId/appointments/:appointmentId", requireAuth, requir
   }
 
   const [appointment] = await db
-    .select()
+    .select({
+      id: appointmentsTable.id,
+      clinicId: appointmentsTable.clinicId,
+      sessionId: appointmentsTable.sessionId,
+      patientName: appointmentsTable.patientName,
+      patientPhone: appointmentsTable.patientPhone,
+      patientProblem: appointmentsTable.patientProblem,
+      appointmentDate: appointmentsTable.appointmentDate,
+      selectedTimeSlot: appointmentsTable.selectedTimeSlot,
+      calendarEventId: appointmentsTable.calendarEventId,
+      status: appointmentsTable.status,
+      appointmentSource: appointmentsTable.appointmentSource,
+      patientAge: appointmentsTable.patientAge,
+      patientGender: appointmentsTable.patientGender,
+      visitType: appointmentsTable.visitType,
+      notes: appointmentsTable.notes,
+      doctorId: appointmentsTable.doctorId,
+      createdAt: appointmentsTable.createdAt,
+    })
     .from(appointmentsTable)
     .where(
       and(
@@ -170,7 +236,7 @@ router.get("/clinics/:clinicId/appointments/:appointmentId", requireAuth, requir
     return;
   }
 
-  res.json(GetAppointmentResponse.parse(serializeAppt(appointment)));
+  res.json(GetAppointmentResponse.parse(serializeAppt(appointment as unknown as Record<string, unknown>)));
 });
 
 router.patch("/clinics/:clinicId/appointments/:appointmentId", requireAuth, requireClinicOwnership, async (req, res): Promise<void> => {
@@ -187,7 +253,25 @@ router.patch("/clinics/:clinicId/appointments/:appointmentId", requireAuth, requ
   }
 
   const [existingAppt] = await db
-    .select()
+    .select({
+      id: appointmentsTable.id,
+      clinicId: appointmentsTable.clinicId,
+      sessionId: appointmentsTable.sessionId,
+      patientName: appointmentsTable.patientName,
+      patientPhone: appointmentsTable.patientPhone,
+      patientProblem: appointmentsTable.patientProblem,
+      appointmentDate: appointmentsTable.appointmentDate,
+      selectedTimeSlot: appointmentsTable.selectedTimeSlot,
+      calendarEventId: appointmentsTable.calendarEventId,
+      status: appointmentsTable.status,
+      appointmentSource: appointmentsTable.appointmentSource,
+      patientAge: appointmentsTable.patientAge,
+      patientGender: appointmentsTable.patientGender,
+      visitType: appointmentsTable.visitType,
+      notes: appointmentsTable.notes,
+      doctorId: appointmentsTable.doctorId,
+      createdAt: appointmentsTable.createdAt,
+    })
     .from(appointmentsTable)
     .where(
       and(
@@ -261,58 +345,86 @@ router.patch("/clinics/:clinicId/appointments/:appointmentId", requireAuth, requ
   }
 
   // Google Calendar Integration
-  const [clinic] = await db.select().from(clinicsTable).where(eq(clinicsTable.id, params.data.clinicId));
-  if (clinic && clinic.googleConnected && clinic.googleCalendarId) {
-    try {
-      if (appointment.selectedTimeSlot && appointment.appointmentDate) {
-        const startDate = parseTimeToDate(appointment.appointmentDate, appointment.selectedTimeSlot, "Asia/Kolkata");
-        const endDate = new Date(startDate.getTime() + (clinic.slotDuration || 30) * 60 * 1000);
+  const targetClinicId = params.data.clinicId;
+  const targetAppointmentId = appointment.id;
+  const targetTimeSlot = appointment.selectedTimeSlot;
+  const targetDate = appointment.appointmentDate;
+  const targetPatientName = appointment.patientName;
+  const targetSource = appointment.appointmentSource;
+  const targetPhone = appointment.patientPhone;
+  const targetAge = appointment.patientAge;
+  const targetGender = appointment.patientGender;
+  const targetVisitType = appointment.visitType;
+  const targetProblem = appointment.patientProblem;
+  const targetNotes = appointment.notes;
+  const targetStatus = appointment.status;
+  const targetEventId = appointment.calendarEventId;
 
-        const sourceLabel = appointment.appointmentSource === "Online" ? "AI" : "Admin";
-        const descriptionLines = [
-          `Appointment booked via ClinicFlow ${sourceLabel}.`,
-          `Patient: ${appointment.patientName}`,
-          `Phone: ${appointment.patientPhone}`,
-          appointment.patientAge ? `Age: ${appointment.patientAge}` : null,
-          appointment.patientGender ? `Gender: ${appointment.patientGender}` : null,
-          appointment.visitType ? `Visit Type: ${appointment.visitType}` : null,
-          appointment.patientProblem ? `Concern: ${appointment.patientProblem}` : null,
-          appointment.notes ? `Notes: ${appointment.notes}` : null,
-        ].filter(Boolean);
+  enqueueSyncJob(async () => {
+    const [clinic] = await db
+      .select({
+        id: clinicsTable.id,
+        name: clinicsTable.name,
+        googleConnected: clinicsTable.googleConnected,
+        googleCalendarId: clinicsTable.googleCalendarId,
+        googleAccessToken: clinicsTable.googleAccessToken,
+        googleRefreshToken: clinicsTable.googleRefreshToken,
+        googleTokenExpiresAt: clinicsTable.googleTokenExpiresAt,
+        slotDuration: clinicsTable.slotDuration,
+      })
+      .from(clinicsTable)
+      .where(eq(clinicsTable.id, targetClinicId));
 
-        const eventDetails = {
-          summary: `Appointment: ${appointment.patientName}`,
-          description: descriptionLines.join("\n"),
-          start: formatToLocalISO(startDate, "Asia/Kolkata"),
-          end: formatToLocalISO(endDate, "Asia/Kolkata"),
-        };
+    if (clinic && clinic.googleConnected && clinic.googleCalendarId) {
+      try {
+        if (targetTimeSlot && targetDate) {
+          const startDate = parseTimeToDate(targetDate, targetTimeSlot, "Asia/Kolkata");
+          const endDate = new Date(startDate.getTime() + (clinic.slotDuration || 30) * 60 * 1000);
 
-        const token = await getValidAccessToken(clinic);
+          const sourceLabel = targetSource === "Online" ? "AI" : "Admin";
+          const descriptionLines = [
+            `Appointment booked via ClinicFlow ${sourceLabel}.`,
+            `Patient: ${targetPatientName}`,
+            `Phone: ${targetPhone}`,
+            targetAge ? `Age: ${targetAge}` : null,
+            targetGender ? `Gender: ${targetGender}` : null,
+            targetVisitType ? `Visit Type: ${targetVisitType}` : null,
+            targetProblem ? `Concern: ${targetProblem}` : null,
+            targetNotes ? `Notes: ${targetNotes}` : null,
+          ].filter(Boolean);
 
-        if (appointment.calendarEventId) {
-          if (appointment.status === "cancelled") {
-            await deleteCalendarEvent(token, clinic.googleCalendarId, appointment.calendarEventId);
+          const eventDetails = {
+            summary: `Appointment: ${targetPatientName}`,
+            description: descriptionLines.join("\n"),
+            start: formatToLocalISO(startDate, "Asia/Kolkata"),
+            end: formatToLocalISO(endDate, "Asia/Kolkata"),
+          };
+
+          const token = await getValidAccessToken(clinic as any);
+
+          if (targetEventId) {
+            if (targetStatus === "cancelled") {
+              await deleteCalendarEvent(token, clinic.googleCalendarId!, targetEventId);
+              await db
+                .update(appointmentsTable)
+                .set({ calendarEventId: null })
+                .where(eq(appointmentsTable.id, targetAppointmentId));
+            } else {
+              await updateCalendarEvent(token, clinic.googleCalendarId!, targetEventId, eventDetails);
+            }
+          } else if (targetStatus !== "cancelled" && targetStatus !== "pending_slot_selection") {
+            const eventId = await createCalendarEvent(token, clinic.googleCalendarId!, eventDetails);
             await db
               .update(appointmentsTable)
-              .set({ calendarEventId: null })
-              .where(eq(appointmentsTable.id, appointment.id));
-            appointment.calendarEventId = null;
-          } else {
-            await updateCalendarEvent(token, clinic.googleCalendarId, appointment.calendarEventId, eventDetails);
+              .set({ calendarEventId: eventId })
+              .where(eq(appointmentsTable.id, targetAppointmentId));
           }
-        } else if (appointment.status !== "cancelled" && appointment.status !== "pending_slot_selection") {
-          const eventId = await createCalendarEvent(token, clinic.googleCalendarId, eventDetails);
-          await db
-            .update(appointmentsTable)
-            .set({ calendarEventId: eventId })
-            .where(eq(appointmentsTable.id, appointment.id));
-          appointment.calendarEventId = eventId;
         }
+      } catch (err) {
+        console.error("Failed to sync appointment with Google Calendar:", err);
       }
-    } catch (err) {
-      console.error("Failed to sync appointment with Google Calendar:", err);
     }
-  }
+  });
 
   res.json(UpdateAppointmentStatusResponse.parse(serializeAppt(appointment)));
 });
@@ -325,7 +437,12 @@ router.delete("/clinics/:clinicId/appointments/:appointmentId", requireAuth, req
   }
 
   const [appointment] = await db
-    .select()
+    .select({
+      id: appointmentsTable.id,
+      clinicId: appointmentsTable.clinicId,
+      patientName: appointmentsTable.patientName,
+      calendarEventId: appointmentsTable.calendarEventId,
+    })
     .from(appointmentsTable)
     .where(
       and(
@@ -341,15 +458,31 @@ router.delete("/clinics/:clinicId/appointments/:appointmentId", requireAuth, req
 
   // Google Calendar Integration
   if (appointment.calendarEventId) {
-    const [clinic] = await db.select().from(clinicsTable).where(eq(clinicsTable.id, params.data.clinicId));
-    if (clinic && clinic.googleConnected && clinic.googleCalendarId) {
-      try {
-        const token = await getValidAccessToken(clinic);
-        await deleteCalendarEvent(token, clinic.googleCalendarId, appointment.calendarEventId);
-      } catch (err) {
-        console.error("Failed to delete Google Calendar event for deleted appointment:", err);
+    const targetClinicId = params.data.clinicId;
+    const targetEventId = appointment.calendarEventId;
+
+    enqueueSyncJob(async () => {
+      const [clinic] = await db
+        .select({
+          id: clinicsTable.id,
+          googleConnected: clinicsTable.googleConnected,
+          googleCalendarId: clinicsTable.googleCalendarId,
+          googleAccessToken: clinicsTable.googleAccessToken,
+          googleRefreshToken: clinicsTable.googleRefreshToken,
+          googleTokenExpiresAt: clinicsTable.googleTokenExpiresAt,
+        })
+        .from(clinicsTable)
+        .where(eq(clinicsTable.id, targetClinicId));
+
+      if (clinic && clinic.googleConnected && clinic.googleCalendarId) {
+        try {
+          const token = await getValidAccessToken(clinic as any);
+          await deleteCalendarEvent(token, clinic.googleCalendarId!, targetEventId);
+        } catch (err) {
+          console.error("Failed to delete Google Calendar event for deleted appointment:", err);
+        }
       }
-    }
+    });
   }
 
   await db

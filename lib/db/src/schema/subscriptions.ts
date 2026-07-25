@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, index } from "drizzle-orm/pg-core";
 import { clinicsTable } from "./clinics";
 import { usersTable } from "./users";
 
@@ -22,7 +22,9 @@ export const subscriptionRequestsTable = pgTable("subscription_requests", {
   notes: text("notes"),
   status: text("status").notNull().default("Pending Verification"), // Pending Verification, Approved, Rejected
   submittedAt: timestamp("submitted_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => [
+  index("sub_requests_clinic_status_idx").on(table.clinicId, table.status),
+]);
 
 export const auditLogsTable = pgTable("audit_logs", {
   id: serial("id").primaryKey(),

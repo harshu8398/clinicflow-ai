@@ -18,12 +18,15 @@ import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 export default function Dashboard() {
   const { clinicId } = useParams();
   const id = Number(clinicId);
-  const { data: stats, isLoading } = useGetDashboard(id);
+  const { data: stats, isLoading } = useGetDashboard(id, {
+    query: {
+      staleTime: 15 * 60 * 1000,
+      gcTime: 15 * 60 * 1000,
+    }
+  } as any);
   const updateStatus = useUpdateAppointmentStatus();
   const queryClient = useQueryClient();
 
-  const [subData, setSubData] = useState<any>(null);
-  const [loadingSub, setLoadingSub] = useState(true);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeStep, setUpgradeStep] = useState<"plans" | "upload" | "success">("plans");
   const [selectedPlan, setSelectedPlan] = useState("Monthly");
@@ -31,27 +34,6 @@ export default function Dashboard() {
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
-
-  const fetchSubStatus = useCallback(async () => {
-    try {
-      const res = await fetch(
-        `${import.meta.env.BASE_URL.replace(/\/$/, "")}/api/subscriptions/my-status`,
-        { credentials: "include" }
-      );
-      if (res.ok) {
-        const data = await res.json();
-        setSubData(data);
-      }
-    } catch (err) {
-      console.error("Failed to load subscription status:", err);
-    } finally {
-      setLoadingSub(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchSubStatus();
-  }, [fetchSubStatus]);
 
   const handleStatusChange = (appointmentId: number, status: string) => {
     updateStatus.mutate(
@@ -98,10 +80,10 @@ export default function Dashboard() {
     try {
       const price =
         selectedPlan === "Monthly"
-          ? subData?.settings?.monthlyPrice
+          ? stats?.settings?.monthlyPrice
           : selectedPlan === "Quarterly"
-          ? subData?.settings?.quarterlyPrice
-          : subData?.settings?.yearlyPrice;
+          ? stats?.settings?.quarterlyPrice
+          : stats?.settings?.yearlyPrice;
 
       const res = await fetch(
         `${import.meta.env.BASE_URL.replace(/\/$/, "")}/api/subscriptions/requests`,
@@ -119,7 +101,7 @@ export default function Dashboard() {
       }
 
       setUpgradeStep("success");
-      fetchSubStatus();
+      queryClient.invalidateQueries({ queryKey: getGetDashboardQueryKey(id) });
     } catch (err: any) {
       setSubmitError(err.message || "Something went wrong");
     } finally {
@@ -128,14 +110,14 @@ export default function Dashboard() {
   };
 
   const getPlanPrice = (plan: string) => {
-    if (!subData?.settings) return "0";
-    if (plan === "Monthly") return subData.settings.monthlyPrice;
-    if (plan === "Quarterly") return subData.settings.quarterlyPrice;
-    if (plan === "Yearly") return subData.settings.yearlyPrice;
+    if (!stats?.settings) return "0";
+    if (plan === "Monthly") return stats.settings.monthlyPrice;
+    if (plan === "Quarterly") return stats.settings.quarterlyPrice;
+    if (plan === "Yearly") return stats.settings.yearlyPrice;
     return "0";
   };
 
-  if (isLoading || loadingSub) {
+  if (isLoading) {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -148,9 +130,9 @@ export default function Dashboard() {
 
   if (!stats) return null;
 
-  const subStatus = subData?.clinic?.subscriptionStatus ?? "Active";
-  const planType = subData?.clinic?.planType ?? "Demo";
-  const expiryDate = subData?.clinic?.expiryDate;
+  const subStatus = stats?.subscription?.subscriptionStatus ?? stats?.clinic?.subscriptionStatus ?? "Active";
+  const planType = stats?.subscription?.planType ?? stats?.clinic?.planType ?? "Demo";
+  const expiryDate = stats?.subscription?.expiryDate ?? stats?.clinic?.expiryDate;
 
   let daysRemaining = 0;
   if (subStatus === "Lifetime") {
@@ -248,7 +230,7 @@ export default function Dashboard() {
               </div>
             </div>
             <p className="text-xs font-semibold text-slate-400 mb-0.5">Today's Online</p>
-            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.todayOnlineAppointments ?? 0}</h3>
+            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.stats.todayOnlineAppointments ?? 0}</h3>
           </CardContent>
         </Card>
         
@@ -261,7 +243,7 @@ export default function Dashboard() {
               </div>
             </div>
             <p className="text-xs font-semibold text-slate-400 mb-0.5">Today's Manual</p>
-            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.todayManualAppointments ?? 0}</h3>
+            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.stats.todayManualAppointments ?? 0}</h3>
           </CardContent>
         </Card>
 
@@ -274,7 +256,7 @@ export default function Dashboard() {
               </div>
             </div>
             <p className="text-xs font-semibold text-slate-400 mb-0.5">Today's Blocked</p>
-            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.todayBlockedSlots ?? 0}</h3>
+            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.stats.todayBlockedSlots ?? 0}</h3>
           </CardContent>
         </Card>
 
@@ -287,7 +269,7 @@ export default function Dashboard() {
               </div>
             </div>
             <p className="text-xs font-semibold text-slate-400 mb-0.5">Today's Completed</p>
-            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.todayCompletedAppointments ?? 0}</h3>
+            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.stats.todayCompletedAppointments ?? 0}</h3>
           </CardContent>
         </Card>
 
@@ -300,7 +282,7 @@ export default function Dashboard() {
               </div>
             </div>
             <p className="text-xs font-semibold text-slate-400 mb-0.5">Today's Cancelled</p>
-            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.todayCancelledAppointments ?? 0}</h3>
+            <h3 className="text-2xl font-extrabold text-slate-800 font-display">{stats.stats.todayCancelledAppointments ?? 0}</h3>
           </CardContent>
         </Card>
       </div>
@@ -394,7 +376,7 @@ export default function Dashboard() {
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between border-b border-slate-200/60 pb-2">
                     <span className="text-slate-400 font-medium">UPI ID:</span>
-                    <span className="font-bold text-slate-800 select-all">{subData?.settings?.upiId || "8178141497@jio"}</span>
+                    <span className="font-bold text-slate-800 select-all">{stats?.settings?.upiId || "8178141497@jio"}</span>
                   </div>
                   <div className="flex justify-between pt-0.5">
                     <span className="text-slate-400 font-medium">Payable Amount:</span>
@@ -402,10 +384,10 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {subData?.settings?.upiQrCodeUrl && (
+                {stats?.settings?.upiQrCodeUrl && (
                   <div className="flex flex-col items-center pt-2">
                     <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-xs">
-                      <ImageWithFallback src={subData.settings.upiQrCodeUrl} alt="UPI QR" className="w-24 h-24 object-contain" />
+                      <ImageWithFallback src={stats.settings.upiQrCodeUrl} alt="UPI QR" className="w-24 h-24 object-contain" />
                     </div>
                   </div>
                 )}
